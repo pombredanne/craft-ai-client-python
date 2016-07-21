@@ -9,7 +9,7 @@ class CraftAIClient():
     def config(self, cfg):
         self.cfg = cfg
 
-    def create_agent(self, agent_id, model):
+    def create_agent(self, model, agent_id=""):
         pass
 
     def get_agent(self, agent_id):

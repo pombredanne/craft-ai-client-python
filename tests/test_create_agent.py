@@ -30,8 +30,8 @@ class TestCreateAgentSuccess(unittest.TestCase):
         given as a parameter.
         """
         resp = self.client.create_agent(
-            valid_data.VALID_MODEL,
-            valid_data.VALID_ID)
+            valid_data.VALID_ID,
+            valid_data.VALID_MODEL)
         self.assertEqual(resp.id, valid_data.VALID_ID)
 
 
