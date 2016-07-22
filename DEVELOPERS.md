@@ -4,15 +4,18 @@
 
 1. Retrieve your **craft ai** _owner_ and _token_.
 2. On your dev machine, at the root of your clone, create a file named `.env` with the following content
-````
-CRAFT_OWNER=<retrieved_owner>
-CRAFT_TOKEN=<retrieved_token>
-````
+    
+    ```
+    CRAFT_OWNER=<retrieved_owner>
+    CRAFT_TOKEN=<retrieved_token>
+    ```
+
 3. Run `pip3 install -r requirements.txt` to install dependencies
 4. You can run the following script:
-```sh
-sh run_tests.sh # this runs all tests via nosetests
-```
+    
+    ```sh
+    sh run_tests.sh # this runs all tests via nosetests
+    ```
 
 <!-- ## Releasing a new version (needs administrator rights) ##
 
