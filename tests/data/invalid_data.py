@@ -1,10 +1,10 @@
-INVALID_IDS = (("bad_id_type", 42),
-               ("empty_id", ""),
-               ("undefined_id", None))
+INVALID_IDS = {"bad_id_type": 42,
+               "empty_id": "",
+               "undefined_id": None}
 
-INVALID_CONTEXTS = (("no_context", None),
-                    ("empty_context", {}),
-                    ("invalid_context_type", {
+INVALID_CONTEXTS = {"no_context": None,
+                    "empty_context": {},
+                    "invalid_context_type": {
                         "presence": {
                             "type": "chair"
                         },
@@ -14,8 +14,8 @@ INVALID_CONTEXTS = (("no_context", None),
                         "lightbulbColor": {
                             "type": "enum"
                         }
-                    }),
-                    ("invalid_context_missing_type_key", {
+                    },
+                    "invalid_context_missing_type_key": {
                         "context": {
                             "presence": {
                                 "typo": "enum"
@@ -29,16 +29,16 @@ INVALID_CONTEXTS = (("no_context", None),
                         },
                         "output": ["lightbulbColor"],
                         "time_quantum": 100
-                    }))
+                    }}
 
-INVALID_OUTPUTS = (("no_output", None),
-                   ("output_not_in_the_model", ["beerBrand"]))
+INVALID_OUTPUTS = {"no_output": None,
+                   "output_not_in_the_model": ["beerBrand"]}
 
-UNSPECIFIED_MODELS = (None,
-                      "",
-                      {})
+UNSPECIFIED_MODELS = {"none": None,
+                      "empty_string": "",
+                      "empty_dict": {}}
 
-INVALID_TIME_QUANTA = (("negative_tq", -42),
-                       ("null_tq", 0),
-                       ("high_tq", 4294967296),
-                       ("float_tq", 3.141592))
+INVALID_TIME_QUANTA = {"negative_tq": -42,
+                       "null_tq": 0,
+                       "high_tq": 4294967296,
+                       "float_tq": 3.141592}
