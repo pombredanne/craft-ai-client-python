@@ -1,4 +1,4 @@
-VALID_ID = "rainbow unicorn"
+VALID_ID = "one legged rainbow unicorn"
 VALID_CONTEXT = {
     "presence": {
         "type": "enum"
