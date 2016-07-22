@@ -1,5 +1,5 @@
 class CraftAIError(Exception):
-    """Base class for exceptions in this module."""
+    """Base class for exceptions in the craft ai client."""
     def __init__(self, message):
         super(CraftAIError, self).__init__(message)
 
@@ -8,21 +8,22 @@ class CraftAIError(Exception):
 
 
 class CraftAIUnknownError(CraftAIError):
-    """docstring for CraftAIUnknownError"""
+    """Raised when an unknown error happens in the craft ai client."""
     def __init__(self, message):
-        self.message = "".join(("Unknwon error occured. ", message))
+        self.message = "".join(("Unknown error occured. ", message))
         super(CraftAIError, self).__init__(message)
 
 
 class CraftAINetworkError(CraftAIError):
-    """docstring for CraftAINetworkError"""
+    """Raised when a network error happens between the client and craft ai"""
     def __init__(self, message):
         self.message = "".join(("Network issue: ", message))
         super(CraftAIError, self).__init__(message)
 
 
 class CraftAICredentialsError(CraftAIError):
-    """docstring for CraftAICredentialsError"""
+    """Raised when the given credentials for a request or the global config
+    aren't valid """
     def __init__(self, message):
         self.message = "".join((
             "Credentials error, make sure the given owner/token are valid.",
@@ -32,14 +33,21 @@ class CraftAICredentialsError(CraftAIError):
 
 
 class CraftAIInternalError(CraftAIError):
-    """docstring for CraftAIInternalError"""
+    """Raised when an Internal Server Error (500) happens on craft ai's side"""
     def __init__(self, message):
         self.message = "".join(("Internal error occured", message))
         super(CraftAIError, self).__init__(message)
 
 
 class CraftAIBadRequestError(CraftAIError):
-    """docstring for CraftAIBadRequestError"""
+    """Raised when the asked request is not valid for craft ai's API"""
     def __init__(self, message):
         self.message = "".join(("Bad request: ", message))
+        super(CraftAIError, self).__init__(message)
+
+
+class CraftAINotFoundError(CraftAIError):
+    """Raised when craft ai answers with a Not Found Error (404)"""
+    def __init__(self, message, obj="URL"):
+        self.message = "".join((obj, " not found: ", message))
         super(CraftAIError, self).__init__(message)
