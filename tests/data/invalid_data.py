@@ -34,9 +34,9 @@ INVALID_CONTEXTS = {"no_context": None,
 INVALID_OUTPUTS = {"no_output": None,
                    "output_not_in_the_model": ["beerBrand"]}
 
-UNSPECIFIED_MODELS = {"none": None,
-                      "empty_string": "",
-                      "empty_dict": {}}
+UNDEFINED_KEY = {"none": None,
+                 "empty_string": "",
+                 "empty_dict": {}}
 
 INVALID_TIME_QUANTA = {"negative_tq": -42,
                        "null_tq": 0,

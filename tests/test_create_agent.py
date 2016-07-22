@@ -20,7 +20,7 @@ class TestCreateAgentSuccess(unittest.TestCase):
         `model` fields being strings.
         """
         resp = self.client.create_agent(valid_data.VALID_MODEL)
-        self.assertTrue(isinstance(resp.id, basestring))
+        self.assertIsInstance(resp.id, basestring)
 
     def test_create_agent_given_agent_id(self):
         """create_agent should succeed when given a string ID
@@ -42,7 +42,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         self.client = CraftAIClient(settings.CRAFT_CFG)
 
     def test_create_agent_with_invalid_given_agent_id(self):
-        """create_agent should fail when given a non-string ID
+        """create_agent should fail when given a non-string/empty string ID
 
         It should raise an error upon request for creation of
         an agent with an ID that is not of type string, since agent IDs
@@ -119,7 +119,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         no model key in the request body, since it is a mandatory field to
         create an agent.
         """
-        for empty_model in invalid_data.UNSPECIFIED_MODELS:
+        for empty_model in invalid_data.UNDEFINED_KEY:
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,
                 self.client.create_agent,
