@@ -73,3 +73,6 @@ target/
 
 # sftp configuration file
 sftp-config.json
+
+# project management
+TODO.md

@@ -32,17 +32,19 @@ class TestGetAgentSuccess(unittest.TestCase):
 
 
 class TestGetAgentFailure(unittest.TestCase):
-    """Checks that the client succeeds when getting an agent with bad input"""
+    """Checks that the client fails properly when getting an agent with bad
+    input"""
 
     def setUp(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
-        # Makes sure that no agent exists with the test id (for )
+        # Makes sure that no agent exists with the test id
+        # (especially for test_get_agent_with_unknown_id)
         self.client.delete_agent(valid_data.VALID_ID)
 
     def test_get_agent_with_invalid_id(self):
         """create_agent should fail when given a non-string/empty string ID
 
-        It should raise an error upon request for creation of
+        It should raise an error upon request for retrieval of
         an agent with an ID that is not of type string, since agent IDs
         should always be strings.
         """
