@@ -26,7 +26,7 @@ class CraftAICredentialsError(CraftAIError):
     aren't valid """
     def __init__(self, message):
         self.message = "".join((
-            "Credentials error, make sure the given owner/token are valid.",
+            "Credentials error: ",
             message
         ))
         super(CraftAIError, self).__init__(message)

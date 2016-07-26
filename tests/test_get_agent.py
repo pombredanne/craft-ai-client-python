@@ -9,9 +9,11 @@ from craftai import errors as craft_err
 
 class TestGetAgentSuccess(unittest.TestCase):
     """Checks that the client succeeds when getting an agent with OK input"""
+    @classmethod
+    def setUpClass(self):
+        self.client = CraftAIClient(settings.CRAFT_CFG)
 
     def setUp(self):
-        self.client = CraftAIClient(settings.CRAFT_CFG)
         self.client.delete_agent(valid_data.VALID_ID)
         self.client.create_agent(valid_data.VALID_MODEL, valid_data.VALID_ID)
 
@@ -34,9 +36,11 @@ class TestGetAgentSuccess(unittest.TestCase):
 class TestGetAgentFailure(unittest.TestCase):
     """Checks that the client fails properly when getting an agent with bad
     input"""
+    @classmethod
+    def setUpClass(self):
+        self.client = CraftAIClient(settings.CRAFT_CFG)
 
     def setUp(self):
-        self.client = CraftAIClient(settings.CRAFT_CFG)
         # Makes sure that no agent exists with the test id
         # (especially for test_get_agent_with_unknown_id)
         self.client.delete_agent(valid_data.VALID_ID)

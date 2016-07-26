@@ -1,4 +1,5 @@
 import unittest
+import six
 
 from . import settings
 from .data import valid_data
@@ -10,8 +11,13 @@ from craftai import errors as craft_err
 class TestCreateAgentSuccess(unittest.TestCase):
     """Checks that the client succeeds when creating an agent with OK input"""
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+
+    def setUp(self):
+        # Makes sure that no agent with the same ID already exists
+        self.client.delete_agent(valid_data.VALID_ID)
 
     def test_create_agent_with_generated_agent_id(self):
         """create_agent should succeed when given an empty `id` field
@@ -20,7 +26,7 @@ class TestCreateAgentSuccess(unittest.TestCase):
         `model` fields being strings.
         """
         resp = self.client.create_agent(valid_data.VALID_MODEL)
-        self.assertIsInstance(resp.id, basestring)
+        self.assertIsInstance(resp.get("id"), six.string_types)
 
     def test_create_agent_given_agent_id(self):
         """create_agent should succeed when given a string ID
@@ -30,16 +36,21 @@ class TestCreateAgentSuccess(unittest.TestCase):
         given as a parameter.
         """
         resp = self.client.create_agent(
-            valid_data.VALID_ID,
-            valid_data.VALID_MODEL)
-        self.assertEqual(resp.id, valid_data.VALID_ID)
+            valid_data.VALID_MODEL,
+            valid_data.VALID_ID)
+        self.assertEqual(resp.get("id"), valid_data.VALID_ID)
 
 
 class TestCreateAgentFailure(unittest.TestCase):
     """Checks that the client fails when creating an agent with bad input"""
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+
+    def setUp(self):
+        # Makes sure that no agent with the same ID already exists
+        self.client.delete_agent(valid_data.VALID_ID)
 
     def test_create_agent_with_invalid_given_agent_id(self):
         """create_agent should fail when given a non-string/empty string ID
@@ -79,11 +90,9 @@ class TestCreateAgentFailure(unittest.TestCase):
         """
         for inv_context in invalid_data.INVALID_CONTEXTS:
             model = {
-                "model": {
-                    "context": inv_context,
-                    "output": ["lightbulbColor"],
-                    "time_quantum": 100
-                }
+                "context": inv_context,
+                "output": ["lightbulbColor"],
+                "time_quantum": 100
             }
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,
@@ -100,11 +109,9 @@ class TestCreateAgentFailure(unittest.TestCase):
         """
         for inv_output in invalid_data.INVALID_OUTPUTS:
             model = {
-                "model": {
-                    "context": valid_data.VALID_CONTEXT,
-                    "output": inv_output,
-                    "time_quantum": 100
-                }
+                "context": valid_data.VALID_CONTEXT,
+                "output": inv_output,
+                "time_quantum": 100
             }
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,
@@ -135,11 +142,9 @@ class TestCreateAgentFailure(unittest.TestCase):
         """
         for inv_tq in invalid_data.INVALID_TIME_QUANTA:
             model = {
-                "model": {
-                    "context": valid_data.VALID_CONTEXT,
-                    "output": valid_data.VALID_OUTPUT,
-                    "time_quantum": inv_tq
-                }
+                "context": valid_data.VALID_CONTEXT,
+                "output": valid_data.VALID_OUTPUT,
+                "time_quantum": inv_tq
             }
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,

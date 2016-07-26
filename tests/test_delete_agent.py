@@ -9,10 +9,11 @@ from craftai import errors as craft_err
 
 class TestDeleteAgentWithValidID(unittest.TestCase):
     """Checks that the client succeeds when deleting an agent with OK input"""
-
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
 
+    def setUp(self):
         # Creating an agent may raise an error if one with the same ID
         # already exists. Although it shouldn' matter for the deletion test,
         # it is necessary to catch this kind of errors.
@@ -36,7 +37,8 @@ class TestDeleteAgentWithUnknownID(unittest.TestCase):
     """Checks that the client succeeds when deleting an agent which
     doesn't exist"""
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
 
     def test_delete_agent_with_unknown_id(self):
@@ -58,6 +60,9 @@ class TestDeleteAgentWithUnknownID(unittest.TestCase):
 
 class TestDeleteAgentWithInvalidID(unittest.TestCase):
     """Checks that the client fails when trying to delete an invalid agent"""
+    @classmethod
+    def setUpClass(self):
+        self.client = CraftAIClient(settings.CRAFT_CFG)
 
     def setUp(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
