@@ -1,4 +1,4 @@
-VALID_ID = "rainbow unicorn"
+VALID_ID = "one_legged_rainbow_unicorn"
 VALID_CONTEXT = {
     "presence": {
         "type": "enum"
@@ -13,9 +13,7 @@ VALID_CONTEXT = {
 VALID_OUTPUT = ["lightbulbColor"]
 VALID_TQ = 100
 VALID_MODEL = {
-    "model": {
-        "context": VALID_CONTEXT,
-        "output": VALID_OUTPUT,
-        "time_quantum": VALID_TQ
-    }
+    "context": VALID_CONTEXT,
+    "output": VALID_OUTPUT,
+    "time_quantum": VALID_TQ
 }
