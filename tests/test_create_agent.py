@@ -100,25 +100,7 @@ class TestCreateAgentFailure(unittest.TestCase):
                 "output": ["lightbulbColor"],
                 "time_quantum": 100
             }
-            self.assertRaises(
-                craft_err.CraftAIBadRequestError,
-                self.client.create_agent,
-                model,
-                valid_data.VALID_ID)
-
-    def test_create_agent_with_invalid_output(self):
-        """create_agent should fail when given no or an invalid output
-
-        It should raise an error upon request for creation of an agent
-        with no specified output or one that doesn't exist in the
-        model, since it is a mandatory key in the model.
-        """
-        for inv_output in invalid_data.INVALID_OUTPUTS:
-            model = {
-                "context": valid_data.VALID_CONTEXT,
-                "output": invalid_data.INVALID_OUTPUTS[inv_output],
-                "time_quantum": 100
-            }
+            print(model)
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,
                 self.client.create_agent,
