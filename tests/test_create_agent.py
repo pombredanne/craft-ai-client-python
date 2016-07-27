@@ -64,7 +64,7 @@ class TestCreateAgentFailure(unittest.TestCase):
                 craft_err.CraftAIBadRequestError,
                 self.client.create_agent,
                 valid_data.VALID_MODEL,
-                inv_id)
+                invalid_data.INVALID_IDS[inv_id])
 
     def test_create_agent_with_existing_agent_id(self):
         """create_agent should fail when given an ID that already exists
@@ -90,7 +90,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         """
         for inv_context in invalid_data.INVALID_CONTEXTS:
             model = {
-                "context": inv_context,
+                "context": invalid_data.INVALID_CONTEXTS[inv_context],
                 "output": ["lightbulbColor"],
                 "time_quantum": 100
             }
@@ -110,7 +110,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         for inv_output in invalid_data.INVALID_OUTPUTS:
             model = {
                 "context": valid_data.VALID_CONTEXT,
-                "output": inv_output,
+                "output": invalid_data.INVALID_OUTPUTS[inv_output],
                 "time_quantum": 100
             }
             self.assertRaises(
@@ -126,12 +126,31 @@ class TestCreateAgentFailure(unittest.TestCase):
         no model key in the request body, since it is a mandatory field to
         create an agent.
         """
+
+        # Testing all non dict model cases
         for empty_model in invalid_data.UNDEFINED_KEY:
-            self.assertRaises(
-                craft_err.CraftAIBadRequestError,
-                self.client.create_agent,
-                empty_model,
-                valid_data.VALID_ID)
+            if not isinstance(invalid_data.UNDEFINED_KEY[empty_model], dict):
+                self.assertRaises(
+                    craft_err.CraftAIBadRequestError,
+                    self.client.create_agent,
+                    invalid_data.UNDEFINED_KEY[empty_model],
+                    valid_data.VALID_ID)
+
+    def test_create_agent_with_unknown_model(self):
+        """create_agent should fail when given an unknown model
+
+        It should raise an error upon request for creation of an agent with
+        no valid model in the request body, since it is a mandatory field to
+        create an agent.
+        """
+        # Testing all dict model cases
+        for empty_model in invalid_data.UNDEFINED_KEY:
+            if isinstance(invalid_data.UNDEFINED_KEY[empty_model], dict):
+                self.assertRaises(
+                    craft_err.CraftAINotFoundError,
+                    self.client.create_agent,
+                    invalid_data.UNDEFINED_KEY[empty_model],
+                    valid_data.VALID_ID)
 
     def test_create_agent_with_invalid_time_quantum(self):
         """create_agent should fail when given an invalid time quantum
@@ -141,10 +160,11 @@ class TestCreateAgentFailure(unittest.TestCase):
         perform any action with craft ai.
         """
         for inv_tq in invalid_data.INVALID_TIME_QUANTA:
+            print(invalid_data.INVALID_TIME_QUANTA[inv_tq])
             model = {
                 "context": valid_data.VALID_CONTEXT,
                 "output": valid_data.VALID_OUTPUT,
-                "time_quantum": inv_tq
+                "time_quantum": invalid_data.INVALID_TIME_QUANTA[inv_tq]
             }
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,

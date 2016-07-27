@@ -1,6 +1,4 @@
-INVALID_IDS = {"bad_id_type": 42,
-               "empty_id": "",
-               "undefined_id": None}
+INVALID_IDS = {"bad_id_type": 42}
 
 INVALID_CONTEXTS = {"no_context": None,
                     "empty_context": {},
@@ -29,6 +27,11 @@ INVALID_CONTEXTS = {"no_context": None,
                         },
                         "output": ["lightbulbColor"],
                         "time_quantum": 100
+                    },
+                    "invalid_context_nonjsonserializable": {
+                        "context": {("1", "2", "3")},
+                        "output": ["lightbulbColor"],
+                        "time_quantum": 100
                     }}
 
 INVALID_OUTPUTS = {"no_output": None,
@@ -39,6 +42,5 @@ UNDEFINED_KEY = {"none": None,
                  "empty_dict": {}}
 
 INVALID_TIME_QUANTA = {"negative_tq": -42,
-                       "null_tq": 0,
-                       "high_tq": 4294967296,
-                       "float_tq": 3.141592}
+                       "null_tq": 0}
+                       # "float_tq": 3.141592}

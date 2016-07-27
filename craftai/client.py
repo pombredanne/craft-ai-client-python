@@ -1,7 +1,11 @@
+import requests
+import json
 import six
 
 from craftai.errors import CraftAICredentialsError
 from craftai.errors import CraftAIBadRequestError
+from craftai.errors import CraftAINotFoundError
+from craftai.errors import CraftAIUnknownError
 
 
 class CraftAIClient():
@@ -30,13 +34,65 @@ class CraftAIClient():
         self.cfg = cfg
 
     def create_agent(self, model, agent_id=""):
-        pass
+        headers = {}
+        headers["Authorization"] = "Bearer " + self.cfg.get("token")
+        headers["Content-Type"] = "application/json; charset=utf-8"
+        headers["Accept"] = "application/json"
+        url = "".join((
+            self.cfg.get("url"),
+            "api/",
+            self.cfg.get("owner"),
+            "/agents"))
+
+        payload = {
+            "id": agent_id,
+            "model": model
+        }
+
+        # Checking that the sent model is valid for a JSON serialization
+        try:
+            json.dumps(payload)
+        except TypeError as e:
+            raise CraftAIBadRequestError(
+                        e.__msg__()))
+                "".join(("Invalid model or agent id given. ",
+
+        r = requests.post(url, headers=headers, json=payload)
+
+        if r.status_code == requests.codes.not_found:
+            raise CraftAINotFoundError(r.text)
+        if r.status_code == requests.codes.bad_request:
+            raise CraftAIBadRequestError(r.text)
+
+        try:
+            agent = r.json()
+        except json.JSONDecodeError:
+            raise CraftAIUnknownError(r.text)
+
+        return agent
 
     def get_agent(self, agent_id):
         pass
 
     def delete_agent(self, agent_id):
-        pass
+        headers = {}
+        headers["Authorization"] = "Bearer " + self.cfg.get("token")
+        headers["Accept"] = "application/json"
+        url = "".join((
+            self.cfg.get("url"),
+            "api/",
+            self.cfg.get("owner"),
+            "/agents/",
+            agent_id)
+        )
+
+        r = requests.delete(url, headers=headers)
+        # print(r.body)
+
+        if r.status_code == requests.codes.bad_request:
+            raise CraftAIBadRequestError(r.text)
+
+        return r.json()
 
     def add_operations(self, agent_id, operations):
         pass
