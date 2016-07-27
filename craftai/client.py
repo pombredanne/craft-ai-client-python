@@ -54,8 +54,8 @@ class CraftAIClient():
             json.dumps(payload)
         except TypeError as e:
             raise CraftAIBadRequestError(
-                        e.__msg__()))
                 "".join(("Invalid model or agent id given. ",
+                        e.__str__())))
 
         r = requests.post(url, headers=headers, json=payload)
 
@@ -75,6 +75,9 @@ class CraftAIClient():
         pass
 
     def delete_agent(self, agent_id):
+        if not (agent_id and isinstance(agent_id, six.string_types)):
+            raise CraftAIBadRequestError("agent_id has to be a string")
+
         headers = {}
         headers["Authorization"] = "Bearer " + self.cfg.get("token")
         headers["Accept"] = "application/json"
@@ -92,7 +95,12 @@ class CraftAIClient():
         if r.status_code == requests.codes.bad_request:
             raise CraftAIBadRequestError(r.text)
 
-        return r.json()
+        try:
+            resp = r.json()
+        except json.JSONDecodeError:
+            raise CraftAIUnknownError(r.text)
+
+        return resp
 
     def add_operations(self, agent_id, operations):
         pass

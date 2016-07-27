@@ -30,7 +30,7 @@ class TestDeleteAgentWithValidID(unittest.TestCase):
     def test_delete_agent_with_valid_id(self):
         resp = self.client.delete_agent(valid_data.VALID_ID)
         self.assertIsInstance(resp, dict)
-        self.assertDictContainsSubset("id", resp)
+        self.assertTrue("id" in resp.keys())
 
 
 class TestDeleteAgentWithUnknownID(unittest.TestCase):
@@ -55,7 +55,7 @@ class TestDeleteAgentWithUnknownID(unittest.TestCase):
         self.client.delete_agent(valid_data.VALID_ID)
         resp = self.client.delete_agent(valid_data.VALID_ID)
         self.assertIsInstance(resp, dict)
-        self.assertDictContainsSubset("message", resp)
+        self.assertTrue("message" in resp.keys())
 
 
 class TestDeleteAgentWithInvalidID(unittest.TestCase):
@@ -79,4 +79,4 @@ class TestDeleteAgentWithInvalidID(unittest.TestCase):
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,
                 self.client.delete_agent,
-                empty_id)
+                invalid_data.UNDEFINED_KEY[empty_id])
