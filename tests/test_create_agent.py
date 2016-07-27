@@ -19,6 +19,10 @@ class TestCreateAgentSuccess(unittest.TestCase):
         # Makes sure that no agent with the same ID already exists
         self.client.delete_agent(valid_data.VALID_ID)
 
+    def clean_up_agent(self, aid):
+        # Makes sure that no agent with the standard ID remains
+        self.client.delete_agent(aid)
+
     def test_create_agent_with_generated_agent_id(self):
         """create_agent should succeed when given an empty `id` field
 
@@ -27,6 +31,7 @@ class TestCreateAgentSuccess(unittest.TestCase):
         """
         resp = self.client.create_agent(valid_data.VALID_MODEL)
         self.assertIsInstance(resp.get("id"), six.string_types)
+        self.addCleanup(self.clean_up_agent, resp.get("id"))
 
     def test_create_agent_given_agent_id(self):
         """create_agent should succeed when given a string ID
@@ -39,6 +44,7 @@ class TestCreateAgentSuccess(unittest.TestCase):
             valid_data.VALID_MODEL,
             valid_data.VALID_ID)
         self.assertEqual(resp.get("id"), valid_data.VALID_ID)
+        self.addCleanup(self.clean_up_agent, valid_data.VALID_ID)
 
 
 class TestCreateAgentFailure(unittest.TestCase):
