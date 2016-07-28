@@ -63,6 +63,8 @@ class CraftAIClient():
             raise CraftAINotFoundError(r.text)
         if r.status_code == requests.codes.bad_request:
             raise CraftAIBadRequestError(r.text)
+        if r.status_code == requests.codes.unauthorized:
+            raise CraftAICredentialsError(r.text)
 
         try:
             agent = r.json()
@@ -72,7 +74,35 @@ class CraftAIClient():
         return agent
 
     def get_agent(self, agent_id):
-        pass
+        if (not agent_id) or (not isinstance(agent_id, six.string_types)):
+            raise CraftAIBadRequestError("agent_id has to be a string")
+
+        headers = {}
+        headers["Authorization"] = "Bearer " + self.cfg.get("token")
+        headers["Accept"] = "application/json"
+        url = "".join((
+            self.cfg.get("url"),
+            "api/",
+            self.cfg.get("owner"),
+            "/agents/",
+            agent_id)
+        )
+
+        r = requests.get(url, headers=headers)
+
+        if r.status_code == requests.codes.not_found:
+            raise CraftAINotFoundError(r.text)
+        if r.status_code == requests.codes.bad_request:
+            raise CraftAIBadRequestError(r.text)
+        if r.status_code == requests.codes.unauthorized:
+            raise CraftAICredentialsError(r.text)
+
+        try:
+            resp = r.json()
+        except json.JSONDecodeError:
+            raise CraftAIUnknownError(r.text)
+
+        return resp
 
     def delete_agent(self, agent_id):
         if not (agent_id and isinstance(agent_id, six.string_types)):
@@ -94,6 +124,8 @@ class CraftAIClient():
 
         if r.status_code == requests.codes.bad_request:
             raise CraftAIBadRequestError(r.text)
+        if r.status_code == requests.codes.unauthorized:
+            raise CraftAICredentialsError(r.text)
 
         try:
             resp = r.json()
