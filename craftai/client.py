@@ -2,10 +2,7 @@ import requests
 import json
 import six
 
-from craftai.errors import CraftAICredentialsError
-from craftai.errors import CraftAIBadRequestError
-from craftai.errors import CraftAINotFoundError
-from craftai.errors import CraftAIUnknownError
+from craftai.errors import *
 
 
 class CraftAIClient():
