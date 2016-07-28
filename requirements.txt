@@ -1,0 +1,4 @@
+nose
+python-dotenv
+requests
+six
