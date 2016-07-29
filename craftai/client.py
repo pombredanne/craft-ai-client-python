@@ -2,6 +2,8 @@ import requests
 import json
 import six
 
+from craftai import helpers
+
 from craftai.errors import *
 
 
@@ -9,12 +11,19 @@ class CraftAIClient():
     """docstring for CraftAIClient"""
     def __init__(self, cfg):
         super(CraftAIClient, self).__init__()
+        self._base_url = ""
+        # self._config = {}
         try:
-            self.set_config(cfg)
+            self.config = cfg
         except (CraftAICredentialsError, CraftAIBadRequestError) as e:
             raise e
 
-    def set_config(self, cfg):
+    @property
+    def config(self):
+        return self._config
+
+    @config.setter
+    def config(self, cfg):
         if (not isinstance(cfg.get("token"), six.string_types)):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid token provided.""")
@@ -28,43 +37,48 @@ class CraftAIClient():
             raise CraftAIBadRequestError("""Unable to create client with"""
                                          """ invalid url provided. The url"""
                                          """ should terminate with a slash.""")
-        self.cfg = cfg
+        self._config = cfg
+
+        self._base_url = "".join((
+            self.config.get("url"),
+            "api/",
+            self.config.get("owner")))
+
+        # Headers have to be reset here (not in __init__) to avoid multiple
+        # definition of the 'Authorization' header if config is modified
+        self._headers = {}
+        self._headers["Authorization"] = "Bearer " + self.config.get("token")
 
     def create_agent(self, model, agent_id=""):
-        headers = {}
-        headers["Authorization"] = "Bearer " + self.cfg.get("token")
-        headers["Content-Type"] = "application/json; charset=utf-8"
-        headers["Accept"] = "application/json"
-        url = "".join((
-            self.cfg.get("url"),
-            "api/",
-            self.cfg.get("owner"),
-            "/agents"))
+        # Building final headers
+        ct_header = {"Content-Type": "application/json; charset=utf-8"}
+        headers = helpers.join_headers(self._headers, ct_header)
 
+        # Building payload and checking that it is valid for a JSON
+        # serialization
         payload = {
             "id": agent_id,
             "model": model
         }
-
-        # Checking that the sent model is valid for a JSON serialization
         try:
-            json.dumps(payload)
+            json_pl = json.dumps(payload)
         except TypeError as e:
             raise CraftAIBadRequestError(
                 "".join(("Invalid model or agent id given. ",
                         e.__str__())))
 
-        r = requests.post(url, headers=headers, json=payload)
+        req_url = "{}/agents".format(self._base_url)
+        resp = requests.post(req_url, headers=headers, data=json_pl)
 
-        if r.status_code == requests.codes.not_found:
-            raise CraftAINotFoundError(r.text)
-        if r.status_code == requests.codes.bad_request:
-            raise CraftAIBadRequestError(r.text)
+        if resp.status_code == requests.codes.not_found:
+            raise CraftAINotFoundError(resp.text)
+        if resp.status_code == requests.codes.bad_request:
+            raise CraftAIBadRequestError(resp.text)
 
         try:
-            agent = r.json()
+            agent = resp.json()
         except json.JSONDecodeError:
-            raise CraftAIUnknownError(r.text)
+            raise CraftAIUnknownError(resp.text)
 
         return agent
 
@@ -75,19 +89,11 @@ class CraftAIClient():
         if not (agent_id and isinstance(agent_id, six.string_types)):
             raise CraftAIBadRequestError("agent_id has to be a string")
 
-        headers = {}
-        headers["Authorization"] = "Bearer " + self.cfg.get("token")
-        headers["Accept"] = "application/json"
-        url = "".join((
-            self.cfg.get("url"),
-            "api/",
-            self.cfg.get("owner"),
-            "/agents/",
-            agent_id)
-        )
+        # No supplementary headers
+        headers = self._headers.copy()
 
-        r = requests.delete(url, headers=headers)
-        # print(r.body)
+        req_url = "{}/agents/{}".format(self._base_url, agent_id)
+        r = requests.delete(req_url, headers=headers)
 
         if r.status_code == requests.codes.bad_request:
             raise CraftAIBadRequestError(r.text)
