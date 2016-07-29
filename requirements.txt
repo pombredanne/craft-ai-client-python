@@ -1,4 +1,5 @@
 tox
+tox-travis
 nose
 python-dotenv
 requests
