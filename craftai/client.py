@@ -7,12 +7,12 @@ from craftai import helpers
 from craftai.errors import *
 
 
-class CraftAIClient():
+class CraftAIClient(object):
     """docstring for CraftAIClient"""
     def __init__(self, cfg):
-        super(CraftAIClient, self).__init__()
         self._base_url = ""
-        # self._config = {}
+        self._headers = {}
+
         try:
             self.config = cfg
         except (CraftAICredentialsError, CraftAIBadRequestError) as e:
@@ -44,8 +44,8 @@ class CraftAIClient():
             "api/",
             self.config.get("owner")))
 
-        # Headers have to be reset here (not in __init__) to avoid multiple
-        # definition of the 'Authorization' header if config is modified
+        # Headers have to be reset here to avoid multiple definitions
+        # of the 'Authorization' header if config is modified
         self._headers = {}
         self._headers["Authorization"] = "Bearer " + self.config.get("token")
 

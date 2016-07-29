@@ -2,8 +2,9 @@ import unittest
 import six
 
 from . import settings
-from .data import valid_data
-from .data import invalid_data
+from tests.data import valid_data
+from tests.data import invalid_data
+
 from craftai.client import CraftAIClient
 from craftai import errors as craft_err
 

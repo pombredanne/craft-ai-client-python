@@ -1,3 +1,4 @@
+tox
 nose
 python-dotenv
 requests

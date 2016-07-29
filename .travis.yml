@@ -1,11 +1,7 @@
 language: python
-python:
-- '2.7'
-- '3.3'
-- '3.5'
-- 3.5-dev
+python: 3.5
 install: pip install -r requirements.txt
-script: nosetests
+script: tox
 env:
   global:
   - secure: hWJEIqdIhaKPVIlRy3gxSX5dX9ykmN6AM09EzjgegGSSnzaV6WJMKttvQhZrwUVk1XnXgjw8cbP0szqoVF3hkvNMoejdJ5zBhCpM8HSJat8ze0DmDLLpYg5Ivc5c4Y1JqAQPN+ol9wEt9NNQmfOngP2CnLyfTZtJWOtYmJruXHwu/03tpbUHGZt8gWSOCztvjbtxzi0lpzcfZ/9FkfGQ9541MPJUAdoiPyiwVQguiklbGF47we8Gko9nTBjyBRCr1eZxGSMqR9AkGYoUL7RLSj4V9xbKoNnHjamtw709F5AiSNF76Qe+za+dXXCugsZDruGok4ViN3inI7QI6sbuGVAPB9cqVAqWXKS23Yzrw/kiRoQ2YkOEFl4m+AgwRTdW/VPyh2o1CQ8IzfxP25hHwinyeI8qu3BLlZM8fjdpp/EiyXwogV6Zsvcb5T62HbjMnCTXsJ3H4kJk0n7UtgoMVA2mdz5kP6BKWZkG75Z/gQBnNvbZ0e5JCk7gfc3z7yDqqAzrEYkGHdPA0JOMTK7CqCiwFuw5Gy/3AclEoe8+VldBbjhEG2xzz4izD9hizkJiCv8Etdn3Ol8QagN5bdkWpOLlBvOe6fzvolaSAVInTEsDzbyZFjdfNIh8Y2eIb6zQhovk+2bmfN5PRG6TejzlOkPPjT57JqrInOwWgCiGM0w=
