@@ -70,17 +70,7 @@ class CraftAIClient(object):
         req_url = "{}/agents".format(self._base_url)
         resp = requests.post(req_url, headers=headers, data=json_pl)
 
-        if resp.status_code == requests.codes.not_found:
-            raise CraftAINotFoundError(resp.text)
-        if resp.status_code == requests.codes.bad_request:
-            raise CraftAIBadRequestError(resp.text)
-        if resp.status_code == requests.codes.unauthorized:
-            raise CraftAICredentialsError(resp.text)
-
-        try:
-            agent = resp.json()
-        except json.JSONDecodeError:
-            raise CraftAIUnknownError(resp.text)
+        agent = self._decode_response(resp)
 
         return agent
 
@@ -94,17 +84,7 @@ class CraftAIClient(object):
         req_url = "{}/agents/{}".format(self._base_url, agent_id)
         resp = requests.get(req_url, headers=headers)
 
-        if resp.status_code == requests.codes.not_found:
-            raise CraftAINotFoundError(resp.text)
-        if resp.status_code == requests.codes.bad_request:
-            raise CraftAIBadRequestError(resp.text)
-        if resp.status_code == requests.codes.unauthorized:
-            raise CraftAICredentialsError(resp.text)
-
-        try:
-            agent = resp.json()
-        except json.JSONDecodeError:
-            raise CraftAIUnknownError(resp.text)
+        agent = self._decode_response(resp)
 
         return agent
 
@@ -116,19 +96,11 @@ class CraftAIClient(object):
         headers = self._headers.copy()
 
         req_url = "{}/agents/{}".format(self._base_url, agent_id)
-        r = requests.delete(req_url, headers=headers)
+        resp = requests.delete(req_url, headers=headers)
 
-        if r.status_code == requests.codes.bad_request:
-            raise CraftAIBadRequestError(r.text)
-        if r.status_code == requests.codes.unauthorized:
-            raise CraftAICredentialsError(r.text)
+        decoded_resp = self._decode_response(resp)
 
-        try:
-            resp = r.json()
-        except json.JSONDecodeError:
-            raise CraftAIUnknownError(r.text)
-
-        return resp
+        return decoded_resp
 
     def add_operations(self, agent_id, operations):
         pass
@@ -144,3 +116,16 @@ class CraftAIClient(object):
 
     def get_decision_from_context(self, agent_id, timestamp, decision_context):
         pass
+
+    def _decode_response(self, response):
+        if response.status_code == requests.codes.not_found:
+            raise CraftAINotFoundError(response.text)
+        if response.status_code == requests.codes.bad_request:
+            raise CraftAIBadRequestError(response.text)
+        if response.status_code == requests.codes.unauthorized:
+            raise CraftAICredentialsError(response.text)
+
+        try:
+            return response.json()
+        except json.JSONDecodeError:
+            raise CraftAIUnknownError(response.text)
