@@ -24,8 +24,8 @@ class TestGetAgentSuccess(unittest.TestCase):
     def test_get_agent_with_correct_id(self):
         """get_agent should succeed when given a correct agent ID
 
-        It should give a proper JSON response with `model`, `firstTimestamp`
-        and `lastTimestamp` fields being strings.
+        It should give a proper JSON response with `model` field being a
+        string.
         """
         agent = self.client.get_agent(valid_data.VALID_ID)
         self.assertIsInstance(agent, dict)
