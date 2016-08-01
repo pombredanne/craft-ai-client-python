@@ -33,16 +33,16 @@ class CraftAIClient(object):
         if (not isinstance(cfg.get("url"), six.string_types)):
             raise CraftAIBadRequestError("""Unable to create client with no"""
                                          """ or invalid url provided.""")
-        if (cfg.get("url")[-1] != '/'):
+        if cfg.get("url").endswith("/"):
             raise CraftAIBadRequestError("""Unable to create client with"""
-                                         """ invalid url provided. The url"""
-                                         """ should terminate with a slash.""")
+                                         """invalid url provided. The url """
+                                         """should not terminate with a """
+                                         """slash. """)
         self._config = cfg
 
-        self._base_url = "".join((
-            self.config.get("url"),
-            "api/",
-            self.config.get("owner")))
+        self._base_url = "{}/api/{}".format(
+            self.config["url"],
+            self.config["owner"])
 
         # Headers have to be reset here to avoid multiple definitions
         # of the 'Authorization' header if config is modified
@@ -63,9 +63,9 @@ class CraftAIClient(object):
         try:
             json_pl = json.dumps(payload)
         except TypeError as e:
-            raise CraftAIBadRequestError(
-                "".join(("Invalid model or agent id given. ",
-                        e.__str__())))
+            raise CraftAIBadRequestError("Invalid model or agent id given. {}".
+                                         format(e.__str__())
+                                         )
 
         req_url = "{}/agents".format(self._base_url)
         resp = requests.post(req_url, headers=headers, data=json_pl)
