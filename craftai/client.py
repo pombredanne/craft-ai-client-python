@@ -75,9 +75,10 @@ class CraftAIClient(object):
         return agent
 
     def get_agent(self, agent_id):
-        if (not agent_id) or (not isinstance(agent_id, six.string_types)):
-            raise CraftAIBadRequestError("agent_id has to be a string")
-
+        if (not isinstance(agent_id, six.string_types) or
+                agent_id == ""):
+            raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
+                                         """string""")
         # No supplementary headers
         headers = self._headers.copy()
 
@@ -89,9 +90,10 @@ class CraftAIClient(object):
         return agent
 
     def delete_agent(self, agent_id):
-        if not (agent_id and isinstance(agent_id, six.string_types)):
-            raise CraftAIBadRequestError("agent_id has to be a string")
-
+        if (not isinstance(agent_id, six.string_types) or
+                agent_id == ""):
+            raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
+                                         """string""")
         # No supplementary headers
         headers = self._headers.copy()
 
