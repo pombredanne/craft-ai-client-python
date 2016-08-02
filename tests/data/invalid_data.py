@@ -1,6 +1,6 @@
 INVALID_IDS = {"bad_id_type": 42}
 
-UNKNOWN_ID = "one-eyed drunken pirate"
+UNKNOWN_ID = "one_eyed_drunken_pirate"
 
 INVALID_CONTEXTS = {
     "invalid_context_missing_type_key": {
@@ -67,5 +67,14 @@ INVALID_OPS_SET = {
                 "lightbulbColor": "#ffffff"
             }
         }
-    ]
+    ],
+    "dict_operations": {
+        "time_of_day": 0.5,
+        "day_of_week": 5,
+        "diff": {
+            "presence": "occupant",
+            "lightIntensity": 1,
+            "lightbulbColor": "#ffffff"
+        }
+    }
 }

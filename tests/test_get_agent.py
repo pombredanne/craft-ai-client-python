@@ -50,7 +50,7 @@ class TestGetAgentFailure(unittest.TestCase):
         self.client.delete_agent(valid_data.VALID_ID)
 
     def test_get_agent_with_invalid_id(self):
-        """create_agent should fail when given a non-string/empty string ID
+        """get_agent should fail when given a non-string/empty string ID
 
         It should raise an error upon request for retrieval of
         an agent with an ID that is not of type string, since agent IDs
@@ -71,4 +71,4 @@ class TestGetAgentFailure(unittest.TestCase):
         self.assertRaises(
             craft_err.CraftAINotFoundError,
             self.client.get_agent,
-            valid_data.VALID_ID)
+            invalid_data.UNKNOWN_ID)

@@ -79,10 +79,9 @@ class CraftAIClient(object):
         return agent
 
     def get_agent(self, agent_id):
-        if (not isinstance(agent_id, six.string_types) or
-                agent_id == ""):
-            raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
-                                         """string""")
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
+
         # No supplementary headers needed
         headers = self._headers.copy()
 
@@ -94,10 +93,9 @@ class CraftAIClient(object):
         return agent
 
     def delete_agent(self, agent_id):
-        if (not isinstance(agent_id, six.string_types) or
-                agent_id == ""):
-            raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
-                                         """string""")
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
+
         # No supplementary headers needed
         headers = self._headers.copy()
 
@@ -113,10 +111,8 @@ class CraftAIClient(object):
     ###################
 
     def add_operations(self, agent_id, operations):
-        if (not isinstance(agent_id, six.string_types) or
-                agent_id == ""):
-            raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
-                                         """string""")
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
 
         # Building final headers
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
@@ -137,7 +133,18 @@ class CraftAIClient(object):
         return decoded_resp
 
     def get_operations_list(self, agent_id):
-        pass
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
+
+        headers = self._headers.copy()
+
+        req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
+
+        resp = requests.get(req_url, headers=headers)
+
+        ops_list = self._decode_response(resp)
+
+        return ops_list
 
     def get_context_state(self, agent_id, timestamp):
         pass
@@ -168,3 +175,14 @@ class CraftAIClient(object):
             return response.json()
         except json.JSONDecodeError:
             raise CraftAIUnknownError(response.text)
+
+    def _check_agent_id(self, agent_id):
+        """Checks that the given agent_id is a valid non-empty string.
+
+        Raises an error if the given agent_id is not of type string or if it is
+        an empty string.
+        """
+        if (not isinstance(agent_id, six.string_types) or
+                agent_id == ""):
+            raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
+                                         """string""")
