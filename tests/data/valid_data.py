@@ -1,5 +1,8 @@
 VALID_ID = "one_legged_rainbow_unicorn"
 VALID_CONTEXT = {
+    "tz": {
+        "type": "timezone"
+    },
     "presence": {
         "type": "enum"
     },
