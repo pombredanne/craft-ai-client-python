@@ -147,7 +147,20 @@ class CraftAIClient(object):
         return ops_list
 
     def get_context_state(self, agent_id, timestamp):
-        pass
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
+
+        headers = self._headers.copy()
+
+        req_url = "{}/agents/{}/context/state?t={}".format(
+            self._base_url,
+            agent_id,
+            timestamp)
+        resp = requests.get(req_url, headers=headers)
+
+        context_state = self._decode_response(resp)
+
+        return context_state
 
     #########################
     # Decision tree methods #

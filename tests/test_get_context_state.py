@@ -84,7 +84,7 @@ class TestGetContextStateFailure(unittest.TestCase):
         that doesn't exist.
         """
         self.assertRaises(
-            craft_err.CraftAINotFoundError,
+            craft_err.CraftAIBadRequestError,
             self.client.get_context_state,
             invalid_data.UNKNOWN_ID,
             valid_data.VALID_TIMESTAMP)
