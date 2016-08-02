@@ -36,6 +36,13 @@ UNDEFINED_KEY = {"none": None,
 INVALID_TIME_QUANTA = {"negative_tq": -42,
                        "null_tq": 0}
 
+INVALID_TIMESTAMPS = {
+    "negative_ts": -42,
+    "null_ts": 0,
+    "float_ts": 3.141592,
+    "none": None
+}
+
 INVALID_OPS_SET = {
     "incomplete_first_op": [
         {

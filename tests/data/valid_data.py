@@ -20,9 +20,11 @@ VALID_MODEL = {
     "output": VALID_OUTPUT,
     "time_quantum": VALID_TQ
 }
+
+VALID_TIMESTAMP = 1458741230
 VALID_OPERATIONS_SET = [
     {
-        "timestamp": 1458741230,
+        "timestamp": VALID_TIMESTAMP,
         "diff": {
             "tz": "+02:00",
             "presence": "occupant",

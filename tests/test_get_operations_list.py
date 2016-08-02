@@ -1,5 +1,4 @@
 import unittest
-import six
 
 from . import settings
 from tests.data import valid_data
@@ -37,7 +36,8 @@ class TestGetOperationsListSuccess(unittest.TestCase):
 
 
 class TestGetOperationsListFailure(unittest.TestCase):
-    """docstring for TestGetOperationsListFailure"""
+    """Checks that the client fails properly when getting an agent with bad
+    input"""
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
@@ -49,8 +49,8 @@ class TestGetOperationsListFailure(unittest.TestCase):
             valid_data.VALID_ID,
             valid_data.VALID_OPERATIONS_SET)
 
-    # def tearDown(self):
-    #     self.client.delete_agent(valid_data.VALID_ID)
+    def tearDown(self):
+        self.client.delete_agent(valid_data.VALID_ID)
 
     def test_get_operations_list_with_invalid_id(self):
         """get_operations_list should fail when given a non-string/empty ID
