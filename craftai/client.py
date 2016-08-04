@@ -167,7 +167,21 @@ class CraftAIClient(object):
     #########################
 
     def get_decision_tree(self, agent_id, timestamp):
-        pass
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
+
+        headers = self._headers.copy()
+
+        req_url = "{}/agents/{}/decision/tree?t={}".format(
+            self._base_url,
+            agent_id,
+            timestamp)
+
+        resp = requests.get(req_url, headers=headers)
+
+        decision_tree = self._decode_response(resp)
+
+        return decision_tree
 
     def get_decision_from_context(self, agent_id, timestamp, decision_context):
         pass
