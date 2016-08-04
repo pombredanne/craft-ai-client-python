@@ -6,11 +6,20 @@ try:
 except ImportError:
     from distutils.core import setup
 
+here = path.abspath(path.dirname(__file__))
+
 
 def readme():
-    here = path.abspath(path.dirname(__file__))
-    with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-        return f.read()
+    try:
+        import pypandoc
+        long_description = pypandoc.convert("README.md", "rst")
+        long_description = long_description.replace("\r", "")
+    except (OSError, ImportError):
+        print("Pandoc not found. Long_description conversion failure.")
+        with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+            long_description = f.read()
+
+    return long_description
 
 setup(
     name='craft-ai',
