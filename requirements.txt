@@ -1,6 +1,5 @@
-tox
-tox-travis
-nose
-python-dotenv
-requests
-six
+tox==2.3.1
+nose==1.3.7
+python-dotenv==0.5.1
+requests==2.9.1
+six==1.1
