@@ -2,8 +2,9 @@ import unittest
 import six
 
 from . import settings
-from .data import valid_data
-from .data import invalid_data
+from tests.data import valid_data
+from tests.data import invalid_data
+
 from craftai.client import CraftAIClient
 from craftai import errors as craft_err
 
@@ -117,7 +118,8 @@ class TestCreateAgentFailure(unittest.TestCase):
 
         # Testing all non dict model cases
         for empty_model in invalid_data.UNDEFINED_KEY:
-            if not isinstance(invalid_data.UNDEFINED_KEY[empty_model], dict):
+            if not (isinstance(invalid_data.UNDEFINED_KEY[empty_model],
+                               (dict, list))):
                 self.assertRaises(
                     craft_err.CraftAIBadRequestError,
                     self.client.create_agent,
@@ -133,7 +135,8 @@ class TestCreateAgentFailure(unittest.TestCase):
         """
         # Testing all dict model cases
         for empty_model in invalid_data.UNDEFINED_KEY:
-            if isinstance(invalid_data.UNDEFINED_KEY[empty_model], dict):
+            if isinstance(invalid_data.UNDEFINED_KEY[empty_model],
+                          (dict, list)):
                 self.assertRaises(
                     craft_err.CraftAINotFoundError,
                     self.client.create_agent,

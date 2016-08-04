@@ -1,13 +1,24 @@
 language: python
-python:
-- '3.3'
-- '3.4'
-- '3.5'
-- 3.5-dev
-- nightly
-install: pip install -r requirements.txt
-script: nosetests
+python: '3.5'
+install:
+- pip install --upgrade pip
+- pip install -r requirements.txt
+script: "sh run-tests.sh"
 env:
+  matrix:
+  - TOXENV=py27
+  - TOXENV=py33
+  - TOXENV=py35
   global:
   - secure: hWJEIqdIhaKPVIlRy3gxSX5dX9ykmN6AM09EzjgegGSSnzaV6WJMKttvQhZrwUVk1XnXgjw8cbP0szqoVF3hkvNMoejdJ5zBhCpM8HSJat8ze0DmDLLpYg5Ivc5c4Y1JqAQPN+ol9wEt9NNQmfOngP2CnLyfTZtJWOtYmJruXHwu/03tpbUHGZt8gWSOCztvjbtxzi0lpzcfZ/9FkfGQ9541MPJUAdoiPyiwVQguiklbGF47we8Gko9nTBjyBRCr1eZxGSMqR9AkGYoUL7RLSj4V9xbKoNnHjamtw709F5AiSNF76Qe+za+dXXCugsZDruGok4ViN3inI7QI6sbuGVAPB9cqVAqWXKS23Yzrw/kiRoQ2YkOEFl4m+AgwRTdW/VPyh2o1CQ8IzfxP25hHwinyeI8qu3BLlZM8fjdpp/EiyXwogV6Zsvcb5T62HbjMnCTXsJ3H4kJk0n7UtgoMVA2mdz5kP6BKWZkG75Z/gQBnNvbZ0e5JCk7gfc3z7yDqqAzrEYkGHdPA0JOMTK7CqCiwFuw5Gy/3AclEoe8+VldBbjhEG2xzz4izD9hizkJiCv8Etdn3Ol8QagN5bdkWpOLlBvOe6fzvolaSAVInTEsDzbyZFjdfNIh8Y2eIb6zQhovk+2bmfN5PRG6TejzlOkPPjT57JqrInOwWgCiGM0w=
   - secure: 3Paz1IcBB4MhhYKkcC87vBH0QUk2uSMz9oosF3AVeeuROufdep+cms9Mx80+qVEvY7xV1CXSSFbfVzwc0qdczacmMDHOZzU7tjzSUkTxYP1dN0Fu4HjUcKc3WBOhCH4l6vTi5YLscVsyvL4UNgVfnm1OjKk2hNZyreDeYj6ffsKhwW5WAto2aH8ADEkDKWatDzXkaSpbEzcbe62OD42SQmRPNCtKVBdEVnjDvfcCLJi7Euy5ln5gm37IOjr9/6BuYQVRr/NOtYHQPgz87qWLAMHD3wZbijbIIQCLNNLpNk71UCNLZijOR+iUAIckQSD9XLuZHhRnVpe3NgukRaeQ547603pnjT1Wv0455aCENFgIkxBRK8PyaSHbnmOPWV4VTVLDjB449qnMViOAd3TYZ31UAI1OvehBdXrd9rYe8eXvH2pSsB1IqrrhhjaKGeccyu/9NTETMgl8RHH8yl9C6xuv0cgzVKp5oh2DbjzONT2NK3Yz1sGUdGOcOJt3qynUyevmTKlhGI5n3jVz/E++0lxn85XSBniNTBTjyA5VCFnMK8+J+uC9vl5a5CIMU0bLesCSwTfiAdsWIAmu1iMY+biq4cPRW2MP2HgQNQlmX4JvjOqopdqnnho6TM9nHw8crjlT5Omn31Wc8Foi2x8td6dKYIiWd+y7YI1NgIEsD1M=
+deploy:
+  provider: pypi
+  user: ops
+  password:
+    secure: BV855ZvX9A+93Zn3o8OjbxJCJ4GiHjcPLzerd4TiuBHFh4e78i9UAcjCS4f1GjgdDe+QM+c/PKxHDI0Fgk/QcNSjAWNPyreY5qNfScLVbfD2GGWoi71Oqt2Yo82lGOGEQjbiOruJhbnnPTJ0tYCedtYsgy/aDAK5Asl9lpzlZm0mH+5FNJbyuPWr0KkWh3oR5kZ9yaO3kSAvTkn3gCS4E14s/n+qYCBQPaHHmDCDoE6J021kHTIqXQpTXY39Xoc1q5z+cJXJ01L2c/z/MDRbFrLvetglqD6sru9ZwSV1U9HUMbzuHv/+yrxydyuZoRE/IHfD8BfWkq+A8dGLytLs0R4EJlVS2bTBCGIIRQ+STWlFl8JjkG4ONkzeCWR0VppEKMQ41YGU7pexm7Z7c7dwxsTsOU5wV5TNS3jHJTvbkVBWtIrJSgN//DDTIwo3kP/ayeZ+Ndz29b17/MTkCScUXxU0QD5Qril3JMPEJo/O1g1pw7FcvaAWRkcGzTyi1Nt//6dqGWTvTX89WZ5F9mnwDN7PL3WPqVNIg/eZq2pQIdT6S6iiVdS9pmrFAJ+u51kV4Udedp70HlR6RxxWILCKmP3wiV9YA9NX8vk8woOoWq9WCJ89/oI2VcOPOvwnUXiLEbQqb89uqGpCzhwluKZrlSt+y6tHXsmu0P47MwDwpn0=
+  distributions: "bdist_wheel"
+  on:
+    tags: true
+    branch: master
+  
