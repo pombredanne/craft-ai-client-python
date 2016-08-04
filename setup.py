@@ -67,7 +67,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'update_readme= cli:update_readme'
+            'craft-ai= craftai.cli:main'
         ]
     }
 )
