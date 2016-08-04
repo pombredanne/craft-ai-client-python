@@ -1,5 +1,4 @@
 import unittest
-import six
 
 from . import settings
 from tests.data import valid_data
@@ -47,8 +46,8 @@ class TestGetContextStateSuccess(unittest.TestCase):
 
 
 class TestGetContextStateFailure(unittest.TestCase):
-    """Checks that the client fails properly when getting an agent with bad
-    input"""
+    """Checks that the client fails properly when getting an agent's context
+    with bad input"""
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
