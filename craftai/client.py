@@ -24,6 +24,7 @@ class CraftAIClient(object):
 
     @config.setter
     def config(self, cfg):
+        cfg = cfg.copy()
         if (not isinstance(cfg.get("token"), six.string_types)):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid token provided.""")
@@ -31,8 +32,7 @@ class CraftAIClient(object):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid owner provided.""")
         if (not isinstance(cfg.get("url"), six.string_types)):
-            raise CraftAIBadRequestError("""Unable to create client with no"""
-                                         """ or invalid url provided.""")
+            cfg["url"] = "https://beta.craft.ai"
         if cfg.get("url").endswith("/"):
             raise CraftAIBadRequestError("""Unable to create client with"""
                                          """invalid url provided. The url """

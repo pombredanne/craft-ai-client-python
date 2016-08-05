@@ -38,8 +38,7 @@ from craftai import client as craftai
 ```python
 config = {
     "owner": '{owner}',
-    "token": '{token}',
-    "url": "https://beta.craft.ai"
+    "token": '{token}'
 }
 client = craftai.CraftAIClient(config)
 ```
