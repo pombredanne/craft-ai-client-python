@@ -213,3 +213,53 @@ class CraftAIClient(object):
                 agent_id == ""):
             raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
                                          """string""")
+    def _parse_tree(self, tree_object):
+        # Checking definition of tree_object
+        if not (tree_object and isinstance(tree_object, list)):
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, the given object is not a"""
+                """ list or is empty."""
+            )
+
+        # Checking version existence
+        tree_version = tree_object[0].get("version")
+        if not tree_version:
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, unable to find the version"""
+                """ information."""
+            )
+
+        # Checking version and tree validity according to version
+        if not semver.validate(tree_version):
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, {} is not a valid version.""".
+                format(tree_version)
+            )
+        elif semver.Version(tree_version) == semver.Version("0.0.1"):
+            if len(tree_object) < 2:
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, no tree found."""
+                )
+            bare_tree = tree_object[1]
+            model = {}
+        elif (semver.Version(tree_version) == semver.Version("0.0.2") or
+              semver.Version(tree_version) == semver.Version("0.0.3")):
+            if (len(tree_object) < 2 or
+                    not tree_object[1].get("model")):
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, no model found"""
+                )
+            if len(tree_object) < 3:
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, no tree found."""
+                )
+            bare_tree = tree_object[2]
+            model = tree_object[1]["model"]
+        else:
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, {} is not a supported"""
+                """ version.""".
+                format(tree_version)
+            )
+
+        return bare_tree, model
