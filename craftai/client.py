@@ -2,13 +2,17 @@ import requests
 import json
 import six
 
+import semantic_version as semver
+
 from craftai import helpers
 
 from craftai.errors import *
+from craftai.operators import _OPERATORS
 
 
 class CraftAIClient(object):
     """docstring for CraftAIClient"""
+
     def __init__(self, cfg):
         self._base_url = ""
         self._headers = {}
@@ -183,8 +187,33 @@ class CraftAIClient(object):
 
         return decision_tree
 
-    def get_decision_from_context(self, agent_id, timestamp, decision_context):
-        pass
+    def decide(self, tree, context={}, time={}):
+        bare_tree, model = self._parse_tree(tree)
+        if not isinstance(context, dict):
+            raise CraftAIDecisionError(
+                """Invalid context format, the given object is not a"""
+                """ dict or is empty."""
+            )
+        if not (context or time):
+            raise CraftAIDecisionError(
+                """No decision can be taken without any context or"""
+                """ timestamp."""
+            )
+
+        raw_decision = self._decide_recursion(bare_tree, context)
+
+        output_name = model.get("output")[0]
+        if not output_name:
+            output_name = "value"
+
+        decision = {}
+        decision["decision"] = {}
+        decision["decision"][output_name] = raw_decision["value"]
+        decision["confidence"] = raw_decision["confidence"]
+        decision["predicates"] = raw_decision["predicates"]
+        decision["context"] = context
+
+        return decision
 
     ####################
     # Internal helpers #
@@ -213,6 +242,73 @@ class CraftAIClient(object):
                 agent_id == ""):
             raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
                                          """string""")
+
+    def _check_context(self, context):
+        pass
+
+    def _decide_recursion(self, node, context):
+        # If we are on a leaf
+        if not node.get("predicate_property"):
+            return {
+                "value": node["value"],
+                "confidence": node.get("confidence") or 0,
+                "predicates": []
+            }
+
+        # If we are on a regular node
+        prop_name = node["predicate_property"]
+
+        ctx_value = context.get(prop_name)
+        if not ctx_value:
+            raise CraftAIDecisionError(
+                """Property {} is not defined in the given context""".
+                format(prop_name)
+            )
+
+        # Finding the first element in this node's childrens matching the
+        # operator condition with given context
+        matching_child = self._find_matching_child(node, ctx_value, prop_name)
+
+        if not matching_child:
+            raise CraftAIDecisionError("No matching child found")
+
+        # If a matching child is found, recurse
+        result = self._decide_recursion(matching_child, context)
+        new_predicates = [{
+            "property": prop_name,
+            "op": matching_child["predicate"]["op"],
+            "value": matching_child["predicate"]["value"]
+        }]
+        return {
+            "value": result["value"],
+            "confidence": result["confidence"],
+            "predicates": new_predicates + result["predicates"]
+        }
+
+    def _find_matching_child(self, node, context, prop_name):
+        for child in node["children"]:
+            threshold = child["predicate"]["value"]
+            operator = child["predicate"]["op"]
+            if not isinstance(operator, six.string_types):
+                raise CraftAIDecisionError(
+                    """{} operator is not a valid string""".
+                    format(operator)
+                )
+            if operator not in _OPERATORS:
+                raise CraftAIDecisionError(
+                    """{} is not a valid decision tree operator""".
+                    format(operator)
+                )
+
+            # Continuous parameters should not be strings to be compared
+            if "continuous" in operator:
+                context = float(context)
+                threshold = float(threshold)
+            print("context: ", context, "threshold: ", threshold)
+            if _OPERATORS[operator](context, threshold):
+                return child
+        return {}
+
     def _parse_tree(self, tree_object):
         # Checking definition of tree_object
         if not (tree_object and isinstance(tree_object, list)):
