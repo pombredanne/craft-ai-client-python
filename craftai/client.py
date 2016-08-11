@@ -188,22 +188,15 @@ class CraftAIClient(object):
         return decision_tree
 
     def decide(self, tree, context={}, time={}):
-        bare_tree, model = self._parse_tree(tree)
-        if not isinstance(context, dict):
-            raise CraftAIDecisionError(
-                """Invalid context format, the given object is not a"""
-                """ dict or is empty."""
-            )
-        if not (context or time):
-            raise CraftAIDecisionError(
-                """No decision can be taken without any context or"""
-                """ timestamp."""
-            )
-
+        bare_tree, model, version = self._parse_tree(tree)
+        self._check_context(model, context, version)
         raw_decision = self._decide_recursion(bare_tree, context)
 
-        output_name = model.get("output")[0]
-        if not output_name:
+        # If the model is not included in the tree object (f.i. version 0.0.1)
+        # we give a default key name to the output
+        try:
+            output_name = model.get("output")[0]
+        except TypeError:
             output_name = "value"
 
         decision = {}
@@ -243,8 +236,49 @@ class CraftAIClient(object):
             raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
                                          """string""")
 
-    def _check_context(self, context):
-        pass
+    def _check_context(self, model, context, version):
+        if not isinstance(context, dict):
+            raise CraftAIDecisionError(
+                """Invalid context format, the given object is not a"""
+                """ dict or is empty."""
+            )
+        # It's impossible to check the context keys against the model
+        # if the model is not included in the tree object (v0.0.1).
+        # This case should be rather rare.
+        if semver.Version(version) == semver.Version("0.0.1"):
+            return
+
+        # Model should come from _parse_tree and is assumed to be checked upon
+        # already.
+        # We should not copy the output key(s)
+        model_context = {}
+        model_output = model["output"]
+        for key, value in model["context"].items():
+            if key not in model_output:
+                model_context[key] = model["context"][key]
+
+        # Checking that context's keys are included in model_context
+        # and reciprocally.
+        missing = []
+        supplementary = []
+        for key in model_context:
+            if key not in context:
+                missing.append(key)
+        if missing != []:
+            raise CraftAIDecisionError(
+                """Invalid context, the following keys from the model are"""
+                """ missing: {}.""".
+                format(", ".join(missing))
+            )
+        for key in context:
+            if key not in model_context:
+                supplementary.append(key)
+        if supplementary != []:
+            raise CraftAIDecisionError(
+                """Invalid context, the following keys are not included in"""
+                """ the original model missing: {}.""".
+                format(", ".join(supplementary))
+            )
 
     def _decide_recursion(self, node, context):
         # If we are on a leaf
@@ -259,9 +293,9 @@ class CraftAIClient(object):
         prop_name = node["predicate_property"]
 
         ctx_value = context.get(prop_name)
-        if not ctx_value:
+        if ctx_value is None:
             raise CraftAIDecisionError(
-                """Property {} is not defined in the given context""".
+                """Property '{}' is not defined in the given context""".
                 format(prop_name)
             )
 
@@ -304,7 +338,7 @@ class CraftAIClient(object):
             if "continuous" in operator:
                 context = float(context)
                 threshold = float(threshold)
-            print("context: ", context, "threshold: ", threshold)
+
             if _OPERATORS[operator](context, threshold):
                 return child
         return {}
@@ -358,4 +392,4 @@ class CraftAIClient(object):
                 format(tree_version)
             )
 
-        return bare_tree, model
+        return bare_tree, model, tree_version
