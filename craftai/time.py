@@ -2,12 +2,13 @@ import six
 import time as _time
 
 from datetime import datetime
-from datetime import timezone as _timezone
+from pytz import timezone as _timezone
+from pytz import utc as pyutc
 from tzlocal import get_localzone
 
 from craftai.errors import CraftAITimeError
 
-_EPOCH = datetime(1970, 1, 1, tzinfo=_timezone.utc)
+_EPOCH = datetime(1970, 1, 1, tzinfo=pyutc)
 _ISO_FMT = "%Y-%m-%dT%H-%M:%S%z"
 
 
