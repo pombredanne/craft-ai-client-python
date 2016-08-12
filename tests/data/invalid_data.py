@@ -39,8 +39,7 @@ INVALID_TIME_QUANTA = {"negative_tq": -42,
 INVALID_TIMESTAMPS = {
     "negative_ts": -42,
     "null_ts": 0,
-    "float_ts": 3.141592,
-    "none": None
+    "float_ts": 3.141592
 }
 
 INVALID_OPS_SET = {

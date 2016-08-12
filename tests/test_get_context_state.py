@@ -1,5 +1,4 @@
 import unittest
-import six
 
 from . import settings
 from tests.data import valid_data
@@ -47,8 +46,8 @@ class TestGetContextStateSuccess(unittest.TestCase):
 
 
 class TestGetContextStateFailure(unittest.TestCase):
-    """Checks that the client fails properly when getting an agent with bad
-    input"""
+    """Checks that the client fails properly when getting an agent's context
+    with bad input"""
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
@@ -84,15 +83,17 @@ class TestGetContextStateFailure(unittest.TestCase):
         that doesn't exist.
         """
         self.assertRaises(
-            craft_err.CraftAIBadRequestError,
+            craft_err.CraftAINotFoundError,
             self.client.get_context_state,
             invalid_data.UNKNOWN_ID,
             valid_data.VALID_TIMESTAMP)
 
     def test_get_context_state_with_invalid_timestamp(self):
-        for inv_ts in invalid_data.UNDEFINED_KEY:
-            context_state = self.client.get_context_state(
-                valid_data.VALID_ID,
-                invalid_data.UNDEFINED_KEY[inv_ts])
-            self.assertIsInstance(context_state, dict)
-            self.assertEqual(context_state, {})
+        for inv_ts in invalid_data.INVALID_TIMESTAMPS:
+            print(inv_ts)
+            if not (inv_ts is None):
+                self.assertRaises(
+                    craft_err.CraftAIBadRequestError,
+                    self.client.get_context_state,
+                    valid_data.VALID_ID,
+                    invalid_data.INVALID_TIMESTAMPS[inv_ts])

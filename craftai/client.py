@@ -2,13 +2,17 @@ import requests
 import json
 import six
 
+import semantic_version as semver
+
 from craftai import helpers
 
 from craftai.errors import *
+from craftai.operators import _OPERATORS
 
 
 class CraftAIClient(object):
     """docstring for CraftAIClient"""
+
     def __init__(self, cfg):
         self._base_url = ""
         self._headers = {}
@@ -24,6 +28,7 @@ class CraftAIClient(object):
 
     @config.setter
     def config(self, cfg):
+        cfg = cfg.copy()
         if (not isinstance(cfg.get("token"), six.string_types)):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid token provided.""")
@@ -31,8 +36,7 @@ class CraftAIClient(object):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid owner provided.""")
         if (not isinstance(cfg.get("url"), six.string_types)):
-            raise CraftAIBadRequestError("""Unable to create client with no"""
-                                         """ or invalid url provided.""")
+            cfg["url"] = "https://beta.craft.ai"
         if cfg.get("url").endswith("/"):
             raise CraftAIBadRequestError("""Unable to create client with"""
                                          """invalid url provided. The url """
@@ -167,10 +171,42 @@ class CraftAIClient(object):
     #########################
 
     def get_decision_tree(self, agent_id, timestamp):
-        pass
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
 
-    def get_decision_from_context(self, agent_id, timestamp, decision_context):
-        pass
+        headers = self._headers.copy()
+
+        req_url = "{}/agents/{}/decision/tree?t={}".format(
+            self._base_url,
+            agent_id,
+            timestamp)
+
+        resp = requests.get(req_url, headers=headers)
+
+        decision_tree = self._decode_response(resp)
+
+        return decision_tree
+
+    def decide(self, tree, context={}, time={}):
+        bare_tree, model, version = self._parse_tree(tree)
+        self._check_context(model, context, version)
+        raw_decision = self._decide_recursion(bare_tree, context)
+
+        # If the model is not included in the tree object (f.i. version 0.0.1)
+        # we give a default key name to the output
+        try:
+            output_name = model.get("output")[0]
+        except TypeError:
+            output_name = "value"
+
+        decision = {}
+        decision["decision"] = {}
+        decision["decision"][output_name] = raw_decision["value"]
+        decision["confidence"] = raw_decision["confidence"]
+        decision["predicates"] = raw_decision["predicates"]
+        decision["context"] = context
+
+        return decision
 
     ####################
     # Internal helpers #
@@ -199,3 +235,161 @@ class CraftAIClient(object):
                 agent_id == ""):
             raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
                                          """string""")
+
+    def _check_context(self, model, context, version):
+        if not isinstance(context, dict):
+            raise CraftAIDecisionError(
+                """Invalid context format, the given object is not a"""
+                """ dict or is empty."""
+            )
+        # It's impossible to check the context keys against the model
+        # if the model is not included in the tree object (v0.0.1).
+        # This case should be rather rare.
+        if semver.Version(version) == semver.Version("0.0.1"):
+            return
+
+        # Model should come from _parse_tree and is assumed to be checked upon
+        # already.
+        # We should not copy the output key(s)
+        model_context = {}
+        model_output = model["output"]
+        for key, value in model["context"].items():
+            if key not in model_output:
+                model_context[key] = model["context"][key]
+
+        # Checking that context's keys are included in model_context
+        # and reciprocally.
+        missing = []
+        supplementary = []
+        for key in model_context:
+            if key not in context:
+                missing.append(key)
+        if missing != []:
+            raise CraftAIDecisionError(
+                """Invalid context, the following keys from the model are"""
+                """ missing: {}.""".
+                format(", ".join(missing))
+            )
+        for key in context:
+            if key not in model_context:
+                supplementary.append(key)
+        if supplementary != []:
+            raise CraftAIDecisionError(
+                """Invalid context, the following keys are not included in"""
+                """ the original model missing: {}.""".
+                format(", ".join(supplementary))
+            )
+
+    def _decide_recursion(self, node, context):
+        # If we are on a leaf
+        if not node.get("predicate_property"):
+            return {
+                "value": node["value"],
+                "confidence": node.get("confidence") or 0,
+                "predicates": []
+            }
+
+        # If we are on a regular node
+        prop_name = node["predicate_property"]
+
+        ctx_value = context.get(prop_name)
+        if ctx_value is None:
+            raise CraftAIDecisionError(
+                """Property '{}' is not defined in the given context""".
+                format(prop_name)
+            )
+
+        # Finding the first element in this node's childrens matching the
+        # operator condition with given context
+        matching_child = self._find_matching_child(node, ctx_value, prop_name)
+
+        if not matching_child:
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, no leaf matching the given"""
+                """ context could be found because the tree is malformed."""
+            )
+
+        # If a matching child is found, recurse
+        result = self._decide_recursion(matching_child, context)
+        new_predicates = [{
+            "property": prop_name,
+            "op": matching_child["predicate"]["op"],
+            "value": matching_child["predicate"]["value"]
+        }]
+        return {
+            "value": result["value"],
+            "confidence": result["confidence"],
+            "predicates": new_predicates + result["predicates"]
+        }
+
+    def _find_matching_child(self, node, context, prop_name):
+        for child in node["children"]:
+            threshold = child["predicate"]["value"]
+            operator = child["predicate"]["op"]
+            if (not isinstance(operator, six.string_types) or
+                    not (operator in _OPERATORS)):
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, {} is not a valid"""
+                    """decision operator.""".
+                    format(operator)
+                )
+
+            # To be compared, continuous parameters should not be strings
+            if "continuous" in operator:
+                context = float(context)
+                threshold = float(threshold)
+
+            if _OPERATORS[operator](context, threshold):
+                return child
+        return {}
+
+    def _parse_tree(self, tree_object):
+        # Checking definition of tree_object
+        if not (tree_object and isinstance(tree_object, list)):
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, the given object is not a"""
+                """ list or is empty."""
+            )
+
+        # Checking version existence
+        tree_version = tree_object[0].get("version")
+        if not tree_version:
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, unable to find the version"""
+                """ information."""
+            )
+
+        # Checking version and tree validity according to version
+        if not semver.validate(tree_version):
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, {} is not a valid version.""".
+                format(tree_version)
+            )
+        elif semver.Version(tree_version) == semver.Version("0.0.1"):
+            if len(tree_object) < 2:
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, no tree found."""
+                )
+            bare_tree = tree_object[1]
+            model = {}
+        elif (semver.Version(tree_version) == semver.Version("0.0.2") or
+              semver.Version(tree_version) == semver.Version("0.0.3")):
+            if (len(tree_object) < 2 or
+                    not tree_object[1].get("model")):
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, no model found"""
+                )
+            if len(tree_object) < 3:
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, no tree found."""
+                )
+            bare_tree = tree_object[2]
+            model = tree_object[1]["model"]
+        else:
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, {} is not a supported"""
+                """ version.""".
+                format(tree_version)
+            )
+
+        return bare_tree, model, tree_version
