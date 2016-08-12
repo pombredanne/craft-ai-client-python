@@ -51,3 +51,17 @@ class CraftAINotFoundError(CraftAIError):
     def __init__(self, message, obj="URL"):
         self.message = "".join((obj, " not found: ", message))
         super(CraftAIError, self).__init__(message)
+
+
+class CraftAIDecisionError(CraftAIError):
+    """Raised when some issue is encountered when trying to find a decision"""
+    def __init__(self, message):
+        self.message = "".join(("Can't make a decision: ", message))
+        super(CraftAIError, self).__init__(message)
+
+
+class CraftAITimeError(CraftAIError):
+    """Raised when trying to create a time object fails"""
+    def __init__(self, message):
+        self.message = "".join(("Can't create time object: ", message))
+        super(CraftAIError, self).__init__(message)
