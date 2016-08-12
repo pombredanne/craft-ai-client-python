@@ -11,7 +11,7 @@ from craftai.operators import _OPERATORS
 
 
 class CraftAIClient(object):
-    """docstring for CraftAIClient"""
+    """Client class for craft ai's API"""
 
     def __init__(self, cfg):
         self._base_url = ""
@@ -372,8 +372,7 @@ class CraftAIClient(object):
                 )
             bare_tree = tree_object[1]
             model = {}
-        elif (semver.Version(tree_version) == semver.Version("0.0.2") or
-              semver.Version(tree_version) == semver.Version("0.0.3")):
+        elif semver.Version(tree_version) == semver.Version("0.0.2"):
             if (len(tree_object) < 2 or
                     not tree_object[1].get("model")):
                 raise CraftAIDecisionError(
@@ -385,6 +384,18 @@ class CraftAIClient(object):
                 )
             bare_tree = tree_object[2]
             model = tree_object[1]["model"]
+        elif semver.Version(tree_version) == semver.Version("0.0.3"):
+            if (len(tree_object) < 2 or
+                    not tree_object[1]):
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, no model found"""
+                )
+            if len(tree_object) < 3:
+                raise CraftAIDecisionError(
+                    """Invalid decision tree format, no tree found."""
+                )
+            bare_tree = tree_object[2]
+            model = tree_object[1]
         else:
             raise CraftAIDecisionError(
                 """Invalid decision tree format, {} is not a supported"""
