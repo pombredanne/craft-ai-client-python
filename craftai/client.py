@@ -304,7 +304,10 @@ class CraftAIClient(object):
         matching_child = self._find_matching_child(node, ctx_value, prop_name)
 
         if not matching_child:
-            raise CraftAIDecisionError("No matching child found")
+            raise CraftAIDecisionError(
+                """Invalid decision tree format, no leaf matching the given"""
+                """ context could be found because the tree is malformed."""
+            )
 
         # If a matching child is found, recurse
         result = self._decide_recursion(matching_child, context)
@@ -323,18 +326,15 @@ class CraftAIClient(object):
         for child in node["children"]:
             threshold = child["predicate"]["value"]
             operator = child["predicate"]["op"]
-            if not isinstance(operator, six.string_types):
+            if (not isinstance(operator, six.string_types) or
+                    not (operator in _OPERATORS)):
                 raise CraftAIDecisionError(
-                    """{} operator is not a valid string""".
-                    format(operator)
-                )
-            if operator not in _OPERATORS:
-                raise CraftAIDecisionError(
-                    """{} is not a valid decision tree operator""".
+                    """Invalid decision tree format, {} is not a valid"""
+                    """decision operator.""".
                     format(operator)
                 )
 
-            # Continuous parameters should not be strings to be compared
+            # To be compared, continuous parameters should not be strings
             if "continuous" in operator:
                 context = float(context)
                 threshold = float(threshold)
