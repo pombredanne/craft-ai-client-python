@@ -62,7 +62,6 @@ setup(
         'requests',
         'six',
         'datetime',
-        'time',
         'pytz',
         'tzlocal',
         'semantic_version'
