@@ -58,10 +58,18 @@ setup(
     keywords='ai craft-ai',
 
     packages=['craftai'],
-    install_requires=['requests', 'six'],
+    install_requires=[
+        'requests',
+        'six',
+        'datetime',
+        'pytz',
+        'tzlocal',
+        'semantic_version'
+    ],
+
     extras_require={
         'dev': ['python-dotenv'],
-        'test': ['tox', 'nose']
+        'test': ['tox', 'nose'],
     },
 
     include_package_data=True,
