@@ -194,7 +194,6 @@ class CraftAIClient(object):
             context = self._rebuild_context(model, args)
         else:
             context = self._join_decide_args(args)
-        print(context)
         # self._check_context(model, context, version)
         raw_decision = self._decide_recursion(bare_tree, context)
 
