@@ -60,7 +60,7 @@ class CraftAIClient(object):
     def create_agent(self, model, agent_id=""):
         # Building final headers
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
-        headers = helpers.join_headers(self._headers, ct_header)
+        headers = helpers.join_dicts(self._headers, ct_header)
 
         # Building payload and checking that it is valid for a JSON
         # serialization
@@ -120,7 +120,7 @@ class CraftAIClient(object):
 
         # Building final headers
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
-        headers = helpers.join_headers(self._headers, ct_header)
+        headers = helpers.join_dicts(self._headers, ct_header)
 
         try:
             json_pl = json.dumps(operations)
