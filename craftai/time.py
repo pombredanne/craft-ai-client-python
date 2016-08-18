@@ -49,7 +49,7 @@ class Time(object):
                 offset = int(tz[-4:-2]) * 60 + int(tz[-2:])
                 if tz[0] == "-":
                     offset = -offset
-                time = time.astimezone(tzinfo=timezone(offset))
+                time = time.astimezone(tz=timezone(timedelta(seconds=offset)))
             else:
                 raise CraftAITimeError(
                     """Unable to instantiate Time with the given timezone."""
