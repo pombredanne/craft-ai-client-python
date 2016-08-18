@@ -5,7 +5,7 @@ import unittest
 from . import settings
 
 from craftai.client import CraftAIClient
-from craftai.time import create_time
+from craftai.time import Time
 from craftai.helpers import dict_depth
 from craftai import errors as craft_err
 
@@ -42,10 +42,7 @@ class TestDecide(unittest.TestCase):
                 exp_context = expectation["context"]
                 timestamp = None
                 exp_time = expectation.get("time")
-                if exp_time:
-                    time = create_time(exp_time["t"], exp_time["tz"])
-                else:
-                    time = {}
+                t = Time(exp_time["t"], exp_time["tz"]) if exp_time else {}
 
                 if expectation.get("error"):
                     self.assertRaises(
@@ -56,7 +53,7 @@ class TestDecide(unittest.TestCase):
                         timestamp)
                     print("Successfully raises CraftAIDecisionError.")
                 else:
-                    decision = self.client.decide(tree, exp_context, time)
+                    decision = self.client.decide(tree, exp_context, t)
                     print("decision: ", decision.get("decision"))
                     self.assertEqual(
                         dict_depth(decision),
