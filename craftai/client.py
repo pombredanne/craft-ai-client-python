@@ -8,6 +8,7 @@ from craftai import helpers
 
 from craftai.errors import *
 from craftai.operators import _OPERATORS
+from craftai.time import Time
 
 
 class CraftAIClient(object):
@@ -60,7 +61,7 @@ class CraftAIClient(object):
     def create_agent(self, model, agent_id=""):
         # Building final headers
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
-        headers = helpers.join_headers(self._headers, ct_header)
+        headers = helpers.join_dicts(self._headers, ct_header)
 
         # Building payload and checking that it is valid for a JSON
         # serialization
@@ -120,7 +121,7 @@ class CraftAIClient(object):
 
         # Building final headers
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
-        headers = helpers.join_headers(self._headers, ct_header)
+        headers = helpers.join_dicts(self._headers, ct_header)
 
         try:
             json_pl = json.dumps(operations)
@@ -187,9 +188,13 @@ class CraftAIClient(object):
 
         return decision_tree
 
-    def decide(self, tree, context={}, time={}):
+    def decide(self, tree, *args):
         bare_tree, model, version = self._parse_tree(tree)
-        self._check_context(model, context, version)
+        if model != {}:
+            context = self._rebuild_context(model, args)
+        else:
+            context = self._join_decide_args(args)
+        # self._check_context(model, context, version)
         raw_decision = self._decide_recursion(bare_tree, context)
 
         # If the model is not included in the tree object (f.i. version 0.0.1)
@@ -211,6 +216,46 @@ class CraftAIClient(object):
     ####################
     # Internal helpers #
     ####################
+
+    def _rebuild_context(self, model, args):
+        # Model should come from _parse_tree and is assumed to be checked upon
+        # already
+        mo = model["output"]
+        mc = model["context"]
+
+        # We should not use the output key(s) to compare against
+        model_ctx = {
+            key: mc[key] for (key, value) in mc.items() if (key not in mo)
+        }
+
+        context = {}
+        for arg in args:
+            if not arg:
+                continue
+            context.update({
+                k: self._context_value(k, v, arg) for k, v in model_ctx.items()
+            })
+
+        return context
+
+    def _context_value(self, k, v, arg):
+        if isinstance(arg, Time):
+            time_of_day = arg.to_dict()["time_of_day"]
+            day_of_week = arg.to_dict()["day_of_week"]
+            timezone = arg.to_dict()["timezone"]
+
+            if (v["type"] == "day_of_week" and
+                    (v.get("is_generated") is None or v["is_generated"])):
+                return day_of_week
+            elif (v["type"] == "time_of_day" and
+                    (v.get("is_generated") is None or v["is_generated"])):
+                return time_of_day
+            elif v["type"] == "timezone":
+                return timezone
+            else:
+                return None
+        else:
+            return arg.get(k)
 
     def _decode_response(self, response):
         if response.status_code == requests.codes.not_found:
@@ -235,50 +280,6 @@ class CraftAIClient(object):
                 agent_id == ""):
             raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
                                          """string""")
-
-    def _check_context(self, model, context, version):
-        if not isinstance(context, dict):
-            raise CraftAIDecisionError(
-                """Invalid context format, the given object is not a"""
-                """ dict or is empty."""
-            )
-        # It's impossible to check the context keys against the model
-        # if the model is not included in the tree object (v0.0.1).
-        # This case should be rather rare.
-        if semver.Version(version) == semver.Version("0.0.1"):
-            return
-
-        # Model should come from _parse_tree and is assumed to be checked upon
-        # already.
-        # We should not copy the output key(s)
-        model_context = {}
-        model_output = model["output"]
-        for key, value in model["context"].items():
-            if key not in model_output:
-                model_context[key] = model["context"][key]
-
-        # Checking that context's keys are included in model_context
-        # and reciprocally.
-        missing = []
-        supplementary = []
-        for key in model_context:
-            if key not in context:
-                missing.append(key)
-        if missing != []:
-            raise CraftAIDecisionError(
-                """Invalid context, the following keys from the model are"""
-                """ missing: {}.""".
-                format(", ".join(missing))
-            )
-        for key in context:
-            if key not in model_context:
-                supplementary.append(key)
-        if supplementary != []:
-            raise CraftAIDecisionError(
-                """Invalid context, the following keys are not included in"""
-                """ the original model missing: {}.""".
-                format(", ".join(supplementary))
-            )
 
     def _decide_recursion(self, node, context):
         # If we are on a leaf
@@ -342,6 +343,20 @@ class CraftAIClient(object):
             if _OPERATORS[operator](context, threshold):
                 return child
         return {}
+
+    def _join_decide_args(self, args):
+        joined_args = {}
+        for arg in args:
+            if isinstance(arg, Time):
+                joined_args.update(arg.to_dict())
+            try:
+                joined_args.update(arg)
+            except TypeError:
+                raise CraftAIDecisionError(
+                    """Invalid context args, the given objects aren't dicts"""
+                    """ or Time instances."""
+                )
+        return joined_args
 
     def _parse_tree(self, tree_object):
         # Checking definition of tree_object

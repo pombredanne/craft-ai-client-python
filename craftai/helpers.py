@@ -1,13 +1,13 @@
 from craftai.errors import *
 
 
-def join_headers(old_headers, *new_headers):
-    joined_headers = old_headers.copy()
+def join_dicts(old_dicts, *new_dicts):
+    joined_dicts = old_dicts.copy()
 
-    for header in new_headers:
-        joined_headers.update(header)
+    for dict in new_dicts:
+        joined_dicts.update(dict)
 
-    return joined_headers
+    return joined_dicts
 
 
 def dict_depth(x):

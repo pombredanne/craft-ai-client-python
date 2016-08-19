@@ -59,6 +59,11 @@ class TestCreateAgentFailure(unittest.TestCase):
         # Makes sure that no agent with the same ID already exists
         self.client.delete_agent(valid_data.VALID_ID)
 
+    def clean_up_agent(self, aid):
+        print(aid)
+        # Makes sure that no agent with the standard ID remains
+        self.client.delete_agent(aid)
+
     def test_create_agent_with_invalid_given_agent_id(self):
         """create_agent should fail when given a non-string/empty string ID
 
@@ -66,12 +71,18 @@ class TestCreateAgentFailure(unittest.TestCase):
         an agent with an ID that is not of type string, since agent IDs
         should always be strings.
         """
-        for inv_id in invalid_data.INVALID_IDS:
+        for inv_id_name in invalid_data.INVALID_IDS:
+            inv_id = invalid_data.INVALID_IDS[inv_id_name]
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,
                 self.client.create_agent,
                 valid_data.VALID_MODEL,
-                invalid_data.INVALID_IDS[inv_id])
+                inv_id)
+            if isinstance(inv_id, six.string_types):
+                self.addCleanup(
+                    self.clean_up_agent,
+                    inv_id
+                )
 
     def test_create_agent_with_existing_agent_id(self):
         """create_agent should fail when given an ID that already exists
@@ -88,6 +99,10 @@ class TestCreateAgentFailure(unittest.TestCase):
             self.client.create_agent,
             valid_data.VALID_MODEL,
             valid_data.VALID_ID)
+        self.addCleanup(
+            self.clean_up_agent,
+            valid_data.VALID_ID
+        )
 
     def test_create_agent_with_invalid_context(self):
         """create_agent should fail when given an invalid or no context
@@ -107,6 +122,10 @@ class TestCreateAgentFailure(unittest.TestCase):
                 self.client.create_agent,
                 model,
                 valid_data.VALID_ID)
+            self.addCleanup(
+                self.clean_up_agent,
+                valid_data.VALID_ID
+            )
 
     def test_create_agent_with_undefined_model(self):
         """create_agent should fail when given no model key in the request body
@@ -125,6 +144,10 @@ class TestCreateAgentFailure(unittest.TestCase):
                     self.client.create_agent,
                     invalid_data.UNDEFINED_KEY[empty_model],
                     valid_data.VALID_ID)
+                self.addCleanup(
+                    self.clean_up_agent,
+                    valid_data.VALID_ID
+                )
 
     def test_create_agent_with_unknown_model(self):
         """create_agent should fail when given an unknown model
@@ -142,6 +165,10 @@ class TestCreateAgentFailure(unittest.TestCase):
                     self.client.create_agent,
                     invalid_data.UNDEFINED_KEY[empty_model],
                     valid_data.VALID_ID)
+                self.addCleanup(
+                    self.clean_up_agent,
+                    valid_data.VALID_ID
+                )
 
     def test_create_agent_with_invalid_time_quantum(self):
         """create_agent should fail when given an invalid time quantum
@@ -162,3 +189,7 @@ class TestCreateAgentFailure(unittest.TestCase):
                 self.client.create_agent,
                 model,
                 valid_data.VALID_ID)
+            self.addCleanup(
+                self.clean_up_agent,
+                valid_data.VALID_ID
+            )
