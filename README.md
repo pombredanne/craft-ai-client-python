@@ -1,6 +1,6 @@
 # **craft ai** API python client #
 
-[![Build Status](https://travis-ci.org/craft-ai/craft-ai-client-python.svg?branch=master)](https://travis-ci.org/craft-ai/craft-ai-client-python) [![License](https://img.shields.io/badge/license-BSD--3--Clause-42358A.svg?style=flat-square)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/craft-ai.svg?style=flat-square)](https://pypi.python.org/pypi?:action=display&name=craft-ai) [![Build Status](https://img.shields.io/travis/craft-ai/craft-ai-client-python/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-python) [![License](https://img.shields.io/badge/license-BSD--3--Clause-42358A.svg?style=flat-square)](LICENSE) [![python](https://img.shields.io/pypi/pyversions/craft-ai.svg?style=flat-square)](https://pypi.python.org/pypi?:action=display&name=craft-ai)
 
 [**craft ai** _AI-as-a-service_](http://craft.ai) enables developers to create Apps and Things that adapt to each user. To go beyond useless dashboards and spammy notifications, **craft ai** learns how users behave to automate recurring tasks, make personalized recommendations, or detect anomalies.
 
@@ -53,16 +53,46 @@ In this example, we will create an agent that learns the **decision model** of a
 
 - `peopleCount` which is a `continuous` property,
 - `timeOfDay` which is a `time_of_day` property,
-- `timezone`, a property of type `timezone` needed to generate proper values for `timeOfDay` (cf. the [context properties type section](#context-properties-types) for further information),
+- `tz`, a property of type `timezone` needed to generate proper values for `timeOfDay` (cf. the [context properties type section](#context-properties-types) for further information),
 - and finally `lightbulbState` which is an `enum` property that is also the output of this model.
 
-TODO: Write doc
+```python
+agent_id = "my_first_agent"
+model = {
+    "context": {
+        "peopleCount": {
+            "type": 'continuous'
+        },
+        "timeOfDay": {
+            "type": 'time_of_day'
+        },
+        "tz": {
+            "type": 'timezone'
+        },
+        "lightbulbState": {
+            "type": 'enum'
+        }
+    },
+    "output": ['lightbulbState']
+}
+
+agent = client.create_agent(model, agent_id)
+print("Agent", agent["id"], "was successfully created")
+```
 
 Pretty straightforward to test! Open [`https://beta.craft.ai/inspector`](https://beta.craft.ai/inspector), your agent is now listed.
 
 Now, if you run that a second time, you'll get an error: the agent `'my_first_agent'` is already existing. Let's see how we can delete it before recreating it.
 
-TODO: Write doc
+```python
+agent_id = "my_first_agent"
+client.delete_agent(agent_id)
+print("Agent", agent_id, "no longer exists")
+
+model = ...
+agent = client.create_agent(model, agent_id)
+print("Agent", agent["id"], "was successfully created")
+```
 
 _For further information, check the ['create agent' reference documentation](#create)._
 
@@ -81,7 +111,71 @@ In the following we add 8 operations:
 7. At 22:35, the light is turned on;
 8. At 23:06, everyone leaves the room and the light is turned off.
 
-TODO: Write doc
+```python
+agent_id = "my_first_agent"
+client.delete_agent(agent_id)
+print("Agent", agent_id, "no longer exists")
+
+model = ...
+agent = client.create_agent(model, agent_id)
+print("Agent", agent["id"], "was successfully created")
+
+context_list = [
+    {
+        "timestamp": 1469410200,
+        "diff": {
+            "tz": '+02:00',
+            "peopleCount": 0,
+            "lightbulbState": 'OFF'
+        }
+    },
+    {
+        "timestamp": 1469415720,
+        "diff": {
+            "peopleCount": 1,
+            "lightbulbState": 'ON'
+        }
+    },
+    {
+        "timestamp": 1469416500,
+        "diff": {
+            "peopleCount": 2
+        }
+    },
+    {
+        "timestamp": 1469417460,
+        "diff": {
+            "lightbulbState": 'OFF'
+        }
+    },
+    {
+        "timestamp": 1469419920,
+        "diff": {
+            "peopleCount": 0
+        }
+    },
+    {
+        "timestamp": 1469460180,
+        "diff": {
+            "peopleCount": 2
+        }
+    },
+    {
+        "timestamp": 1469471700,
+        "diff": {
+            "lightbulbState": 'ON'
+        }
+    },
+    {
+        "timestamp": 1469473560,
+        "diff": {
+            "peopleCount": 0
+        }
+    }
+]
+client.add_operations(agent_id, context_list)
+print("Successfully added initial operations to agent", agent_id, "!")
+```
 
 In real-world applications, you'll probably do the same kind of things when the agent is created and then, regularly throughout the lifetime of the agent with newer data.
 
@@ -93,7 +187,24 @@ The agent has acquired a context history, we can now compute a decision tree fro
 
 The decision tree is computed at a given timestamp, which means it will consider the context history from the creation of this agent up to this moment. Let's first try to compute the decision tree at midnight on July the 26th of 2016.
 
-TODO: Write doc
+```python
+    agent_id = "my_first_agent"
+
+client.delete_agent(agent_id)
+print("Agent", agent_id, "no longer exists")
+
+model = ...
+agent = client.create_agent(model, agent_id)
+print("Agent", agent["id"], "was successfully created")
+
+context_list = ...
+client.add_operations(agent_id, context_list)
+print("Successfully added initial operations to agent", agent_id, "!")
+
+resp = client.get_decision_tree(agent_id, 1469476800)
+print("The full decision tree at timestamp", dt_timestamp, "is the following:")
+print(decision_tree)
+```
 
 Try to retrieve the tree at different timestamps to see how it gradually learns from the new operations. To visualize the trees, use the [inspector](https://beta.craft.ai/inspector)!
 
@@ -101,9 +212,34 @@ _For further information, check the ['compute decision tree' reference documenta
 
 ### 6 - Take a decision ###
 
-Once the decision tree is computed it can be used to take a decision. In our case it is basically answering this type of question: "What is the anticipated **state of the lightbulb** at 7:15 if there is 2 persons in the room ?".
+Once the decision tree is computed it can be used to take a decision. In our case it is basically answering this type of question: "What is the anticipated **state of the lightbulb** at 7:15 if there are 2 persons in the room ?".
 
-TODO: Write doc
+```python
+agent_id = "my_first_agent"
+
+client.delete_agent(agent_id)
+print("Agent", agent_id, "no longer exists")
+
+model = ...
+agent = client.create_agent(model, agent_id)
+print("Agent", agent["id"], "was successfully created")
+
+context_list = ...
+client.add_operations(agent_id, context_list)
+print("Successfully added initial operations to agent", agent_id, "!")
+
+decision_tree = client.get_decision_tree(agent_id, 1469476800)
+print("The decision tree at timestamp", dt_timestamp, "is the following:")
+print(decision_tree)
+
+context = {
+    "tz": '+02:00',
+    "timeOfDay": 7.25,
+    "peopleCount": 2
+}
+resp = client.decide(decision_tree, context)
+print("The anticipated lightbulb state is:", resp["decision"]["lightbulbState"])
+```
 
 _For further information, check the ['take decision' reference documentation](#take-decision)._
 
@@ -144,18 +280,20 @@ representing the number of hours in the day since midnight (e.g. 13.5 means
 value represents a day of the week starting from Monday (0 is Monday, 6 is
 Sunday).
 - `timezone` properties can take string values representing the timezone as an
-offset from UTC, the expected format is **±[hh]:[mm]** where `hh` represent the
+offset from UTC, the expected format is **Â±[hh]:[mm]** where `hh` represent the
 hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
 `+14:00`.
 
-> :information_source: By default, the values of `time_of_day` and `day_of_week`
-> properties are > generated from the [`timestamp`](#timestamp) of an agent's
-> state and the agent's current > `timezone`.
+> :information_source: By default, the values of the `time_of_day` and `day_of_week`
+> properties are generated from the [`timestamp`](#timestamp) of an agent's
+> state and the agent's current `timezone`. Therefore, whenever you use generated
+> `time_of_day` and/or `day_of_week` in your model, you **must** provide a
+> `timezone` value in the context.
 >
-> If you wish to provide their value manually, add `is_generated: false` to the
-> time types in your model. In this case, since you provide the values, you must
-> update the context whenever one of these time values changes in a way that is
-> significant for your system.
+> If you wish to provide their values manually, add `is_generated: false` to the
+> time types properties in your model. In this case, since you provide the values, the
+> `timezone` property is not required, and you must update the context whenever
+> one of these time values changes in a way that is significant for your system.
 
 ##### Examples #####
 
@@ -225,7 +363,51 @@ provided continuously.
 
 **craft ai** API heavily relies on `timestamps`. A `timestamp` is an instant represented as a [Unix time](https://en.wikipedia.org/wiki/Unix_time), that is to say the amount of seconds elapsed since Thursday, 1 January 1970 at midnight UTC. In most programming languages this representation is easy to retrieve, you can refer to [**this page**](https://github.com/techgaun/unix-time/blob/master/README.md) to find out how.
 
+The `craftai.time.Time` class facilitates the handling of time types in **craft ai**. It is able to extract the different **craft ai** formats from various _datetime_ representations, thanks to [datetime](https://docs.python.org/3.5/library/datetime.html).
 
+```python
+from craftai.time import Time
+
+# From a unix timestamp and an explicit UTC offset
+t1 = Time(1465496929, '+10:00')
+
+# t1 == {
+#   utc: '2016-06-09T18:28:49.000Z',
+#   timestamp: 1465496929,
+#   day_of_week: 4,
+#   time_of_day: 4.480277777777778,
+#   timezone: '+10:00'
+# }
+
+# From a unix timestamp and using the local UTC offset.
+t2 = Time(1465496929)
+
+# Value are valid if in Paris !
+# t2 == {
+#   utc: '2016-06-09T18:28:49.000Z',
+#   timestamp: 1465496929,
+#   day_of_week: 3,
+#   time_of_day: 20.480277777777776,
+#   timezone: '+02:00'
+# }
+
+# From a ISO 8601 string. Note that here it should not have any ':' in the timezone part
+t3 = Time('1977-04-22T01:00:00-0500')
+
+# t3 == {
+#   utc: '1977-04-22T06:00:00.000Z',
+#   timestamp: 230536800,
+#   day_of_week: 4,
+#   time_of_day: 1,
+#   timezone: '-05:00'
+# }
+
+# Retrieve the current time with the local UTC offset
+now = Time()
+
+# Retrieve the current time with the given UTC offset
+nowP5 = Time(tz='+05:00')
+```
 
 ### Agent ###
 
@@ -233,18 +415,46 @@ provided continuously.
 
 Create a new agent, and create its [model](#model).
 
+```python
+client.create_agent(
+    { # The model
+        "context": {
+            "presence": {
+                "type": 'enum'
+            },
+            "lightIntensity": {
+                "type": 'continuous'
+            },
+            "lightbulbColor": {
+                "type": 'enum'
+            }
+        },
+        "output": ['lightbulbColor'],
+        "time_quantum": 100
+    },
+    "aphasic_parrot" # id for the agent, if undefined a random id is generated
+)
+```
 
 #### Delete ####
 
-TODO: Write doc
+```python
+client.delete_agent(
+    "aphasic_parrot" # The agent id
+)
+```
 
 #### Retrieve ####
 
-TODO: Write doc
+```python
+client.get_agent(
+    "aphasic_parrot" # The agent id
+)
+```
 
 #### List ####
 
-TODO: Write doc
+
 
 
 
@@ -252,24 +462,142 @@ TODO: Write doc
 
 #### Add operations ####
 
-TODO: Write doc
+```python
+client.add_operations(
+    "aphasic_parrot", # The agent id
+    [ # The list of context operations
+        {
+            "timestamp": 1464600000,
+            "diff": {
+                "presence": "robert",
+                "lightIntensity": 0.4,
+                "lightbulbColor": "green"
+            },
+        },
+        {
+            "timestamp": 1464600500,
+            "diff": {
+                "presence": "gisele",
+                "lightbulbColor": "purple"
+                },
+        },
+        {
+            "timestamp": 1464602400,
+            "diff": {
+                "presence": "gisele+robert",
+                "lightbulbColor": "purple"
+            }
+        },
+        {
+            "timestamp": 1464635400,
+            "diff": {
+                "presence": "gisele+robert",
+                "lightbulbColor": "red"
+            }
+        },
+        {
+            "timestamp": 1464722520,
+            "diff": {
+                "presence": "gisele+robert",
+                "lightbulbColor": "red"
+            }
+        },
+        {
+            "timestamp": 1464732520,
+            "diff": {
+                "presence": "gisele+robert",
+                "lightbulbColor": "orange"
+            }
+        },
+        {
+            "timestamp": 1464752520,
+            "diff": {
+                "presence": "gisele+robert",
+                "lightIntensity": 0.2,
+                "lightbulbColor": "orange"
+            }
+        }
+    ]
+)
+```
 
 #### List operations ####
 
-TODO: Write doc
+```python
+client.get_operations_list(
+    "aphasic_parrot" # The agent id
+)
+```
 
 #### Retrieve state ####
 
-TODO: Write doc
+```python
+client.get_context_state(
+    "aphasic_parrot", # The agent id
+    1464600256 # The timestamp at which the context state is retrieved
+)
+```
 
 ### Decision tree ###
 
 #### Compute ####
 
-TODO: Write doc
+```python
+client.get_decision_tree(
+    "aphasic_parrot", # The agent id
+    1464810471 # The timestamp at which the decision tree is retrieved
+)
+```
 
 #### Take Decision ####
 
-TODO: Write doc
+To get a chance to store and reuse the decision tree, use `get_decision_tree` and use `decide`, a simple function evaluating a decision tree offline.
 
+```python
+tree = { ... } # Decision tree as retrieved through the craft ai REST API
 
+# Compute the decision on a fully described context
+decision = client.decide(
+    tree,
+    {
+        "presence": 'gisele',
+        "lightIntensity": 0.75,
+    }
+)
+```
+
+The computed decision looks like:
+
+```python
+{
+    "context": { # The context in which the decision was taken
+        "lightIntensity": 0.75,
+        "presence": "gisele"
+    },
+    "predicates": [ # The ordered list of predicates that were validated to reach this decision
+        {
+            "op": "continuous.greaterthanorequal",
+            "value": 0.4000000059604645,
+            "property": "lightIntensity"
+        },
+        {
+            "op": "enum.equal",
+            "value": "gisele",
+            "property": "presence"
+        }
+    ],
+    "confidence": 0.9755546450614929 # The confidence in the decision
+    "decision": { # The decision itself
+        "lightbulbColor": "purple"
+    }
+}
+```
+
+### Error Handling ###
+
+When using this client, you should be careful wrapping calls to the API with `try/except` blocks, in accordance with the [EAFP](https://docs.python.org/3/glossary.html#term-eafp) principle.
+
+The **craft ai** python client has its specific exception types, all of them inheriting from the `CraftAIError` type.
+
+All methods which have to send an http request (all of them except `decide`) may raise either of these exceptions: `CraftAINotFoundError`, `CraftAIBadRequestError`, `CraftAICredentialsError` or `CraftAIUnknownError`.
+The `decide`Â method should only raise `CrafAIDecisionError` type of exceptions.

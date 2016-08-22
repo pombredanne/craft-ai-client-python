@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 from codecs import open
 from os import path
+
+import versioneer
+
 try:
     from setuptools import setup
 except ImportError:
@@ -18,15 +21,13 @@ def readme():
         print("Pandoc not found. Long_description conversion failure.")
         with open(path.join(here, 'README.md'), encoding='utf-8') as f:
             long_description = f.read()
-
     return long_description
 
 setup(
     name='craft-ai',
 
-    use_scm_version=True,
-    setup_requires=['setuptools_scm'],
-    # version='0.1',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
 
     description='craft ai API client for python',
     long_description=readme(),
@@ -64,7 +65,8 @@ setup(
         'datetime',
         'pytz',
         'tzlocal',
-        'semantic_version'
+        'semantic_version',
+        'pandoc'
     ],
 
     extras_require={
