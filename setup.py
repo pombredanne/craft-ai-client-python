@@ -18,14 +18,13 @@ def readme():
         print("Pandoc not found. Long_description conversion failure.")
         with open(path.join(here, 'README.md'), encoding='utf-8') as f:
             long_description = f.read()
-
     return long_description
 
 setup(
     name='craft-ai',
 
     use_scm_version=True,
-    setup_requires=['setuptools_scm'],
+    setup_requires=['setuptools_scm', 'setuptools_scm_git_archive'],
     # version='0.1',
 
     description='craft ai API client for python',
