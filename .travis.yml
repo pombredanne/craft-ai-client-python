@@ -24,7 +24,7 @@ env:
   - secure: 3Paz1IcBB4MhhYKkcC87vBH0QUk2uSMz9oosF3AVeeuROufdep+cms9Mx80+qVEvY7xV1CXSSFbfVzwc0qdczacmMDHOZzU7tjzSUkTxYP1dN0Fu4HjUcKc3WBOhCH4l6vTi5YLscVsyvL4UNgVfnm1OjKk2hNZyreDeYj6ffsKhwW5WAto2aH8ADEkDKWatDzXkaSpbEzcbe62OD42SQmRPNCtKVBdEVnjDvfcCLJi7Euy5ln5gm37IOjr9/6BuYQVRr/NOtYHQPgz87qWLAMHD3wZbijbIIQCLNNLpNk71UCNLZijOR+iUAIckQSD9XLuZHhRnVpe3NgukRaeQ547603pnjT1Wv0455aCENFgIkxBRK8PyaSHbnmOPWV4VTVLDjB449qnMViOAd3TYZ31UAI1OvehBdXrd9rYe8eXvH2pSsB1IqrrhhjaKGeccyu/9NTETMgl8RHH8yl9C6xuv0cgzVKp5oh2DbjzONT2NK3Yz1sGUdGOcOJt3qynUyevmTKlhGI5n3jVz/E++0lxn85XSBniNTBTjyA5VCFnMK8+J+uC9vl5a5CIMU0bLesCSwTfiAdsWIAmu1iMY+biq4cPRW2MP2HgQNQlmX4JvjOqopdqnnho6TM9nHw8crjlT5Omn31Wc8Foi2x8td6dKYIiWd+y7YI1NgIEsD1M=
 
 before_deploy: 
-  - "git describe --tags --dirty --always --long --match='v*'"
+  - "git describe --tags --match='v*'"
 deploy:
   provider: pypi
   user: ops
@@ -34,4 +34,8 @@ deploy:
   on:
     tags: true
     branch: master
-  
+
+sudo: false
+addons:
+  apt_packages:
+   - pandoc
