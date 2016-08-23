@@ -55,6 +55,7 @@ setup(
     version=git_version(),
 
     description='craft ai API client for python',
+    long_description=readme(),
 
     author='craft.ai team',
     author_email='contact@craft.ai',
