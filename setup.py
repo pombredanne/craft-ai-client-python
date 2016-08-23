@@ -28,7 +28,7 @@ def readme():
 def git_version():
     # Fetch version from git tags, and write to version.py.
     # Also, when git is not available (PyPi package), use storedversion.py.
-    version_py = path.join(here, 'version.py')
+    version_py = path.join(here, 'craftai', 'version.py')
 
     try:
         version_git = (
