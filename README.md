@@ -540,6 +540,19 @@ client.get_context_state(
 
 ### Decision tree ###
 
+Decision trees are computed at specific timestamps, directly by **craft ai** which learns from the context operations [added](#add-operations) throughout time.
+
+When you [compute](#compute) a decision tree, **craft ai** should always return you an array containing the **tree version** as the first element. This **tree version** determines what other information is included in the response body.
+
+In version `"0.0.3"`, the other included elements are (in order):
+
+- the agent's model as specified during the agent's [creation](#create-agent)
+- the tree itself as a JSON object:
+  
+  * Internal nodes are represented by a `"predicate_property"` and a `"children"` array. The latter contains the actual two children of the current node and the criterion (`"predicate"`) on the `"predicate_property"`'s value, to decide which child to walk down towards.
+  * Leaves have an output `"value"` and a confidence for this value, instead of a `"predicate_property"` and a `"children"` array.
+  * The root has one more key than regular nodes: the `"output_property"` which defines what is the actual meaning of the leaves' value.
+
 #### Compute ####
 
 ```python
