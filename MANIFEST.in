@@ -1,4 +1,3 @@
 include LICENSE
 include README.md
-include versioneer.py
-include craftai/_version.py
+include craftai/version.py
