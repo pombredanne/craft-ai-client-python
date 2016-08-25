@@ -1,20 +1,43 @@
 import requests
-import os
+
+from codecs import open
 
 from argparse import ArgumentParser
 
+try:
+    import pypandoc
+    pypandoc.get_pandoc_version()
+except (ImportError) as e:
+    raise e
+except (OSError):
+    # expects a installed pypandoc: pip install pypandoc
+    from pypandoc.pandoc_download import download_pandoc
+    download_pandoc()
+
 
 def update_readme():
-    url = "http://beta.craft.ai/content/api/python.md"
+    url = "https://beta.craft.ai/content/api/python.md"
     r = requests.get(url)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(os.sep, dir_path, "README.md")
 
     if r.status_code == 200:
-        with open(file_path, 'w') as f:
-            for line in r.text:
+        text = r.text
+        with open("README.md", 'w', encoding="utf-8") as f:
+            for line in text:
                 f.write(line)
             print("Successfully updated README.md")
+
+    # Conversion to rst
+    try:
+        import pypandoc
+        readme = pypandoc.convert("README.md", "rst")
+        readme = readme.replace("\r", "")
+    except (OSError, ImportError) as e:
+        print("Pandoc not found. md->rst conversion failure.")
+        raise e
+
+    with open("README.rst", 'w', encoding="utf-8") as outfile:
+        outfile.write(readme)
+    print("Successfully converted README.md to README.rst")
 
 
 def main():

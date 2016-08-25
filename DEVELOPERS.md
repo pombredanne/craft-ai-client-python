@@ -17,19 +17,27 @@
     sh run_tests.sh # this runs all tests via nosetests
     ```
 
-<!-- ## Releasing a new version (needs administrator rights) ##
+## Releasing a new version (needs administrator rights) ##
+
+> Before merging a pull request back to master, update the README and push it to the branch you're working on.
+    ````sh
+    python craftai/cli.py --update_readme
+    git add README.* && git commit -m "Updated README files"
+    ```
 
 1. Make sure the build of the master branch is passing
-[![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-js/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-js)
+    [![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-python/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-python)
+
 2. Checkout the master branch locally
-````sh
-git fetch
-git checkout master
-git reset --hard origin/master
-````
-3. Bump the version and push
-````sh
-npm version patch
-git push origin master
-git push --tags
-```` -->
+    ````sh
+    git fetch
+    git checkout master
+    git reset --hard origin/master
+    ````
+
+3. Tag the new version, writing the major changes, and push
+    ```sh
+    git tag -a <bumped_semantic_version>
+    git push -f origin master
+    git push --tags
+    ````
