@@ -15,7 +15,7 @@ _ISO_FMT = "%Y-%m-%dT%H:%M:%S%z"
 
 class Time(object):
     """Handles time in a useful way for craft ai's client"""
-    def __init__(self, t=None, tz=""):
+    def __init__(self, t=None, timezone=""):
         if not t:
             # If no initial timestamp is given, the current local time is used
             time = datetime.now(get_localzone())
@@ -38,22 +38,22 @@ class Time(object):
                     """Unable to instantiate Time from given string. {}""".
                     format(e.__str__()))
 
-        if tz:
+        if timezone:
             # If a timezone is specified we can try to use it
-            if isinstance(tz, tzinfo):
+            if isinstance(timezone, tzinfo):
                 # If it's already a timezone object, no more work is needed
-                time = time.astimezone(tz)
-            elif isinstance(tz, six.string_types):
+                time = time.astimezone(timezone)
+            elif isinstance(timezone, six.string_types):
                 # If it's a string, we convert it to a usable timezone object
-                tz = tz.replace(":", "")
-                offset = int(tz[-4:-2]) * 60 + int(tz[-2:])
-                if tz[0] == "-":
+                timezone = timezone.replace(":", "")
+                offset = (int(timezone[-4:-2]) * 60 + int(timezone[-2:])) * 60
+                if timezone[0] == "-":
                     offset = -offset
-                time = time.astimezone(tz=timezone(timedelta(seconds=offset)))
+                time = time.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
             else:
                 raise CraftAITimeError(
                     """Unable to instantiate Time with the given timezone."""
-                    """ {} is neither a string nor a timezone.""".format(tz)
+                    """ {} is neither a string nor a timezone.""".format(timezone)
                 )
 
         try:
@@ -88,7 +88,7 @@ class Time(object):
             return (dt - _EPOCH).total_seconds()
 
 
-class timezone(tzinfo):
+class dt_timezone(tzinfo):
     """timezone class from python's standard library datetime"""
     """ This is reincluded here to ensure compatibility with python"""
     """ versions earlier than 3.2."""
@@ -137,15 +137,15 @@ class timezone(tzinfo):
     def __repr__(self):
         """Convert to formal string, for repr().
 
-        >>> tz = timezone.utc
+        >>> tz = dt_timezone.utc
         >>> repr(tz)
-        'datetime.timezone.utc'
-        >>> tz = timezone(timedelta(hours=-5), 'EST')
+        'datetime.dt_timezone.utc'
+        >>> tz = dt_timezone(timedelta(hours=-5), 'EST')
         >>> repr(tz)
-        "datetime.timezone(datetime.timedelta(-1, 68400), 'EST')"
+        "datetime.dt_timezone(datetime.timedelta(-1, 68400), 'EST')"
         """
         if self is self.utc:
-            return 'datetime.timezone.utc'
+            return 'datetime.dt_timezone.utc'
         if self._name is None:
             return "%s(%r)" % ('datetime.' + self.__class__.__name__,
                                self._offset)
@@ -198,6 +198,6 @@ class timezone(tzinfo):
         minutes = rest // timedelta(minutes=1)
         return 'UTC{}{:02d}:{:02d}'.format(sign, hours, minutes)
 
-timezone.utc = timezone._create(timedelta(0))
-timezone.min = timezone._create(timezone._minoffset)
-timezone.max = timezone._create(timezone._maxoffset)
+dt_timezone.utc = dt_timezone._create(timedelta(0))
+dt_timezone.min = dt_timezone._create(dt_timezone._minoffset)
+dt_timezone.max = dt_timezone._create(dt_timezone._maxoffset)
