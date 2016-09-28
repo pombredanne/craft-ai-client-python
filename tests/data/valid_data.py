@@ -1,4 +1,4 @@
-VALID_ID = "one_legged_rainbow_unicorn"
+VALID_ID = "craft_ai_unit_test_agent_1"
 VALID_CONTEXT = {
     "tz": {
         "type": "timezone"
