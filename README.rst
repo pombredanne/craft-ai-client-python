@@ -80,8 +80,8 @@ properties:
 
 -  ``peopleCount`` which is a ``continuous`` property,
 -  ``timeOfDay`` which is a ``time_of_day`` property,
--  ``tz``, a property of type ``timezone`` needed to generate proper
-   values for ``timeOfDay`` (cf. the `context properties type
+-  ``timezone``, a property of type ``timezone`` needed to generate
+   proper values for ``timeOfDay`` (cf. the `context properties type
    section <#context-properties-types>`__ for further information),
 -  and finally ``lightbulbState`` which is an ``enum`` property that is
    also the output of this model.
@@ -97,7 +97,7 @@ properties:
             "timeOfDay": {
                 "type": 'time_of_day'
             },
-            "tz": {
+            "timezone": {
                 "type": 'timezone'
             },
             "lightbulbState": {
@@ -108,7 +108,7 @@ properties:
     }
 
     agent = client.create_agent(model, agent_id)
-    print("Agent", agent["id"], "was successfully created")
+    print("Agent", agent["id"], "has successfully been created")
 
 Pretty straightforward to test! Open
 ```https://beta.craft.ai/inspector`` <https://beta.craft.ai/inspector>`__,
@@ -126,7 +126,7 @@ before recreating it.
 
     model = ...
     agent = client.create_agent(model, agent_id)
-    print("Agent", agent["id"], "was successfully created")
+    print("Agent", agent["id"], "has successfully been created")
 
 *For further information, check the `'create agent' reference
 documentation <#create>`__.*
@@ -158,13 +158,13 @@ In the following we add 8 operations:
 
     model = ...
     agent = client.create_agent(model, agent_id)
-    print("Agent", agent["id"], "was successfully created")
+    print("Agent", agent["id"], "has successfully been created")
 
     context_list = [
         {
             "timestamp": 1469410200,
             "diff": {
-                "tz": '+02:00',
+                "timezone": '+02:00',
                 "peopleCount": 0,
                 "lightbulbState": 'OFF'
             }
@@ -236,22 +236,106 @@ the 26th of 2016.
 
 .. code:: python
 
-        agent_id = "my_first_agent"
+    agent_id = "my_first_agent"
 
     client.delete_agent(agent_id)
     print("Agent", agent_id, "no longer exists")
 
     model = ...
     agent = client.create_agent(model, agent_id)
-    print("Agent", agent["id"], "was successfully created")
+    print("Agent", agent["id"], "has successfully been created")
 
     context_list = ...
     client.add_operations(agent_id, context_list)
     print("Successfully added initial operations to agent", agent_id, "!")
 
-    resp = client.get_decision_tree(agent_id, 1469476800)
+    decision_tree = client.get_decision_tree(agent_id, 1469476800)
     print("The full decision tree at timestamp", dt_timestamp, "is the following:")
     print(decision_tree)
+    """ Outputed tree is the following
+      [
+        {
+          "version": "0.0.3"
+        },
+        {
+          "context": {
+            "peopleCount": {
+              "type": "continuous"
+            },
+            "timeOfDay": {
+              "type": "time_of_day",
+              "is_generated": true
+            },
+            "timezone": {
+              "type": "timezone"
+            },
+            "lightbulbState": {
+              "type": "enum"
+            }
+          },
+          "output": [
+            "lightbulbState"
+          ],
+          "time_quantum": 600
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "confidence": 0.9545537233352661,
+                      "predicate": {
+                        "op": "continuous.lessthan",
+                        "value": 1
+                      },
+                      "value": "OFF"
+                    },
+                    {
+                      "confidence": 0.8630361557006836,
+                      "predicate": {
+                        "op": "continuous.greaterthanorequal",
+                        "value": 1
+                      },
+                      "value": "ON"
+                    }
+                  ],
+                  "predicate": {
+                    "op": "continuous.lessthan",
+                    "value": 5.666666507720947
+                  },
+                  "predicate_property": "peopleCount"
+                },
+                {
+                  "confidence": 0.9947378635406494,
+                  "predicate": {
+                    "op": "continuous.greaterthanorequal",
+                    "value": 5.666666507720947
+                  },
+                  "value": "OFF"
+                }
+              ],
+              "predicate": {
+                "op": "continuous.lessthan",
+                "value": 20.66666603088379
+              },
+              "predicate_property": "timeOfDay"
+            },
+            {
+              "confidence": 0.8630361557006836,
+              "predicate": {
+                "op": "continuous.greaterthanorequal",
+                "value": 20.66666603088379
+              },
+              "value": "ON"
+            }
+          ],
+          "output_property": "lightbulbState",
+          "predicate_property": "timeOfDay"
+        }
+      ]
+      """
 
 Try to retrieve the tree at different timestamps to see how it gradually
 learns from the new operations. To visualize the trees, use the
@@ -277,7 +361,7 @@ the room ?".
 
     model = ...
     agent = client.create_agent(model, agent_id)
-    print("Agent", agent["id"], "was successfully created")
+    print("Agent", agent["id"], "has successfully been created")
 
     context_list = ...
     client.add_operations(agent_id, context_list)
@@ -288,7 +372,7 @@ the room ?".
     print(decision_tree)
 
     context = {
-        "tz": '+02:00',
+        "timezone": '+02:00',
         "timeOfDay": 7.25,
         "peopleCount": 2
     }
@@ -377,13 +461,15 @@ output) depending on the **outside light intensity** (the
 property) and the **day of the week** (the ``day`` property).
 
 ``day`` and ``time`` values will be generated automatically, hence the
-need for ``tz``, the current Time Zone, to compute their value from
-given ```timestamps`` <#timestamp>`__.
+need for ``timezone``, the current Time Zone, to compute their value
+from given ```timestamps`` <#timestamp>`__.
 
 The ``time_quantum`` is set to 100 seconds, which means that if the
 lightbulb color is changed from red to blue then from blue to purple in
 less that 1 minutes and 40 seconds, only the change from red to purple
 will be taken into account.
+
+    :warning: if no time\_quantum is specified, default value is 600.
 
 .. code:: json
 
@@ -398,7 +484,7 @@ will be taken into account.
           "day": {
             "type": "day_of_week"
           },
-          "tz": {
+          "timezone": {
             "type": "timezone"
           },
           "lightbulbColor": {
@@ -443,6 +529,9 @@ UTC. In most programming languages this representation is easy to
 retrieve, you can refer to `**this
 page** <https://github.com/techgaun/unix-time/blob/master/README.md>`__
 to find out how.
+
+``craftai.time``
+^^^^^^^^^^^^^^^^
 
 The ``craftai.time.Time`` class facilitates the handling of time types
 in **craft ai**. It is able to extract the different **craft ai**
@@ -491,7 +580,7 @@ formats from various *datetime* representations, thanks to
     now = Time()
 
     # Retrieve the current time with the given UTC offset
-    nowP5 = Time(tz='+05:00')
+    nowP5 = Time(timezone='+05:00')
 
 Agent
 ~~~~~
@@ -506,21 +595,23 @@ Create a new agent, and create its `model <#model>`__.
     client.create_agent(
         { # The model
             "context": {
-                "presence": {
-                    "type": 'enum'
-                },
-                "lightIntensity": {
-                    "type": 'continuous'
-                },
-                "lightbulbColor": {
-                    "type": 'enum'
-                }
+              "peopleCount": {
+                "type": 'continuous'
+              },
+              "timeOfDay": {
+                "type": 'time_of_day'
+              },
+              "timezone": {
+                "type": 'timezone'
+              },
+              "lightbulbState": {
+                "type": 'enum'
+              }
             },
-            "output": ['lightbulbColor'],
+            "output": [ 'lightbulbState' ],
             "time_quantum": 100
         },
-        "aphasic_parrot" # id for the agent, if undefined a random id is generated
-    )
+        "impervious_kraken", # id for the agent, if undefined a random id is generated
 
 Delete
 ^^^^^^
@@ -528,7 +619,7 @@ Delete
 .. code:: python
 
     client.delete_agent(
-        "aphasic_parrot" # The agent id
+        "impervious_kraken" # The agent id
     )
 
 Retrieve
@@ -537,11 +628,13 @@ Retrieve
 .. code:: python
 
     client.get_agent(
-        "aphasic_parrot" # The agent id
+        "impervious_kraken" # The agent id
     )
 
 List
 ^^^^
+
+Not implemented, yet.
 
 Context
 ~~~~~~~
@@ -552,57 +645,57 @@ Add operations
 .. code:: python
 
     client.add_operations(
-        "aphasic_parrot", # The agent id
+        "impervious_kraken", # The agent id
         [ # The list of context operations
             {
-                "timestamp": 1464600000,
+                "timestamp": 1469410200,
                 "diff": {
-                    "presence": "robert",
-                    "lightIntensity": 0.4,
-                    "lightbulbColor": "green"
-                },
-            },
-            {
-                "timestamp": 1464600500,
-                "diff": {
-                    "presence": "gisele",
-                    "lightbulbColor": "purple"
-                    },
-            },
-            {
-                "timestamp": 1464602400,
-                "diff": {
-                    "presence": "gisele+robert",
-                    "lightbulbColor": "purple"
+                    "timezone": '+02:00',
+                    "peopleCount": 0,
+                    "lightbulbState": 'OFF'
                 }
             },
             {
-                "timestamp": 1464635400,
+                "timestamp": 1469415720,
                 "diff": {
-                    "presence": "gisele+robert",
-                    "lightbulbColor": "red"
+                    "peopleCount": 1,
+                    "lightbulbState": 'ON'
                 }
             },
             {
-                "timestamp": 1464722520,
+                "timestamp": 1469416500,
                 "diff": {
-                    "presence": "gisele+robert",
-                    "lightbulbColor": "red"
+                    "peopleCount": 2
                 }
             },
             {
-                "timestamp": 1464732520,
+                "timestamp": 1469417460,
                 "diff": {
-                    "presence": "gisele+robert",
-                    "lightbulbColor": "orange"
+                    "lightbulbState": 'OFF'
                 }
             },
             {
-                "timestamp": 1464752520,
+                "timestamp": 1469419920,
                 "diff": {
-                    "presence": "gisele+robert",
-                    "lightIntensity": 0.2,
-                    "lightbulbColor": "orange"
+                    "peopleCount": 0
+                }
+            },
+            {
+                "timestamp": 1469460180,
+                "diff": {
+                    "peopleCount": 2
+                }
+            },
+            {
+                "timestamp": 1469471700,
+                "diff": {
+                    "lightbulbState": 'ON'
+                }
+            },
+            {
+                "timestamp": 1469473560,
+                "diff": {
+                    "peopleCount": 0
                 }
             }
         ]
@@ -614,7 +707,7 @@ List operations
 .. code:: python
 
     client.get_operations_list(
-        "aphasic_parrot" # The agent id
+        "impervious_kraken" # The agent id
     )
 
 Retrieve state
@@ -623,8 +716,8 @@ Retrieve state
 .. code:: python
 
     client.get_context_state(
-        "aphasic_parrot", # The agent id
-        1464600256 # The timestamp at which the context state is retrieved
+        "impervious_kraken", # The agent id
+        1469473600 # The timestamp at which the context state is retrieved
     )
 
 Decision tree
@@ -650,8 +743,9 @@ In version ``"0.0.3"``, the other included elements are (in order):
    the current node and the criterion (``"predicate"``) on the
    ``"predicate_property"``'s value, to decide which child to walk down
    towards.
--  Leaves have an output ``"value"`` and a confidence for this value,
-   instead of a ``"predicate_property"`` and a ``"children"`` array.
+-  Leaves have an output ``"value"`` and a ``"confidence"`` for this
+   value, instead of a ``"predicate_property"`` and a ``"children"``
+   array.
 -  The root has one more key than regular nodes: the
    ``"output_property"`` which defines what is the actual meaning of the
    leaves' value.
@@ -662,8 +756,8 @@ Compute
 .. code:: python
 
     client.get_decision_tree(
-        "aphasic_parrot", # The agent id
-        1464810471 # The timestamp at which the decision tree is retrieved
+        "impervious_kraken", # The agent id
+        1469473600 # The timestamp at which the decision tree is retrieved
     )
 
 Take Decision
@@ -680,10 +774,23 @@ decision tree offline.
     # Compute the decision on a fully described context
     decision = client.decide(
         tree,
-        {
-            "presence": 'gisele',
-            "lightIntensity": 0.75,
+        { # The context on which the decision is taken
+            "timezone": '+02:00',
+            "timeOfDay": 7.5,
+            "peopleCount": 3
         }
+    )
+
+    # Or Compute the decision on a context created from the given one and filling the
+    # `day_of_week`, `time_of_day` and `timezone` properties from the given `Time`
+
+    decision = client.decide(
+      tree,
+      {
+        "timezone": '+02:00',
+        "peopleCount": 3
+      },
+      craftai.time.Time('2010-01-01T07:30:30')
     )
 
 The computed decision looks like:
@@ -691,26 +798,27 @@ The computed decision looks like:
 .. code:: python
 
     {
-        "context": { # The context in which the decision was taken
-            "lightIntensity": 0.75,
-            "presence": "gisele"
+      context: { # In which context the decision was taken
+        "timezone": '+02:00',
+        "timeOfDay": 7.5,
+        "peopleCount": 3
+      },
+      decision: { # The decision itself
+        "lightbulbState": 'ON'
+      },
+      "confidence": 0.9937745256361138, # The confidence in the decision
+      "predicates": [ # The ordered list of predicates that were validated to reach this decision
+        {
+          "property": 'timeOfDay',
+          "op": 'continuous.greaterthanorequal',
+          "value": 6
         },
-        "predicates": [ # The ordered list of predicates that were validated to reach this decision
-            {
-                "op": "continuous.greaterthanorequal",
-                "value": 0.4000000059604645,
-                "property": "lightIntensity"
-            },
-            {
-                "op": "enum.equal",
-                "value": "gisele",
-                "property": "presence"
-            }
-        ],
-        "confidence": 0.9755546450614929 # The confidence in the decision
-        "decision": { # The decision itself
-            "lightbulbColor": "purple"
+        {
+          "property": 'peopleCount',
+          "op": 'continuous.greaterthanorequal',
+          "value": 2
         }
+      ]
     }
 
 Error Handling
