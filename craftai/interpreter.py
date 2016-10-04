@@ -13,7 +13,7 @@ class Interpreter(object):
     if model != {}:
         context = Interpreter._rebuild_context(model, args)
     else:
-        context = Interpreter._join_decide_args(args)
+        context = Interpreter.join_decide_args(args)
     # self._check_context(model, context, version)
     raw_decision = Interpreter._decide_recursion(bare_tree, context)
 
@@ -144,7 +144,7 @@ class Interpreter(object):
       return {}
 
   @staticmethod
-  def _join_decide_args(args):
+  def join_decide_args(args):
     joined_args = {}
     for arg in args:
       if isinstance(arg, Time):

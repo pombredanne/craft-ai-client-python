@@ -187,30 +187,6 @@ class CraftAIClient(object):
 
         return decision_tree
 
-    def get_decision(self, agent_id, timestamp, *args):
-        # Raises an error when agent_id is invalid
-        self._check_agent_id(agent_id)
-
-        headers = self._headers.copy()
-
-        req_url = "{}/agents/{}/decision?t={}".format(
-            self._base_url,
-            agent_id,
-            timestamp)
-
-        payload = Interpreter.join_decide_args(args)
-        try:
-            json_pl = json.dumps(payload)
-        except TypeError as e:
-            raise CraftAIBadRequestError("Invalid context. {}".
-                                         format(e.__str__())
-                                         )
-
-        resp = requests.get(req_url, headers=headers, data=json_pl)
-
-        decision = self._decode_response(resp)
-
-        return decision
 
     def decide(self, tree, *args):
         return Interpreter.decide(tree, args)
