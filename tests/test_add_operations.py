@@ -67,17 +67,17 @@ class TestAddOperationsFailure(unittest.TestCase):
                 invalid_data.UNDEFINED_KEY[empty_id],
                 valid_data.VALID_OPERATIONS_SET)
 
-    def test_add_operations_with_unknown_id(self):
-        """add_operations should fail when given an unknown agent ID
-
-        It should raise an error upon request for operations posting to an
-        agent's model, for which the agent doesn't exist.
-        """
-        self.assertRaises(
-            craft_err.CraftAINotFoundError,
-            self.client.add_operations,
-            invalid_data.UNKNOWN_ID,
-            valid_data.VALID_OPERATIONS_SET)
+#    def test_add_operations_with_unknown_id(self):
+#        """add_operations should fail when given an unknown agent ID
+#
+#        It should raise an error upon request for operations posting to an
+#        agent's model, for which the agent doesn't exist.
+#        """
+#        self.assertRaises(
+#            craft_err.CraftAINotFoundError,
+#            self.client.add_operations,
+#            invalid_data.UNKNOWN_ID,
+#            valid_data.VALID_OPERATIONS_SET)
 
     def test_add_operations_with_empty_operations_set(self):
         """add_operations should fail when given an empty set of operations
