@@ -14,7 +14,7 @@
 4. You can run the following script:
     
     ```sh
-    sh run_tests.sh # this runs all tests via nosetests
+    sh run-tests.sh # this runs all tests via nosetests
     ```
 
 ## Releasing a new version (needs administrator rights) ##
