@@ -1,5 +1,5 @@
-import semantic_version as semver
 import six
+import re
 
 from craftai.errors import *
 from craftai.operators import _OPERATORS
@@ -176,19 +176,19 @@ class Interpreter(object):
       )
 
     # Checking version and tree validity according to version
-    if not semver.validate(tree_version):
+    if re.compile('\d+.\d+.\d+').match(tree_version) is None:
       raise CraftAIDecisionError(
         """Invalid decision tree format, {} is not a valid version.""".
         format(tree_version)
       )
-    elif semver.Version(tree_version) == semver.Version("0.0.1"):
+    elif tree_version == "0.0.1":
       if len(tree_object) < 2:
         raise CraftAIDecisionError(
           """Invalid decision tree format, no tree found."""
         )
       bare_tree = tree_object[1]
       model = {}
-    elif semver.Version(tree_version) == semver.Version("0.0.2"):
+    elif tree_version == "0.0.2":
       if (len(tree_object) < 2 or
           not tree_object[1].get("model")):
         raise CraftAIDecisionError(
@@ -200,7 +200,7 @@ class Interpreter(object):
         )
       bare_tree = tree_object[2]
       model = tree_object[1]["model"]
-    elif semver.Version(tree_version) == semver.Version("0.0.3"):
+    elif tree_version == "0.0.3":
       if (len(tree_object) < 2 or
             not tree_object[1]):
         raise CraftAIDecisionError(

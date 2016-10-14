@@ -85,7 +85,6 @@ setup(
         'datetime',
         'pytz',
         'tzlocal',
-        'semantic_version',
         'pypandoc'
     ],
 
