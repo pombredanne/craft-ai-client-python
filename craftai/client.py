@@ -2,8 +2,6 @@ import requests
 import json
 import six
 
-import semantic_version as semver
-
 from craftai import helpers
 
 from craftai.errors import *
@@ -218,5 +216,3 @@ class CraftAIClient(object):
                 agent_id == ""):
             raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
                                          """string""")
-
-
