@@ -28,9 +28,9 @@ class TestCreateAgentSuccess(unittest.TestCase):
         """create_agent should succeed when given an empty `id` field
 
         It should give a proper JSON response with `id` and
-        `model` fields being strings.
+        `configuration` fields being strings.
         """
-        resp = self.client.create_agent(valid_data.VALID_MODEL)
+        resp = self.client.create_agent(valid_data.VALID_CONFIGURATION)
         self.assertIsInstance(resp.get("id"), six.string_types)
         self.addCleanup(self.clean_up_agent, resp.get("id"))
 
@@ -38,11 +38,11 @@ class TestCreateAgentSuccess(unittest.TestCase):
         """create_agent should succeed when given a string ID
 
         It should give a proper JSON response with `id` and
-        `model` fields being strings and `id` being the same as the one
+        `configuration` fields being strings and `id` being the same as the one
         given as a parameter.
         """
         resp = self.client.create_agent(
-            valid_data.VALID_MODEL,
+            valid_data.VALID_CONFIGURATION,
             valid_data.VALID_ID)
         self.assertEqual(resp.get("id"), valid_data.VALID_ID)
         self.addCleanup(self.clean_up_agent, valid_data.VALID_ID)
@@ -72,12 +72,12 @@ class TestCreateAgentFailure(unittest.TestCase):
         should always be unique.
         """
         # Calling create_agent a first time
-        self.client.create_agent(valid_data.VALID_MODEL, valid_data.VALID_ID)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
         # Asserting that an error is risen the second time
         self.assertRaises(
             craft_err.CraftAIBadRequestError,
             self.client.create_agent,
-            valid_data.VALID_MODEL,
+            valid_data.VALID_CONFIGURATION,
             valid_data.VALID_ID)
         self.addCleanup(
             self.clean_up_agent,
@@ -91,75 +91,52 @@ class TestCreateAgentFailure(unittest.TestCase):
         an agent with no context or a context that is invalid.
         """
         for inv_context in invalid_data.INVALID_CONTEXTS:
-            model = {
+            configuration = {
                 "context": invalid_data.INVALID_CONTEXTS[inv_context],
                 "output": ["lightbulbColor"],
                 "time_quantum": 100
             }
-            print(model)
+            print(configuration)
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,
                 self.client.create_agent,
-                model,
+                configuration,
                 valid_data.VALID_ID)
             self.addCleanup(
                 self.clean_up_agent,
                 valid_data.VALID_ID
             )
 
-    def test_create_agent_with_undefined_model(self):
-        """create_agent should fail when given no model key in the request body
+    def test_create_agent_with_undefined_configuration(self):
+        """create_agent should fail when given no configuration key in the request body
 
         It should raise an error upon request for creation of an agent with
-        no model key in the request body, since it is a mandatory field to
+        no configuration key in the request body, since it is a mandatory field to
         create an agent.
         """
 
-        # Testing all non dict model cases
-        for empty_model in invalid_data.UNDEFINED_KEY:
-            if not (isinstance(invalid_data.UNDEFINED_KEY[empty_model],
-                               (dict, list))):
-                self.assertRaises(
-                    craft_err.CraftAIBadRequestError,
-                    self.client.create_agent,
-                    invalid_data.UNDEFINED_KEY[empty_model],
-                    valid_data.VALID_ID)
-                self.addCleanup(
-                    self.clean_up_agent,
-                    valid_data.VALID_ID
-                )
-
-    def test_create_agent_with_unknown_model(self):
-        """create_agent should fail when given an unknown model
-
-        It should raise an error upon request for creation of an agent with
-        no valid model in the request body, since it is a mandatory field to
-        create an agent.
-        """
-        # Testing all dict model cases
-        for empty_model in invalid_data.UNDEFINED_KEY:
-            if isinstance(invalid_data.UNDEFINED_KEY[empty_model],
-                          (dict, list)):
-                self.assertRaises(
-                    craft_err.CraftAINotFoundError,
-                    self.client.create_agent,
-                    invalid_data.UNDEFINED_KEY[empty_model],
-                    valid_data.VALID_ID)
-                self.addCleanup(
-                    self.clean_up_agent,
-                    valid_data.VALID_ID
-                )
+        # Testing all non dict configuration cases
+        for empty_configuration in invalid_data.UNDEFINED_KEY:
+            self.assertRaises(
+                craft_err.CraftAIBadRequestError,
+                self.client.create_agent,
+                invalid_data.UNDEFINED_KEY[empty_configuration],
+                valid_data.VALID_ID)
+            self.addCleanup(
+                self.clean_up_agent,
+                valid_data.VALID_ID
+            )
 
     def test_create_agent_with_invalid_time_quantum(self):
         """create_agent should fail when given an invalid time quantum
 
         It should raise an error upon request for creation of an agent with
-        an incorrect time quantum in the model, since it is essential to
+        an incorrect time quantum in the configuration, since it is essential to
         perform any action with craft ai.
         """
         for inv_tq in invalid_data.INVALID_TIME_QUANTA:
             print(invalid_data.INVALID_TIME_QUANTA[inv_tq])
-            model = {
+            configuration = {
                 "context": valid_data.VALID_CONTEXT,
                 "output": valid_data.VALID_OUTPUT,
                 "time_quantum": invalid_data.INVALID_TIME_QUANTA[inv_tq]
@@ -167,7 +144,7 @@ class TestCreateAgentFailure(unittest.TestCase):
             self.assertRaises(
                 craft_err.CraftAIBadRequestError,
                 self.client.create_agent,
-                model,
+                configuration,
                 valid_data.VALID_ID)
             self.addCleanup(
                 self.clean_up_agent,

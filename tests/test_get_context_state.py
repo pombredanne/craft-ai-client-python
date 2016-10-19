@@ -18,7 +18,7 @@ class TestGetContextStateSuccess(unittest.TestCase):
 
     def setUp(self):
         self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_MODEL, valid_data.VALID_ID)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
         self.client.add_operations(
             valid_data.VALID_ID,
             valid_data.VALID_OPERATIONS_SET)
@@ -54,7 +54,7 @@ class TestGetContextStateFailure(unittest.TestCase):
 
     def setUp(self):
         self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_MODEL, valid_data.VALID_ID)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
         self.client.add_operations(
             valid_data.VALID_ID,
             valid_data.VALID_OPERATIONS_SET)

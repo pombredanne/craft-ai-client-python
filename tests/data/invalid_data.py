@@ -26,7 +26,7 @@ INVALID_CONTEXTS = {
 }
 
 INVALID_OUTPUTS = {"no_output": None,
-                   "output_not_in_the_model": ["beerBrand"]}
+                   "output_not_in_the_configuration": ["beerBrand"]}
 
 UNDEFINED_KEY = {"none": None,
                  "empty_string": "",
