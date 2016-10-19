@@ -9,18 +9,18 @@ class Interpreter(object):
 
   @staticmethod
   def decide(tree, args):
-    bare_tree, model, version = Interpreter._parse_tree(tree)
-    if model != {}:
-        context = Interpreter._rebuild_context(model, args)
+    bare_tree, configuration, version = Interpreter._parse_tree(tree)
+    if configuration != {}:
+        context = Interpreter._rebuild_context(configuration, args)
     else:
         context = Interpreter.join_decide_args(args)
-    # self._check_context(model, context, version)
+    # self._check_context(configuration, context, version)
     raw_decision = Interpreter._decide_recursion(bare_tree, context)
 
-    # If the model is not included in the tree object (f.i. version 0.0.1)
+    # If the configuration is not included in the tree object (f.i. version 0.0.1)
     # we give a default key name to the output
     try:
-        output_name = model.get("output")[0]
+        output_name = configuration.get("output")[0]
     except TypeError:
         output_name = "value"
 
@@ -38,14 +38,14 @@ class Interpreter(object):
   ####################
 
   @staticmethod
-  def _rebuild_context(model, args):
+  def _rebuild_context(configuration, args):
       # Model should come from _parse_tree and is assumed to be checked upon
       # already
-      mo = model["output"]
-      mc = model["context"]
+      mo = configuration["output"]
+      mc = configuration["context"]
 
       # We should not use the output key(s) to compare against
-      model_ctx = {
+      configuration_ctx = {
           key: mc[key] for (key, value) in mc.items() if (key not in mo)
       }
 
@@ -54,7 +54,7 @@ class Interpreter(object):
           if not arg:
               continue
           context.update({
-              k: Interpreter._context_value(k, v, arg) for k, v in model_ctx.items()
+              k: Interpreter._context_value(k, v, arg) for k, v in configuration_ctx.items()
           })
 
       return context
@@ -187,35 +187,35 @@ class Interpreter(object):
           """Invalid decision tree format, no tree found."""
         )
       bare_tree = tree_object[1]
-      model = {}
+      configuration = {}
     elif tree_version == "0.0.2":
       if (len(tree_object) < 2 or
-          not tree_object[1].get("model")):
+          not tree_object[1].get("configuration")):
         raise CraftAIDecisionError(
-          """Invalid decision tree format, no model found"""
+          """Invalid decision tree format, no configuration found"""
         )
       if len(tree_object) < 3:
         raise CraftAIDecisionError(
           """Invalid decision tree format, no tree found."""
         )
       bare_tree = tree_object[2]
-      model = tree_object[1]["model"]
+      configuration = tree_object[1]["configuration"]
     elif tree_version == "0.0.3":
       if (len(tree_object) < 2 or
             not tree_object[1]):
         raise CraftAIDecisionError(
-            """Invalid decision tree format, no model found"""
+            """Invalid decision tree format, no configuration found"""
         )
       if len(tree_object) < 3:
         raise CraftAIDecisionError(
           """Invalid decision tree format, no tree found."""
         )
       bare_tree = tree_object[2]
-      model = tree_object[1]
+      configuration = tree_object[1]
     else:
       raise CraftAIDecisionError(
         """Invalid decision tree format, {} is not a supported"""
         """ version.""".
         format(tree_version)
       )
-    return bare_tree, model, tree_version
+    return bare_tree, configuration, tree_version
