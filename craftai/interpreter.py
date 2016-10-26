@@ -190,16 +190,16 @@ class Interpreter(object):
       configuration = {}
     elif tree_version == "0.0.2":
       if (len(tree_object) < 2 or
-          not tree_object[1].get("configuration")):
+          not tree_object[1].get("model")):
         raise CraftAIDecisionError(
-          """Invalid decision tree format, no configuration found"""
+          """Invalid decision tree format, no model found"""
         )
       if len(tree_object) < 3:
         raise CraftAIDecisionError(
           """Invalid decision tree format, no tree found."""
         )
       bare_tree = tree_object[2]
-      configuration = tree_object[1]["configuration"]
+      configuration = tree_object[1]["model"]
     elif tree_version == "0.0.3":
       if (len(tree_object) < 2 or
             not tree_object[1]):
