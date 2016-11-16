@@ -16,7 +16,7 @@ except (OSError):
 
 
 def update_readme():
-    url = "https://beta.craft.ai/content/api/python.md"
+    url = "http://www.craft.ai/content/api/python.md"
     r = requests.get(url)
 
     if r.status_code == 200:
