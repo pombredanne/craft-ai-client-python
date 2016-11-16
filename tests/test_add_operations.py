@@ -18,7 +18,7 @@ class TestAddOperationsSuccess(unittest.TestCase):
 
     def setUp(self):
         self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_MODEL, valid_data.VALID_ID)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
 
     def tearDown(self):
         self.client.delete_agent(valid_data.VALID_ID)
@@ -48,7 +48,7 @@ class TestAddOperationsFailure(unittest.TestCase):
 
     def setUp(self):
         self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_MODEL, valid_data.VALID_ID)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
 
     def tearDown(self):
         self.client.delete_agent(valid_data.VALID_ID)
@@ -71,7 +71,7 @@ class TestAddOperationsFailure(unittest.TestCase):
 #        """add_operations should fail when given an unknown agent ID
 #
 #        It should raise an error upon request for operations posting to an
-#        agent's model, for which the agent doesn't exist.
+#        agent's configuration, for which the agent doesn't exist.
 #        """
 #        self.assertRaises(
 #            craft_err.CraftAINotFoundError,
@@ -83,7 +83,7 @@ class TestAddOperationsFailure(unittest.TestCase):
         """add_operations should fail when given an empty set of operations
 
         It should raise an error upon request for posting an empty set of
-        operations to an agent's model.
+        operations to an agent's configuration.
         """
         for ops_set in invalid_data.UNDEFINED_KEY:
             self.assertRaises(

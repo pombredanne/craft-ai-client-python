@@ -15,7 +15,7 @@ class TestGetAgentSuccess(unittest.TestCase):
 
     def setUp(self):
         self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_MODEL, valid_data.VALID_ID)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
 
     def tearDown(self):
         # Makes sure that no agent with the standard ID remains
@@ -24,13 +24,13 @@ class TestGetAgentSuccess(unittest.TestCase):
     def test_get_agent_with_correct_id(self):
         """get_agent should succeed when given a correct agent ID
 
-        It should give a proper JSON response with `model` field being a
+        It should give a proper JSON response with `configuration` field being a
         string.
         """
         agent = self.client.get_agent(valid_data.VALID_ID)
         self.assertIsInstance(agent, dict)
         agent_keys = agent.keys()
-        self.assertTrue("model" in agent_keys)
+        self.assertTrue("configuration" in agent_keys)
 
 
 class TestGetAgentFailure(unittest.TestCase):

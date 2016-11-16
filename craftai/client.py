@@ -55,7 +55,7 @@ class CraftAIClient(object):
     # Agent methods #
     #################
 
-    def create_agent(self, model, agent_id=""):
+    def create_agent(self, configuration, agent_id=""):
         # Building final headers
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
         headers = helpers.join_dicts(self._headers, ct_header)
@@ -64,12 +64,12 @@ class CraftAIClient(object):
         # serialization
         payload = {
             "id": agent_id,
-            "model": model
+            "configuration": configuration
         }
         try:
             json_pl = json.dumps(payload)
         except TypeError as e:
-            raise CraftAIBadRequestError("Invalid model or agent id given. {}".
+            raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
                                          format(e.__str__())
                                          )
 
@@ -123,7 +123,7 @@ class CraftAIClient(object):
         try:
             json_pl = json.dumps(operations)
         except TypeError as e:
-            raise CraftAIBadRequestError("Invalid model or agent id given. {}".
+            raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
                                          format(e.__str__())
                                          )
 

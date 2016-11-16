@@ -19,7 +19,7 @@ class TestDeleteAgentWithValidID(unittest.TestCase):
         # it is necessary to catch this kind of errors.
         try:
             self.client.create_agent(
-                valid_data.VALID_MODEL,
+                valid_data.VALID_CONFIGURATION,
                 valid_data.VALID_ID)
         except craft_err.CraftAIBadRequestError as e:
             if "one already exists" not in e.message:

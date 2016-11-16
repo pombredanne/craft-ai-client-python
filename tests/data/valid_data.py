@@ -15,7 +15,7 @@ VALID_CONTEXT = {
 }
 VALID_OUTPUT = ["lightbulbColor"]
 VALID_TQ = 100
-VALID_MODEL = {
+VALID_CONFIGURATION = {
     "context": VALID_CONTEXT,
     "output": VALID_OUTPUT,
     "time_quantum": VALID_TQ

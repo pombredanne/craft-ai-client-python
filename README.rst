@@ -84,12 +84,12 @@ properties:
    proper values for ``timeOfDay`` (cf. the `context properties type
    section <#context-properties-types>`__ for further information),
 -  and finally ``lightbulbState`` which is an ``enum`` property that is
-   also the output of this model.
+   also the output.
 
 .. code:: python
 
     agent_id = "my_first_agent"
-    model = {
+    configuration = {
         "context": {
             "peopleCount": {
                 "type": 'continuous'
@@ -107,7 +107,7 @@ properties:
         "output": ['lightbulbState']
     }
 
-    agent = client.create_agent(model, agent_id)
+    agent = client.create_agent(configuration, agent_id)
     print("Agent", agent["id"], "has successfully been created")
 
 Pretty straightforward to test! Open
@@ -124,8 +124,8 @@ before recreating it.
     client.delete_agent(agent_id)
     print("Agent", agent_id, "no longer exists")
 
-    model = ...
-    agent = client.create_agent(model, agent_id)
+    configuration = ...
+    agent = client.create_agent(configuration, agent_id)
     print("Agent", agent["id"], "has successfully been created")
 
 *For further information, check the `'create agent' reference
@@ -156,8 +156,8 @@ In the following we add 8 operations:
     client.delete_agent(agent_id)
     print("Agent", agent_id, "no longer exists")
 
-    model = ...
-    agent = client.create_agent(model, agent_id)
+    configuration = ...
+    agent = client.create_agent(configuration, agent_id)
     print("Agent", agent["id"], "has successfully been created")
 
     context_list = [
@@ -241,8 +241,8 @@ the 26th of 2016.
     client.delete_agent(agent_id)
     print("Agent", agent_id, "no longer exists")
 
-    model = ...
-    agent = client.create_agent(model, agent_id)
+    configuration = ...
+    agent = client.create_agent(configuration, agent_id)
     print("Agent", agent["id"], "has successfully been created")
 
     context_list = ...
@@ -359,8 +359,8 @@ the room ?".
     client.delete_agent(agent_id)
     print("Agent", agent_id, "no longer exists")
 
-    model = ...
-    agent = client.create_agent(model, agent_id)
+    configuration = ...
+    agent = client.create_agent(configuration, agent_id)
     print("Agent", agent["id"], "has successfully been created")
 
     context_list = ...
@@ -392,10 +392,10 @@ Owner
 identified users defines a owner, in the future we will introduce shared
 organization-level owners.
 
-Model
-~~~~~
+Configuration
+~~~~~~~~~~~~~
 
-Each agent is based upon a model, the model defines:
+Each agent has a configuration defining:
 
 -  the context schema, i.e. the list of property keys and their type (as
    defined in the following section),
@@ -441,22 +441,22 @@ Time types: ``timezone``, ``time_of_day`` and ``day_of_week``
     and ``day_of_week`` properties are generated from the
     ```timestamp`` <#timestamp>`__ of an agent's state and the agent's
     current ``timezone``. Therefore, whenever you use generated
-    ``time_of_day`` and/or ``day_of_week`` in your model, you **must**
-    provide a ``timezone`` value in the context.
+    ``time_of_day`` and/or ``day_of_week`` in your configuration, you
+    **must** provide a ``timezone`` value in the context.
 
     If you wish to provide their values manually, add
-    ``is_generated: false`` to the time types properties in your model.
-    In this case, since you provide the values, the ``timezone``
-    property is not required, and you must update the context whenever
-    one of these time values changes in a way that is significant for
-    your system.
+    ``is_generated: false`` to the time types properties in your
+    configuration. In this case, since you provide the values, the
+    ``timezone`` property is not required, and you must update the
+    context whenever one of these time values changes in a way that is
+    significant for your system.
 
 Examples
 ''''''''
 
-Let's take a look at the following model. It is designed to model the
-**color** of a lightbulb (the ``lightbulbColor`` property, defined as an
-output) depending on the **outside light intensity** (the
+Let's take a look at the following configuration. It is designed to
+model the **color** of a lightbulb (the ``lightbulbColor`` property,
+defined as an output) depending on the **outside light intensity** (the
 ``lightIntensity`` property), the **time of the day** (the ``time``
 property) and the **day of the week** (the ``day`` property).
 
@@ -588,12 +588,12 @@ Agent
 Create
 ^^^^^^
 
-Create a new agent, and create its `model <#model>`__.
+Create a new agent, and create its `configuration <#configuration>`__.
 
 .. code:: python
 
     client.create_agent(
-        { # The model
+        { # The configuration
             "context": {
               "peopleCount": {
                 "type": 'continuous'
@@ -734,7 +734,7 @@ included in the response body.
 
 In version ``"0.0.3"``, the other included elements are (in order):
 
--  the agent's model as specified during the agent's
+-  the agent's configuration as specified during the agent's
    `creation <#create-agent>`__
 -  the tree itself as a JSON object:
 
