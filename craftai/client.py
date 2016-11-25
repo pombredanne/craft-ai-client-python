@@ -42,7 +42,7 @@ class CraftAIClient(object):
                                          """slash. """)
         self._config = cfg
 
-        self._base_url = "{}/api/{}".format(
+        self._base_url = "{}/api/v1/{}".format(
             self.config["url"],
             self.config["owner"])
 
