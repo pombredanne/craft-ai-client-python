@@ -42,7 +42,7 @@ class CraftAIClient(object):
                                          """slash. """)
         self._config = cfg
 
-        self._base_url = "{}/api/{}".format(
+        self._base_url = "{}/api/v1/{}".format(
             self.config["url"],
             self.config["owner"])
 
@@ -63,9 +63,12 @@ class CraftAIClient(object):
         # Building payload and checking that it is valid for a JSON
         # serialization
         payload = {
-            "id": agent_id,
             "configuration": configuration
         }
+
+        if (agent_id != ""):
+            payload ["id"] = agent_id
+
         try:
             json_pl = json.dumps(payload)
         except TypeError as e:
