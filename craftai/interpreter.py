@@ -71,6 +71,12 @@ class Interpreter(object):
       elif (v["type"] == "time_of_day" and
             (v.get("is_generated") is None or v["is_generated"])):
         return time_of_day
+      elif (v["type"] == "day_of_month" and
+            (v.get("is_generated") is None or v["is_generated"])):
+        return day_of_month
+      elif (v["type"] == "month_of_year" and
+            (v.get("is_generated") is None or v["is_generated"])):
+        return month_of_year
       elif v["type"] == "timezone":
         return timezone
       else:

@@ -65,6 +65,8 @@ class Time(object):
 
         self.day_of_week = time.weekday()
         self.time_of_day = time.hour + time.minute / 60 + time.second / 3600
+        self.day_of_month = time.day
+        self.month_of_year = time.month
         self.timezone = time.strftime("%z")
         self.ts = Time.timestamp_from_datetime(time)
 
@@ -75,6 +77,8 @@ class Time(object):
             "timezone": self.timezone,
             "time_of_day": self.time_of_day,
             "day_of_week": self.day_of_week,
+            "day_of_month": self.day_of_month,
+            "month_of_year": self.month_of_year,
             "utc_iso": self.utc_iso
         }
 
