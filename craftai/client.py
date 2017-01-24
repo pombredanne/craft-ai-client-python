@@ -30,6 +30,17 @@ class CraftAIClient(object):
         if (not isinstance(cfg.get("token"), six.string_types)):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid token provided.""")
+        if (not isinstance(cfg.get("project"), six.string_types)):
+            raise CraftAICredentialsError("""Unable to create client with no"""
+                                          """ or invalid owner provided.""")
+        else:
+            splittedProject = cfg.get("project").split('/')
+            if (len(splittedProject) == 2):
+                cfg["owner"] = splittedProject[0];
+                cfg["project"] = splittedProject[1];
+            elif (len(splittedProject) > 2):
+                raise CraftAICredentialsError("""Unable to create client with invalid"""
+                                              """ project name.""")
         if (not isinstance(cfg.get("owner"), six.string_types)):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid owner provided.""")
@@ -44,9 +55,10 @@ class CraftAIClient(object):
                                          """slash. """)
         self._config = cfg
 
-        self._base_url = "{}/api/v1/{}".format(
+        self._base_url = "{}/api/v1/{}/{}".format(
             self.config["url"],
-            self.config["owner"])
+            self.config["owner"],
+            self.config["project"])
 
         # Headers have to be reset here to avoid multiple definitions
         # of the 'Authorization' header if config is modified
