@@ -39,3 +39,8 @@ sudo: false
 addons:
   apt_packages:
    - pandoc
+   
+notifications:
+  slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
+  email:
+    - ops@craft.ai
