@@ -27,6 +27,8 @@ class Interpreter(object):
     decision = {}
     decision["decision"] = {}
     decision["decision"][output_name] = raw_decision["value"]
+    if raw_decision.get("standard_deviation", None) is not None:
+        decision["decision"]["standard_deviation"] = raw_decision.get("standard_deviation")
     decision["confidence"] = raw_decision["confidence"]
     decision["predicates"] = raw_decision["predicates"]
     decision["context"] = context
@@ -91,6 +93,7 @@ class Interpreter(object):
       return {
         "value": node["value"],
         "confidence": node.get("confidence") or 0,
+        "standard_deviation": node.get("standard_deviation", None),
         "predicates": []
       }
 
@@ -124,6 +127,7 @@ class Interpreter(object):
     return {
       "value": result["value"],
       "confidence": result["confidence"],
+      "standard_deviation": result.get("standard_deviation", None),
       "predicates": new_predicates + result["predicates"]
     }
 
@@ -207,6 +211,18 @@ class Interpreter(object):
       bare_tree = tree_object[2]
       configuration = tree_object[1]["model"]
     elif tree_version == "0.0.3":
+      if (len(tree_object) < 2 or
+            not tree_object[1]):
+        raise CraftAIDecisionError(
+            """Invalid decision tree format, no configuration found"""
+        )
+      if len(tree_object) < 3:
+        raise CraftAIDecisionError(
+          """Invalid decision tree format, no tree found."""
+        )
+      bare_tree = tree_object[2]
+      configuration = tree_object[1]
+    elif tree_version == "0.0.4":
       if (len(tree_object) < 2 or
             not tree_object[1]):
         raise CraftAIDecisionError(
