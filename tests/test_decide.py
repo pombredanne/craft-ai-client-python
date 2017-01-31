@@ -56,7 +56,5 @@ class TestDecide(unittest.TestCase):
                     decision = self.client.decide(tree, exp_context, t)
                     print("decision: ", decision)
                     print("expectation: ", expectation.get("output"))
-                    self.assertEqual(
-                        dict_depth(decision),
-                        dict_depth(expectation["output"]))
+                    self.assertEqual(decision, expectation["output"])
             print("--------------------------")
