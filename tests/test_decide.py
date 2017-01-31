@@ -54,7 +54,8 @@ class TestDecide(unittest.TestCase):
                     print("Successfully raises CraftAIDecisionError.")
                 else:
                     decision = self.client.decide(tree, exp_context, t)
-                    print("decision: ", decision.get("decision"))
+                    print("decision: ", decision)
+                    print("expectation: ", expectation.get("output"))
                     self.assertEqual(
                         dict_depth(decision),
                         dict_depth(expectation["output"]))
