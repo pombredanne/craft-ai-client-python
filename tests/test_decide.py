@@ -22,6 +22,7 @@ class TestDecide(unittest.TestCase):
     is expected."""
     @classmethod
     def setUpClass(self):
+        self.maxDiff = None
         self.client = CraftAIClient(settings.CRAFT_CFG)
 
     def setUp(self):
