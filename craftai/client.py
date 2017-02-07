@@ -197,12 +197,17 @@ class CraftAIClient(object):
       ####################
 
     def _decode_response(self, response):
+        # https://github.com/kennethreitz/requests/blob/master/requests/status_codes.py
         if response.status_code == requests.codes.not_found:
             raise CraftAINotFoundError(response.text)
         if response.status_code == requests.codes.bad_request:
             raise CraftAIBadRequestError(response.text)
         if response.status_code == requests.codes.unauthorized:
             raise CraftAICredentialsError(response.text)
+        if response.status_code == requests.codes.request_timeout:
+            raise CraftAIBadRequestError('Request has timed out')
+        if response.status_code == requests.codes.gateway_timeout:
+            raise CraftAIInternalError('Response has timed out')
 
         try:
             return response.json()
