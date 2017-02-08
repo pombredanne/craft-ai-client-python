@@ -67,7 +67,7 @@ class Time(object):
         self.time_of_day = time.hour + time.minute / 60 + time.second / 3600
         self.day_of_month = time.day
         self.month_of_year = time.month
-        self.timezone = time.strftime("%z")
+        self.timezone = time.strftime("%z")[:3] + ':' + time.strftime("%z")[3:]
         self.ts = Time.timestamp_from_datetime(time)
 
     def to_dict(self):
