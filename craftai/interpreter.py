@@ -55,9 +55,12 @@ class Interpreter(object):
       for arg in args:
           if not arg:
               continue
-          context.update({
-              k: Interpreter._context_value(k, v, arg) for k, v in configuration_ctx.items()
-          })
+          dic = {}
+          for k, v in configuration_ctx.items():
+            _c_v = Interpreter._context_value(k, v, arg)
+            if _c_v is not None:
+              dic[k] = _c_v
+          context.update(dic)
 
       return context
 
