@@ -56,10 +56,10 @@ class Interpreter(object):
           if not arg:
               continue
           dic = {}
-          for k, v in configuration_ctx.items():
-            _c_v = Interpreter._context_value(k, v, arg)
-            if _c_v is not None:
-              dic[k] = _c_v
+          for feature, properties in configuration_ctx.items():
+            value = Interpreter._context_value(feature, properties, arg)
+            if value is not None:
+              dic[feature] = value
           context.update(dic)
 
       return context
