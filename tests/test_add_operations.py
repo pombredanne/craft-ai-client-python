@@ -37,6 +37,26 @@ class TestAddOperationsSuccess(unittest.TestCase):
         resp_keys = resp.keys()
         self.assertTrue("message" in resp_keys)
 
+    def test_add_operations_with_many_operations(self):
+        """add_operations should succeed when given lots of operations
+
+        It should give a proper JSON response with a `message` fields being a
+        string.
+        """
+        operations = valid_data.VALID_OPERATIONS_SET
+        operations_len = len(operations)
+
+        while len(operations) < 2000:
+            operations = operations + operations
+
+        resp = self.client.add_operations(
+            valid_data.VALID_ID,
+            operations)
+
+        self.assertIsInstance(resp, dict)
+        resp_keys = resp.keys()
+        self.assertTrue("message" in resp_keys)
+
 
 class TestAddOperationsFailure(unittest.TestCase):
     """Checks that the client fails properly when getting an agent with bad
