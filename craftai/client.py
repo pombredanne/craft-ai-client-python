@@ -123,19 +123,26 @@ class CraftAIClient(object):
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
         headers = helpers.join_dicts(self._headers, ct_header)
 
-        try:
-            json_pl = json.dumps(operations)
-        except TypeError as e:
-            raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
-                                         format(e.__str__())
-                                         )
+        offset = 0
 
-        req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
-        resp = requests.post(req_url, headers=headers, data=json_pl)
+        while True:
+            nextOffset = offset + self.config["operationsChunksSize"]
 
-        decoded_resp = self._decode_response(resp)
+            try:
+                json_pl = json.dumps(operations[offset:nextOffset])
+            except TypeError as e:
+                raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
+                                            format(e.__str__())
+                                            )
 
-        return decoded_resp
+            req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
+            resp = requests.post(req_url, headers=headers, data=json_pl)
+
+            decoded_resp = self._decode_response(resp)
+
+            if offset < len(operations): return decoded_resp
+            offset = nextOffset
+
 
     def get_operations_list(self, agent_id):
         # Raises an error when agent_id is invalid
