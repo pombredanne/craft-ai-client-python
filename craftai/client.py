@@ -123,6 +123,7 @@ class CraftAIClient(object):
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
         headers = helpers.join_dicts(self._headers, ct_header)
 
+        s = requests.Session()
         offset = 0
 
         while True:
@@ -136,7 +137,7 @@ class CraftAIClient(object):
                                             )
 
             req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
-            resp = requests.post(req_url, headers=headers, data=json_pl)
+            resp = s.post(req_url, headers=headers, data=json_pl)
 
             decoded_resp = self._decode_response(resp)
 
