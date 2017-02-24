@@ -66,6 +66,8 @@ class Interpreter(object):
     if isinstance(arg, Time):
       time_of_day = arg.to_dict()["time_of_day"]
       day_of_week = arg.to_dict()["day_of_week"]
+      day_of_month = arg.to_dict()["day_of_month"]
+      month_of_year = arg.to_dict()["month_of_year"]
       timezone = arg.to_dict()["timezone"]
       if (v["type"] == "day_of_week" and
           (v.get("is_generated") is None or v["is_generated"])):
