@@ -33,6 +33,8 @@ class CraftAIClient(object):
         if (not isinstance(cfg.get("owner"), six.string_types)):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid owner provided.""")
+        if (not isinstance(cfg.get("operationsChunksSize"), six.integer_types)):
+            cfg["operationsChunksSize"] = 200
         if (not isinstance(cfg.get("url"), six.string_types)):
             cfg["url"] = "https://beta.craft.ai"
         if cfg.get("url").endswith("/"):
