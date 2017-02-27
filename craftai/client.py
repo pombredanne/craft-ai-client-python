@@ -127,10 +127,10 @@ class CraftAIClient(object):
         offset = 0
 
         while True:
-            nextOffset = offset + self.config["operationsChunksSize"]
+            next_offset = offset + self.config["operationsChunksSize"]
 
             try:
-                json_pl = json.dumps(operations[offset:nextOffset])
+                json_pl = json.dumps(operations[offset:next_offset])
             except TypeError as e:
                 raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
                                             format(e.__str__())
@@ -141,8 +141,8 @@ class CraftAIClient(object):
 
             decoded_resp = self._decode_response(resp)
 
-            if offset < len(operations): return decoded_resp
-            offset = nextOffset
+            if next_offset >= len(operations): return decoded_resp
+            offset = next_offset
 
 
     def get_operations_list(self, agent_id):

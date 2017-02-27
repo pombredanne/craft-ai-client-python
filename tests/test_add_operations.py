@@ -43,15 +43,19 @@ class TestAddOperationsSuccess(unittest.TestCase):
         It should give a proper JSON response with a `message` fields being a
         string.
         """
-        operations = valid_data.VALID_OPERATIONS_SET
-        operations_len = len(operations)
+        operations = valid_data.VALID_OPERATIONS_SET[:]
+        operation = operations[-1]
+        timestamp = operation["timestamp"]
+        length = len(operations)
 
-        while len(operations) < 2000:
-            operations = operations + operations
+        while length < 2000:
+            operation["timestamp"] = timestamp + length
+            operations.append(operation.copy())
+            length = length + 1
 
         resp = self.client.add_operations(
             valid_data.VALID_ID,
-            operations)
+            sorted(operations, key=lambda operation: operation["timestamp"]))
 
         self.assertIsInstance(resp, dict)
         resp_keys = resp.keys()
