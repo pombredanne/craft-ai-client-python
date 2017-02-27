@@ -33,6 +33,8 @@ class CraftAIClient(object):
         if (not isinstance(cfg.get("owner"), six.string_types)):
             raise CraftAICredentialsError("""Unable to create client with no"""
                                           """ or invalid owner provided.""")
+        if (not isinstance(cfg.get("operationsChunksSize"), six.integer_types)):
+            cfg["operationsChunksSize"] = 200
         if (not isinstance(cfg.get("url"), six.string_types)):
             cfg["url"] = "https://beta.craft.ai"
         if cfg.get("url").endswith("/"):
@@ -123,19 +125,27 @@ class CraftAIClient(object):
         ct_header = {"Content-Type": "application/json; charset=utf-8"}
         headers = helpers.join_dicts(self._headers, ct_header)
 
-        try:
-            json_pl = json.dumps(operations)
-        except TypeError as e:
-            raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
-                                         format(e.__str__())
-                                         )
+        s = requests.Session()
+        offset = 0
 
-        req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
-        resp = requests.post(req_url, headers=headers, data=json_pl)
+        while True:
+            next_offset = offset + self.config["operationsChunksSize"]
 
-        decoded_resp = self._decode_response(resp)
+            try:
+                json_pl = json.dumps(operations[offset:next_offset])
+            except TypeError as e:
+                raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
+                                            format(e.__str__())
+                                            )
 
-        return decoded_resp
+            req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
+            resp = s.post(req_url, headers=headers, data=json_pl)
+
+            decoded_resp = self._decode_response(resp)
+
+            if next_offset >= len(operations): return decoded_resp
+            offset = next_offset
+
 
     def get_operations_list(self, agent_id):
         # Raises an error when agent_id is invalid
