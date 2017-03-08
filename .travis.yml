@@ -1,47 +1,39 @@
 language: python
 python: '3.5'
-
-# disable the default submodule logic
 git:
-    submodules: false
-
-# use sed to replace the git SSH URL with the public URL, then init and update submodules
+  submodules: false
 before_install:
-  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-  - git submodule update --init --recursive
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
 install:
-  - pip install --upgrade pip
-  - pip install -r requirements.txt
-script: "sh run-tests.sh"
-
+- pip install --upgrade pip
+- pip install -r requirements.txt
+script: sh run-tests.sh
 env:
   matrix:
   - TOXENV=py27
   - TOXENV=py33
   - TOXENV=py35
   global:
-  - secure: hWJEIqdIhaKPVIlRy3gxSX5dX9ykmN6AM09EzjgegGSSnzaV6WJMKttvQhZrwUVk1XnXgjw8cbP0szqoVF3hkvNMoejdJ5zBhCpM8HSJat8ze0DmDLLpYg5Ivc5c4Y1JqAQPN+ol9wEt9NNQmfOngP2CnLyfTZtJWOtYmJruXHwu/03tpbUHGZt8gWSOCztvjbtxzi0lpzcfZ/9FkfGQ9541MPJUAdoiPyiwVQguiklbGF47we8Gko9nTBjyBRCr1eZxGSMqR9AkGYoUL7RLSj4V9xbKoNnHjamtw709F5AiSNF76Qe+za+dXXCugsZDruGok4ViN3inI7QI6sbuGVAPB9cqVAqWXKS23Yzrw/kiRoQ2YkOEFl4m+AgwRTdW/VPyh2o1CQ8IzfxP25hHwinyeI8qu3BLlZM8fjdpp/EiyXwogV6Zsvcb5T62HbjMnCTXsJ3H4kJk0n7UtgoMVA2mdz5kP6BKWZkG75Z/gQBnNvbZ0e5JCk7gfc3z7yDqqAzrEYkGHdPA0JOMTK7CqCiwFuw5Gy/3AclEoe8+VldBbjhEG2xzz4izD9hizkJiCv8Etdn3Ol8QagN5bdkWpOLlBvOe6fzvolaSAVInTEsDzbyZFjdfNIh8Y2eIb6zQhovk+2bmfN5PRG6TejzlOkPPjT57JqrInOwWgCiGM0w=
-  - secure: 3Paz1IcBB4MhhYKkcC87vBH0QUk2uSMz9oosF3AVeeuROufdep+cms9Mx80+qVEvY7xV1CXSSFbfVzwc0qdczacmMDHOZzU7tjzSUkTxYP1dN0Fu4HjUcKc3WBOhCH4l6vTi5YLscVsyvL4UNgVfnm1OjKk2hNZyreDeYj6ffsKhwW5WAto2aH8ADEkDKWatDzXkaSpbEzcbe62OD42SQmRPNCtKVBdEVnjDvfcCLJi7Euy5ln5gm37IOjr9/6BuYQVRr/NOtYHQPgz87qWLAMHD3wZbijbIIQCLNNLpNk71UCNLZijOR+iUAIckQSD9XLuZHhRnVpe3NgukRaeQ547603pnjT1Wv0455aCENFgIkxBRK8PyaSHbnmOPWV4VTVLDjB449qnMViOAd3TYZ31UAI1OvehBdXrd9rYe8eXvH2pSsB1IqrrhhjaKGeccyu/9NTETMgl8RHH8yl9C6xuv0cgzVKp5oh2DbjzONT2NK3Yz1sGUdGOcOJt3qynUyevmTKlhGI5n3jVz/E++0lxn85XSBniNTBTjyA5VCFnMK8+J+uC9vl5a5CIMU0bLesCSwTfiAdsWIAmu1iMY+biq4cPRW2MP2HgQNQlmX4JvjOqopdqnnho6TM9nHw8crjlT5Omn31Wc8Foi2x8td6dKYIiWd+y7YI1NgIEsD1M=
-  - secure: wz0tYyvVgtRfQ76v0NgCLKjXjs+fgjB+7TJ8vk1hG8srRMOXmaPA2NmtqsBVxO4qFTcWygMoiPYk9ra+2mZ519Vwf6pnOoSOuCs1GY1KY9KWOfaRa140MYGyarIeaWG+mAw4v4YZrEl7qutjBRsFahuB8wDErd56SyufwVQK9zCH9lH7sU/FBKTH4hOYnBU7dqyi6ipsxEoK4pY4uO0dEyuwstvgcpuj9cYdkRYHc+En/1HioPqecHfmf1CXDBtbI2shgt3ijpm/SWZPeXEofSW3OjCGAaNUt3ioSTmFjwTBvvJS7wJ2C1IrNvGyb60YOYNt2ZBcMIK5I1mum5xF0ozBNRu+6fdN1MXD9FaTbavhsDMqvla43H8xXO41jo9dokfRAbZoDCB8PI+DzKijfmTfY5wpXWIAiV0aSL+EAE9nKnKednRR0jP0WFiHfmxxsrioaJ4mggl4Yyky4F+ymFhVH2lZgosHDWl7pd2JCULG35XZgTgqbeBbhHLy/hKc/1dZvisSGYTJUFHNy8UyjZom2jLP6/MYeLAdJ6BliQ/73bWzzX08SrND52yTIYUA/Mp+gVP0wWMXcoGngNCzi6HbH0krHwMYtSKHa2JpQ16HHo6yiV8Ozv/qHWAQNwT6Ka+slO188ZnWNAjx5bbUTvKKWDTv0qWYuwRhoGwQytk=
-
-before_deploy: 
-  - "git describe --tags --match='v*'"
+  - secure: RVS8ycUKcYo5hJahJ/8yl2grt/fFJRCcESrWPrGz1M0+jHUCt9XJNNbBddKTItli36y/V8GjO8ZB/uYSNkZRLC95sfX7jQ17FzXY2Vf1DdsQIbF341uE10A2Wq5POKQNNwmDO4Xs0j2s1NfsxHSiW+fcZh45Utas22hG1BbWlaGoYezQqD26RX9BaL9ShjEVbqcgwwf1W3LndSIlzox5bkB/F86IN9GNUujyF9JYP7FPnSzFir5OQn7l9qCjoKq6o/LbfrCWS8hsKeQ2vQ+Fl8IaMeFQebN0h54pt00XcXwKOmAVavgczAznSgYv/iRURtByq7u1wpBP4oc1ovBEdPQ0miZ3QCov3Ui3jDOi9sY5dUwvmqaqumjS2z5Y5yeffxyNTq06OyefeSOYbDsy09/yr0DOE09yxzZymmAmSoszO6i4gR5eoUV7UcQaazTlrKuK5Ay0DmNPV0YwXzLVoJVeH3+rYYu7BQqq9jnyESXsJQlMz0K1ySCbSPY6wWdcT8j/EHG7wUkwvesBMqQKxxK5fINOfLlfUNQJiOS+6yWioqrpwdMC9GGFNwHfmxmneM9lpb/k1Ck3Zn7ir4tH3iFFAz2C07QlLkgdEEYM2HTg+biEU+11cp6pgqxMubVoFrzk6oDdYqC02NA7EXJgkK6iDz1Ui1hKzlF5dCup57A=
+  - secure: iy8wQuT0EbPsitpRO0yJj1+9HmrMFAwhwZtdeWmYegxIBdTY8VTlam0x9R53FxSR+xfE9RrRjhaIv2TkgKbTJwxOW09x2NAtVQFRU2udV4F52R4Lq5ffn5IuwujHrmJudAdgp9qWVSBsABJ+/8wLKopbg104ABhozmMXr7sTAv5Ex8VX5ne2bmG1Dd8cuhsCwqT/2KR67bFdSdOgKEm7SoA8zAF+AmkJ4fnaEa7aO2MTG4EQG8e9G3ti3sdkW/n5bUieyeHCcOscqsgN4WLzAsqhk20QdmaF5RN2997JN2u4/BBEajODIHY2oJWwTcLkw127EqqCjLXgggVSz5WgKGKIC21M4FKseBhUaAroym9/TL4/2XlxC8qRwajajHbofzhpuAaPFj0sfq4YGtxGuY6SrNcYoJxtPpya/huYNhVw11EUws8s03dHNVAzmkTM8456mhhoo7kKd5Xe3cOWkFwIDbqxv1dJbw5ja6R7WI/0ODeGWiSVovRq4//Y9mtFXRMigvRAoYBpkCVHH4R/HmvHnG9hgWuQWRVqkds/ceeqkMP0oWHTMoMC8DwtPEpD/YVHjEmdQPWTybdrRcKYr0F3igYk4kYVyluWZFu7LAk5wi+LXPb1YCcwIvtlZv/ms4GkP72TKeidvaBlkReMQAm2hWbvpNLA5pMa1j0cxT0=
+  - secure: VMjqlwYsrvzB0WyTcNaw8tUrpFtwyM7lf1KZYMty3/834mdOS3Ylu2h0VXFyRzWwlrQs81sCsZeGn0ENVZWKXRA0Fh8yFXv2prMM654l6cCL1dL0Wjq++LwYKlbDmSDR+gZI5pCjYispLQDDjxtHuPDn0y3WxsZgNo0gXPIci8MeOyx4xuf84FsC2bmTw4MHPEms4F7CXAHow8GkaRI3FhOFhrUA/s5iooBMykdb/caUAUaQalsvx6IzHZ+gf4E80kcYSn1KMpq95/L+isDA8qWBGa/niY++A7194tFMT4H/62cLxkqVfwnaifXDBS1IUxGb9717e0mwxzpcl5ZNJU+9Z9ESSknjGuaG/bzctbVicDZ7ZRxP2XziLspEXNfUmPZ5GLgSuvSVJA0xSnLJJnXPXS16JqaqW2c1N5buMHwFgJ++wNMa/iks0xrwVNEH1hy8gCyXtOqBJmIIpfqF8aymwWu5jHr15CvLQciBkrJ6lN8dZKDflNy4IlGcWW1u8X6C/G5j+XVnDmHcYjRhk8lRS/BRepuHeiFvgfvENeh2tgwxjrl/NQCs1aV0AS7NWKkZY/r2lPxT5LflY3typ5cJoSKDos5AkVL2gYh89WXlPh07mMITFqI7u9/YHhESqAN/eXMseM7fOhkyi85uWNZ4bqlRlAiM8zfgB3+v5No=
+before_deploy:
+- git describe --tags --match='v*'
 deploy:
   provider: pypi
   user: ops
   password:
     secure: BV855ZvX9A+93Zn3o8OjbxJCJ4GiHjcPLzerd4TiuBHFh4e78i9UAcjCS4f1GjgdDe+QM+c/PKxHDI0Fgk/QcNSjAWNPyreY5qNfScLVbfD2GGWoi71Oqt2Yo82lGOGEQjbiOruJhbnnPTJ0tYCedtYsgy/aDAK5Asl9lpzlZm0mH+5FNJbyuPWr0KkWh3oR5kZ9yaO3kSAvTkn3gCS4E14s/n+qYCBQPaHHmDCDoE6J021kHTIqXQpTXY39Xoc1q5z+cJXJ01L2c/z/MDRbFrLvetglqD6sru9ZwSV1U9HUMbzuHv/+yrxydyuZoRE/IHfD8BfWkq+A8dGLytLs0R4EJlVS2bTBCGIIRQ+STWlFl8JjkG4ONkzeCWR0VppEKMQ41YGU7pexm7Z7c7dwxsTsOU5wV5TNS3jHJTvbkVBWtIrJSgN//DDTIwo3kP/ayeZ+Ndz29b17/MTkCScUXxU0QD5Qril3JMPEJo/O1g1pw7FcvaAWRkcGzTyi1Nt//6dqGWTvTX89WZ5F9mnwDN7PL3WPqVNIg/eZq2pQIdT6S6iiVdS9pmrFAJ+u51kV4Udedp70HlR6RxxWILCKmP3wiV9YA9NX8vk8woOoWq9WCJ89/oI2VcOPOvwnUXiLEbQqb89uqGpCzhwluKZrlSt+y6tHXsmu0P47MwDwpn0=
-  distributions: "bdist_wheel"
+  distributions: bdist_wheel
   on:
     tags: true
     branch: master
-
 sudo: false
 addons:
   apt_packages:
-   - pandoc
-   
+  - pandoc
 notifications:
   slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
   email:
-    - ops@craft.ai
+  - ops@craft.ai
