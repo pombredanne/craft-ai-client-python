@@ -32,7 +32,7 @@ class CraftAIClient(object):
                                           """ or invalid token provided.""")
         if (not isinstance(cfg.get("project"), six.string_types)):
             raise CraftAICredentialsError("""Unable to create client with no"""
-                                          """ or invalid owner provided.""")
+                                          """ or invalid project provided.""")
         else:
             splittedProject = cfg.get("project").split('/')
             if (len(splittedProject) == 2):
