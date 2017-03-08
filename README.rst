@@ -466,10 +466,9 @@ Time types: ``timezone``, ``time_of_day``, ``day_of_week``, ``day_of_month`` and
 -  ``month_of_year`` properties can take any integer belonging to **[1,
    12]**, each value represents a month of the year.
 -  ``timezone`` properties can take string values representing the
-   timezone as an offset from UTC, the expected format is
-   **Â±[hh]:[mm]** where ``hh`` represent the hour and ``mm`` the
-   minutes from UTC (eg. ``+01:30``)), between ``-12:00`` and
-   ``+14:00``.
+   timezone as an offset from UTC, the expected format is **±[hh]:[mm]**
+   where ``hh`` represent the hour and ``mm`` the minutes from UTC (eg.
+   ``+01:30``)), between ``-12:00`` and ``+14:00``.
 
     :information\_source: By default, the values of the ``time_of_day``
     and ``day_of_week`` properties are generated from the
@@ -894,7 +893,7 @@ All methods which have to send an http request (all of them except
 ``decide``) may raise either of these exceptions:
 ``CraftAINotFoundError``, ``CraftAIBadRequestError``,
 ``CraftAICredentialsError`` or ``CraftAIUnknownError``. The
-``decide``\ Â method should only raise ``CrafAIDecisionError`` type of
+``decide`` method should only raise ``CrafAIDecisionError`` type of
 exceptions.
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/craft-ai.svg?style=flat-square

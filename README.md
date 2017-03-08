@@ -381,7 +381,7 @@ Sunday).
 - `day_of_month` properties can take any integer belonging to **[1, 31]**, each value represents a day of the month.
 - `month_of_year` properties can take any integer belonging to **[1, 12]**, each value represents a month of the year.
 - `timezone` properties can take string values representing the timezone as an
-offset from UTC, the expected format is **Â±[hh]:[mm]** where `hh` represent the
+offset from UTC, the expected format is **±[hh]:[mm]** where `hh` represent the
 hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
 `+14:00`.
 
@@ -756,4 +756,4 @@ When using this client, you should be careful wrapping calls to the API with `tr
 The **craft ai** python client has its specific exception types, all of them inheriting from the `CraftAIError` type.
 
 All methods which have to send an http request (all of them except `decide`) may raise either of these exceptions: `CraftAINotFoundError`, `CraftAIBadRequestError`, `CraftAICredentialsError` or `CraftAIUnknownError`.
-The `decide`Â method should only raise `CrafAIDecisionError` type of exceptions.
+The `decide` method should only raise `CrafAIDecisionError` type of exceptions.
