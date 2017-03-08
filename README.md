@@ -12,9 +12,11 @@ If you're reading this you are probably already registered with **craft ai**, if
 
 > :construction: **craft ai** is currently in private beta, as such we validate accounts, this step should be quick.
 
-### 1 - Retrieve your credentials ###
+### 1 - Create a project ###
 
-Once your account is setup, you need to retrieve your **owner** and **token**. Both are available in the 'Settings' tab in the **craft ai** control center at [`https://beta.craft.ai/settings`](https://beta.craft.ai/settings).
+Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/settings), and press **Create a project**. 
+
+Once it's done, you can click on your newly created project to retrieve its tokens. There are two types of tokens: **read** and **write**. You'll need the **write** token to create, update and delete your agent.
 
 ### 2 - Setup ###
 
@@ -38,6 +40,7 @@ from craftai import client as craftai
 ```python
 config = {
     "owner": '{owner}',
+    "project": '{project}',
     "token": '{token}'
 }
 client = craftai.CraftAIClient(config)
@@ -80,7 +83,7 @@ agent = client.create_agent(configuration, agent_id)
 print("Agent", agent["id"], "has successfully been created")
 ```
 
-Pretty straightforward to test! Open [`https://beta.craft.ai/inspector`](https://beta.craft.ai/inspector), your agent is now listed.
+Pretty straightforward to test! Open [`https://beta.craft.ai/inspector`](https://beta.craft.ai/inspector), select you project and your agent is now listed.
 
 Now, if you run that a second time, you'll get an error: the agent `'my_first_agent'` is already existing. Let's see how we can delete it before recreating it.
 
@@ -102,7 +105,7 @@ We have now created our first agent but it is not able to do much, yet. To learn
 
 In the following we add 8 operations:
 
-1. The initial one sets the initial state of the agent, on July the 25th of 2016 at 5:30, in Paris, nobody is there and the light is off;
+1. The initial one sets the initial state of the agent, on July 25 2016 at 5:30, in Paris, nobody is there and the light is off;
 2. At 7:02, someone enters the room the light is turned on;
 3. At 7:15, someone else enters the room;
 4. At 7:31, the light is turned off;
@@ -183,9 +186,9 @@ _For further information, check the ['add context operations' reference document
 
 ### 5 - Compute the decision tree ###
 
-The agent has acquired a context history, we can now compute a decision tree from it!
+The agent has acquired a context history, we can now compute a decision tree from it! A decision tree models the output, allowing us to estimate what the output would be in a given context.
 
-The decision tree is computed at a given timestamp, which means it will consider the context history from the creation of this agent up to this moment. Let's first try to compute the decision tree at midnight on July the 26th of 2016.
+The decision tree is computed at a given timestamp, which means it will consider the context history from the creation of this agent up to this moment. Let's first try to compute the decision tree at midnight on July 26, 2016.
 
 ```python
 agent_id = "my_first_agent"
@@ -228,7 +231,8 @@ print(decision_tree)
       "output": [
         "lightbulbState"
       ],
-      "time_quantum": 600
+      "time_quantum": 600,
+      "learning_period": 108000
     },
     {
       "children": [
@@ -327,13 +331,17 @@ print("The anticipated lightbulb state is:", resp["decision"]["lightbulbState"])
 
 _For further information, check the ['take decision' reference documentation](#take-decision)._
 
+### Python starter kit ###
 
+If you prefer to get started from an existing code base, the official Python starter kit can get you there! Retrieve the sources locally and follow the "readme" to get a fully working **Wellness Coach** example using _real-world_ data.
+
+> [:package: _Get the **craft ai** Python Starter Kit_](https://github.com/craft-ai/craft-ai-starterkit-python)
 
 ## API ##
 
-### Owner ###
+### Project ###
 
-**craft ai** agents belong to **owners**. In the current version, each identified users defines a owner, in the future we will introduce shared organization-level owners.
+**craft ai** agents belong to **projects**. In the current version, each identified users defines a owner and can create projects for themselves, in the future we will introduce shared projects.
 
 ### Configuration ###
 
@@ -342,9 +350,14 @@ Each agent has a configuration defining:
 - the context schema, i.e. the list of property keys and their type (as defined in the following section),
 - the output properties, i.e. the list of property keys on which the agent takes decisions,
 
-> :warning: In the current version, only one output property can be provided, and must be of type `enum`.
+> :warning: In the current version, only one output property can be provided.
 
-- the `time_quantum` is the minimum amount of time, in seconds, that is meaningful for an agent; context updates occurring faster than this quantum won't be taken into account.
+- the `time_quantum` is the minimum amount of time, in seconds, that is meaningful for an agent; context updates occurring faster than this quantum won't be taken into account. As a rule of thumb, you should always choose the largest value that seems right and reduce it, if necessary, after some tests.
+- the `learning_period` is the maximum amount of time, in seconds, that matters for an agent; the agent's decision model can ignore context that is older than this duration. You should generally choose the smallest value that fits this description.
+
+> :warning: if no time_quantum is specified, the default value is 600.
+
+> :warning: if no learning_period is specified, the default value is 15000 time quantums.
 
 #### Context properties types ####
 
@@ -352,10 +365,10 @@ Each agent has a configuration defining:
 
 `enum` and `continuous` are the two base **craft ai** types:
 
-- `enum` properties can take any string values;
+- `enum` properties can take any string value;
 - `continuous` properties can take any real number value.
 
-##### Time types: `timezone`, `time_of_day` and `day_of_week` #####
+##### Time types: `timezone`, `time_of_day`, `day_of_week`, `day_of_month` and `month_of_year` #####
 
 **craft ai** defines 3 types related to time:
 
@@ -365,8 +378,10 @@ representing the number of hours in the day since midnight (e.g. 13.5 means
 - `day_of_week` properties can take any integer belonging to **[0, 6]**, each
 value represents a day of the week starting from Monday (0 is Monday, 6 is
 Sunday).
+- `day_of_month` properties can take any integer belonging to **[1, 31]**, each value represents a day of the month.
+- `month_of_year` properties can take any integer belonging to **[1, 12]**, each value represents a month of the year.
 - `timezone` properties can take string values representing the timezone as an
-offset from UTC, the expected format is **Â±[hh]:[mm]** where `hh` represent the
+offset from UTC, the expected format is **±[hh]:[mm]** where `hh` represent the
 hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
 `+14:00`.
 
@@ -374,7 +389,7 @@ hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
 > properties are generated from the [`timestamp`](#timestamp) of an agent's
 > state and the agent's current `timezone`. Therefore, whenever you use generated
 > `time_of_day` and/or `day_of_week` in your configuration, you **must** provide a
-> `timezone` value in the context.
+> `timezone` value in the context. There can only be one `timezone` property.
 >
 > If you wish to provide their values manually, add `is_generated: false` to the
 > time types properties in your configuration. In this case, since you provide the values, the
@@ -398,7 +413,9 @@ color is changed from red to blue then from blue to purple in less that 1
 minutes and 40 seconds, only the change from red to purple will be taken into
 account.
 
-> :warning: if no time_quantum is specified, default value is 600.
+The `learning_period` is set to 108 000 seconds (one month) , which means that
+the state of the lightbulb from more than a month ago can be ignored when learning
+the decision model.
 
 ```json
 {
@@ -420,11 +437,12 @@ account.
       }
   },
   "output": ["lightbulbColor"],
-  "time_quantum": 100
+  "time_quantum": 100,
+  "learning_period": 108000
 }
 ```
 
-In this second examples, the `time` property is not generated, no property of
+In this second example, the `time` property is not generated, no property of
 type `timezone` is therefore needed. However values of `time` must be manually
 provided continuously.
 
@@ -443,7 +461,8 @@ provided continuously.
     }
   },
   "output": ["lightbulbColor"],
-  "time_quantum": 100
+  "time_quantum": 100,
+  "learning_period": 108000
 }
 ```
 
@@ -523,7 +542,8 @@ client.create_agent(
           }
         },
         "output": [ 'lightbulbState' ],
-        "time_quantum": 100
+        "time_quantum": 100,
+        "learning_period": 108000
     },
     "impervious_kraken", # id for the agent, if undefined a random id is generated
 ```
@@ -634,16 +654,16 @@ client.get_context_state(
 
 Decision trees are computed at specific timestamps, directly by **craft ai** which learns from the context operations [added](#add-operations) throughout time.
 
-When you [compute](#compute) a decision tree, **craft ai** should always return you an array containing the **tree version** as the first element. This **tree version** determines what other information is included in the response body.
+When you [compute](#compute) a decision tree, **craft ai** returns an array containing the **tree version** as the first element. This **tree version** determines what other information is included in the response body.
 
 In version `"0.0.4"`, the other included elements are (in order):
 
 - the agent's configuration as specified during the agent's [creation](#create-agent)
 - the tree itself as a JSON object:
 
-  * Internal nodes are represented by a `"predicate_property"` and a `"children"` array. The latter contains the actual two children of the current node and the criterion (`"predicate"`) on the `"predicate_property"`'s value, to decide which child to walk down towards.
-  * Leaves have an output `"value"` and a `"confidence"` for this value, instead of a `"predicate_property"` and a `"children"` array. When the output is a numerical type, leaves also have a `"standard_deviation"` around the `"value"` for this leaf.
-  * The root has one more key than regular nodes: the `"output_property"` which defines what is the actual meaning of the leaves' value.
+  * Internal nodes are represented by a `"predicate_property"` and a `"children"` array. The latter contains the children of the current node and the criterion (`"predicate"`) on the `"predicate_property"`'s value, to decide which child matches a context.
+  * Leaves have an output `"value"` and a `"confidence"` for this value, instead of a `"predicate_property"` and a `"children"` array. `"value`" is an estimation of the output in the contexts matching the node. `"confidence"` is a number between 0 and 1 that indicates how confident **craft ai** is that the output is a reliable prediction.  When the output is a numerical type, leaves also have a `"standard_deviation"` that indicates a margin of error around the `"value"`.
+  * The root has one more key than regular nodes: the `"output_property"`, the `"value"` of leaves are values of this property.
 
 #### Compute ####
 
@@ -684,7 +704,7 @@ decision = client.decide(
 )
 ```
 
-The computed decision looks like:
+A computed `decision` on an `enum` output type would look like:
 
 ```python
 {
@@ -712,6 +732,23 @@ The computed decision looks like:
 }
 ```
 
+A `decision` for a numerical output type would look like:
+
+```python
+  decision: {
+    lightbulbIntensity: 10.5,
+    standard_deviation: 1.25, // For numerical types, this field is returned in decisions.
+  }
+
+A `decision` in a case where the tree cannot make a prediction:
+
+```python
+  decision: {
+    lightbulbState: None, // No decision
+  },
+  confidence: 0 // Zero confidence if the decision is null
+```
+
 ### Error Handling ###
 
 When using this client, you should be careful wrapping calls to the API with `try/except` blocks, in accordance with the [EAFP](https://docs.python.org/3/glossary.html#term-eafp) principle.
@@ -719,4 +756,4 @@ When using this client, you should be careful wrapping calls to the API with `tr
 The **craft ai** python client has its specific exception types, all of them inheriting from the `CraftAIError` type.
 
 All methods which have to send an http request (all of them except `decide`) may raise either of these exceptions: `CraftAINotFoundError`, `CraftAIBadRequestError`, `CraftAICredentialsError` or `CraftAIUnknownError`.
-The `decide`Â method should only raise `CrafAIDecisionError` type of exceptions.
+The `decide` method should only raise `CrafAIDecisionError` type of exceptions.
