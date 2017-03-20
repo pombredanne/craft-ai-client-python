@@ -8,6 +8,7 @@ from craftai.client import CraftAIClient
 from craftai.time import Time
 from craftai.helpers import dict_depth
 from craftai import errors as craft_err
+from craftai.interpreter import Interpreter
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -59,3 +60,37 @@ class TestDecide(unittest.TestCase):
                         dict_depth(decision),
                         dict_depth(expectation["output"]))
             print("--------------------------")
+
+    def test__rebuild_context(self):
+        configuration = {
+            "context": {
+                "car": {
+                    "type": "enum"
+                },
+                "speed": {
+                    "type": "continuous"
+                },
+                "month_of_year": {
+                    "type": "month_of_year",
+                    "is_generated": True
+                },
+                "timezone": {
+                    "type": "timezone"
+                }
+            },
+            "output": ["speed"],
+            "time_quantum": 500
+        }
+        state = { "car": "Renault" }
+        time = Time(1489998174, "+01:00")
+
+        rebuilt_context = Interpreter._rebuild_context(configuration, (state, time))
+
+        expected_context = {
+            "car": "Renault",
+            "month_of_year": 3,
+            "timezone": "+01:00"
+        }
+
+        for x in expected_context.keys():
+            self.assertEqual(rebuilt_context[x], expected_context[x])
