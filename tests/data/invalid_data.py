@@ -46,7 +46,7 @@ INVALID_OPS_SET = {
     "incomplete_first_op": [
         {
             "timestamp": 1458741231,
-            "diff": {
+            "context": {
                 "presence": "player",
                 "lightIntensity": 0.5,
             }
@@ -55,7 +55,7 @@ INVALID_OPS_SET = {
     "invalid_operation": [
         {
             "timestamp": 1458741230,
-            "diff": {
+            "context": {
                 "tz": "+02:00",
                 "presence": "occupant",
                 "bananaIntensity": 1,
@@ -67,7 +67,7 @@ INVALID_OPS_SET = {
         {
             "time_of_day": 0.5,
             "day_of_week": 5,
-            "diff": {
+            "context": {
                 "presence": "occupant",
                 "lightIntensity": 1,
                 "lightbulbColor": "#ffffff"
@@ -77,7 +77,7 @@ INVALID_OPS_SET = {
     "dict_operations": {
         "time_of_day": 0.5,
         "day_of_week": 5,
-        "diff": {
+        "context": {
             "presence": "occupant",
             "lightIntensity": 1,
             "lightbulbColor": "#ffffff"
