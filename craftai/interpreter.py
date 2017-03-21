@@ -17,22 +17,11 @@ class Interpreter(object):
     else:
         context = Interpreter.join_decide_args(args)
     # self._check_context(configuration, context, version)
-    raw_decision = Interpreter._decide_recursion(bare_tree, context)
-
-    # If the configuration is not included in the tree object (f.i. version 0.0.1)
-    # we give a default key name to the output
-    try:
-        output_name = configuration.get("output")[0]
-    except TypeError:
-        output_name = "value"
 
     decision = {}
-    decision["decision"] = {}
-    decision["decision"][output_name] = raw_decision["value"]
-    if raw_decision.get("standard_deviation", None) is not None:
-        decision["decision"]["standard_deviation"] = raw_decision.get("standard_deviation")
-    decision["confidence"] = raw_decision["confidence"]
-    decision["predicates"] = raw_decision["predicates"]
+    decision["output"] = {}
+    for output in configuration.get("output"):
+      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context)
     decision["context"] = context
 
     return decision
@@ -99,27 +88,17 @@ class Interpreter(object):
   @staticmethod
   def _decide_recursion(node, context):
     # If we are on a leaf
-    if not node.get("predicate_property"):
+    if not (node.get("children") is not None and len(node.get("children"))):
       return {
-        "value": node["value"],
+        "predicted_value": node.get("predicted_value"),
         "confidence": node.get("confidence") or 0,
         "standard_deviation": node.get("standard_deviation", None),
-        "predicates": []
+        "decision_rules": []
       }
-
-    # If we are on a regular node
-    prop_name = node["predicate_property"]
-
-    ctx_value = context.get(prop_name)
-    if ctx_value is None:
-      raise CraftAIDecisionError(
-        """Property '{}' is not defined in the given context""".
-        format(prop_name)
-      )
 
     # Finding the first element in this node's childrens matching the
     # operator condition with given context
-    matching_child = Interpreter._find_matching_child(node, ctx_value, prop_name)
+    matching_child = Interpreter._find_matching_child(node, context)
 
     if not matching_child:
       raise CraftAIDecisionError(
@@ -130,22 +109,29 @@ class Interpreter(object):
     # If a matching child is found, recurse
     result = Interpreter._decide_recursion(matching_child, context)
     new_predicates = [{
-      "property": prop_name,
-      "op": matching_child["predicate"]["op"],
-      "value": matching_child["predicate"]["value"]
+      "property": matching_child["decision_rule"]["property"],
+      "operator": matching_child["decision_rule"]["operator"],
+      "operand": matching_child["decision_rule"]["operand"]
     }]
     return {
-      "value": result["value"],
+      "predicted_value": result["predicted_value"],
       "confidence": result["confidence"],
       "standard_deviation": result.get("standard_deviation", None),
-      "predicates": new_predicates + result["predicates"]
+      "decision_rules": new_predicates + result["decision_rules"]
     }
 
   @staticmethod
-  def _find_matching_child(node, context, prop_name):
+  def _find_matching_child(node, context):
       for child in node["children"]:
-          threshold = child["predicate"]["value"]
-          operator = child["predicate"]["op"]
+          property_name = child["decision_rule"]["property"]
+          operand = child["decision_rule"]["operand"]
+          operator = child["decision_rule"]["operator"]
+          context_value = context.get(property_name)
+          if context_value is None:
+            raise CraftAIDecisionError(
+              """Property '{}' is not defined in the given context""".
+              format(property_name)
+            )
           if (not isinstance(operator, six.string_types) or
                   not (operator in _OPERATORS)):
               raise CraftAIDecisionError(
@@ -156,10 +142,10 @@ class Interpreter(object):
 
           # To be compared, continuous parameters should not be strings
           if "continuous" in operator:
-              context = float(context)
-              threshold = float(threshold)
+              context_value = float(context_value)
+              operand = float(operand)
 
-          if _OPERATORS[operator](context, threshold):
+          if _OPERATORS[operator](context_value, operand):
               return child
       return {}
 
@@ -181,14 +167,14 @@ class Interpreter(object):
   @staticmethod
   def _parse_tree(tree_object):
     # Checking definition of tree_object
-    if not (tree_object and isinstance(tree_object, list)):
+    if not (tree_object and isinstance(tree_object, object)):
       raise CraftAIDecisionError(
-        """Invalid decision tree format, the given object is not a"""
-        """ list or is empty."""
+        """Invalid decision tree format, the given object is not an"""
+        """ object or is empty."""
       )
 
     # Checking version existence
-    tree_version = tree_object[0].get("version")
+    tree_version = tree_object.get("_version")
     if not tree_version:
       raise CraftAIDecisionError(
         """Invalid decision tree format, unable to find the version"""
@@ -201,49 +187,17 @@ class Interpreter(object):
         """Invalid decision tree format, {} is not a valid version.""".
         format(tree_version)
       )
-    elif tree_version == "0.0.1":
-      if len(tree_object) < 2:
+    elif tree_version == "1.0.0":
+      if (tree_object.get("configuration") is None):
+        raise CraftAIDecisionError(
+          """Invalid decision tree format, no configuration found"""
+        )
+      if (tree_object.get("trees") is None):
         raise CraftAIDecisionError(
           """Invalid decision tree format, no tree found."""
         )
-      bare_tree = tree_object[1]
-      configuration = {}
-    elif tree_version == "0.0.2":
-      if (len(tree_object) < 2 or
-          not tree_object[1].get("model")):
-        raise CraftAIDecisionError(
-          """Invalid decision tree format, no model found"""
-        )
-      if len(tree_object) < 3:
-        raise CraftAIDecisionError(
-          """Invalid decision tree format, no tree found."""
-        )
-      bare_tree = tree_object[2]
-      configuration = tree_object[1]["model"]
-    elif tree_version == "0.0.3":
-      if (len(tree_object) < 2 or
-            not tree_object[1]):
-        raise CraftAIDecisionError(
-            """Invalid decision tree format, no configuration found"""
-        )
-      if len(tree_object) < 3:
-        raise CraftAIDecisionError(
-          """Invalid decision tree format, no tree found."""
-        )
-      bare_tree = tree_object[2]
-      configuration = tree_object[1]
-    elif tree_version == "0.0.4":
-      if (len(tree_object) < 2 or
-            not tree_object[1]):
-        raise CraftAIDecisionError(
-            """Invalid decision tree format, no configuration found"""
-        )
-      if len(tree_object) < 3:
-        raise CraftAIDecisionError(
-          """Invalid decision tree format, no tree found."""
-        )
-      bare_tree = tree_object[2]
-      configuration = tree_object[1]
+      bare_tree = tree_object.get("trees")
+      configuration = tree_object.get("configuration")
     else:
       raise CraftAIDecisionError(
         """Invalid decision tree format, {} is not a supported"""
