@@ -50,9 +50,9 @@ class CraftAIClient(object):
             cfg["url"] = "https://beta.craft.ai"
         if cfg.get("url").endswith("/"):
             raise CraftAIBadRequestError("""Unable to create client with"""
-                                         """invalid url provided. The url """
-                                         """should not terminate with a """
-                                         """slash. """)
+                                         """ invalid url provided. The url"""
+                                         """ should not terminate with a"""
+                                         """ slash.""")
         self._config = cfg
 
         self._base_url = "{}/api/v1/{}/{}".format(
