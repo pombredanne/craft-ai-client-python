@@ -11,7 +11,9 @@ class Interpreter(object):
   def decide(tree, args):
     bare_tree, configuration, version = Interpreter._parse_tree(tree)
     if configuration != {}:
-        context = Interpreter._rebuild_context(configuration, args)
+        state = args[0]
+        time = None if len(args) == 1 else args[1]
+        context = Interpreter._rebuild_context(configuration, state, time)
     else:
         context = Interpreter.join_decide_args(args)
     # self._check_context(configuration, context, version)
@@ -40,7 +42,7 @@ class Interpreter(object):
   ####################
 
   @staticmethod
-  def _rebuild_context(configuration, args):
+  def _rebuild_context(configuration, state, time=None):
       # Model should come from _parse_tree and is assumed to be checked upon
       # already
       mo = configuration["output"]
@@ -51,42 +53,48 @@ class Interpreter(object):
           key: mc[key] for (key, value) in mc.items() if (key not in mo)
       }
 
-      context = {}
-      for arg in args:
-          if not arg:
-              continue
-          context.update({
-              k: Interpreter._context_value(k, v, arg) for k, v in configuration_ctx.items()
-          })
+      # Check if we need the time object
+      to_generate = []
+      for prop in configuration_ctx.items():
+          prop_name = prop[0]
+          prop_attributes = prop[1]
+          if prop_attributes["type"] in ["time_of_day", "day_of_week", "day_of_month", "month_of_year", "timezone"]:
+              # case 1: is_generated is at True, we must generate the time for the associated context property
+              # case 2: is_generated is not given, by default at True, so we must generate it as well
+              case_1 = "is_generated" in list(prop_attributes.keys()) and prop[1]["is_generated"] == True
+              case_2 = "is_generated" not in list(prop_attributes.keys())
+              if case_1 or case_2:
+                to_generate.append(prop_name)
+
+      # Raise an exception if a time object is not provided but needed
+      if (not isinstance(time, Time)) and len(to_generate) > 0:
+
+          # Check for missings (not provided and need to be generated)
+          missings = []
+          for prop in to_generate:
+              if prop_name not in list(state.keys()):
+                  missings.append(prop_name)
+
+          # Raise an error if some need to be generated but not provided and no Time object
+          if len(missings) > 0:
+              raise CraftAIDecisionError(
+                """you must provide a Time object to decide() because"""
+                """ context properties {} need to be generated.""".format(missings)
+              )
+          else:
+              to_generate = []
+
+      # Generate context properties which need to
+      if len(to_generate) > 0:
+          for prop in to_generate:
+              state[prop] = time.to_dict()[configuration_ctx[prop]["type"]]
+
+      # Rebuild the context with generated and non-generated values
+      context = {
+          feature: state.get(feature) for feature, properties in configuration_ctx.items()
+      }
 
       return context
-
-  @staticmethod
-  def _context_value(k, v, arg):
-    if isinstance(arg, Time):
-      time_of_day = arg.to_dict()["time_of_day"]
-      day_of_week = arg.to_dict()["day_of_week"]
-      day_of_month = arg.to_dict()["day_of_month"]
-      month_of_year = arg.to_dict()["month_of_year"]
-      timezone = arg.to_dict()["timezone"]
-      if (v["type"] == "day_of_week" and
-          (v.get("is_generated") is None or v["is_generated"])):
-        return day_of_week
-      elif (v["type"] == "time_of_day" and
-            (v.get("is_generated") is None or v["is_generated"])):
-        return time_of_day
-      elif (v["type"] == "day_of_month" and
-            (v.get("is_generated") is None or v["is_generated"])):
-        return day_of_month
-      elif (v["type"] == "month_of_year" and
-            (v.get("is_generated") is None or v["is_generated"])):
-        return month_of_year
-      elif v["type"] == "timezone":
-        return timezone
-      else:
-        return None
-    else:
-      return arg.get(k)
 
   @staticmethod
   def _decide_recursion(node, context):
