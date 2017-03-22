@@ -61,9 +61,9 @@ Initialize
 .. code:: python
 
     config = {
-        "owner": '{owner}',
-        "project": '{project}',
-        "token": '{token}'
+        "owner": "{owner}",
+        "project": "{project}",
+        "token": "{token}"
     }
     client = craftai.CraftAIClient(config)
 
@@ -97,19 +97,19 @@ properties:
     configuration = {
         "context": {
             "peopleCount": {
-                "type": 'continuous'
+                "type": "continuous"
             },
             "timeOfDay": {
-                "type": 'time_of_day'
+                "type": "time_of_day"
             },
             "timezone": {
-                "type": 'timezone'
+                "type": "timezone"
             },
             "lightbulbState": {
-                "type": 'enum'
+                "type": "enum"
             }
         },
-        "output": ['lightbulbState']
+        "output": ["lightbulbState"]
     }
 
     agent = client.create_agent(configuration, agent_id)
@@ -168,52 +168,52 @@ In the following we add 8 operations:
     context_list = [
         {
             "timestamp": 1469410200,
-            "diff": {
-                "timezone": '+02:00',
+            "context": {
+                "timezone": "+02:00",
                 "peopleCount": 0,
-                "lightbulbState": 'OFF'
+                "lightbulbState": "OFF"
             }
         },
         {
             "timestamp": 1469415720,
-            "diff": {
+            "context": {
                 "peopleCount": 1,
-                "lightbulbState": 'ON'
+                "lightbulbState": "ON"
             }
         },
         {
             "timestamp": 1469416500,
-            "diff": {
+            "context": {
                 "peopleCount": 2
             }
         },
         {
             "timestamp": 1469417460,
-            "diff": {
-                "lightbulbState": 'OFF'
+            "context": {
+                "lightbulbState": "OFF"
             }
         },
         {
             "timestamp": 1469419920,
-            "diff": {
+            "context": {
                 "peopleCount": 0
             }
         },
         {
             "timestamp": 1469460180,
-            "diff": {
+            "context": {
                 "peopleCount": 2
             }
         },
         {
             "timestamp": 1469471700,
-            "diff": {
-                "lightbulbState": 'ON'
+            "context": {
+                "lightbulbState": "ON"
             }
         },
         {
             "timestamp": 1469473560,
-            "diff": {
+            "context": {
                 "peopleCount": 0
             }
         }
@@ -259,11 +259,9 @@ moment. Let's first try to compute the decision tree at midnight on July
     print("The full decision tree at timestamp", dt_timestamp, "is the following:")
     print(decision_tree)
     """ Outputed tree is the following
-      [
-        {
-          "version": "0.0.4"
-        },
-        {
+      {
+        "_version": "1.0.0",
+        "configuration": {
           "context": {
             "peopleCount": {
               "type": "continuous"
@@ -285,61 +283,65 @@ moment. Let's first try to compute the decision tree at midnight on July
           "time_quantum": 600,
           "learning_period": 108000
         },
-        {
-          "children": [
-            {
-              "children": [
-                {
-                  "children": [
-                    {
-                      "confidence": 0.9545537233352661,
-                      "predicate": {
-                        "op": "continuous.lessthan",
-                        "value": 1
+        "trees": {
+          "lightbulbState": {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "confidence": 0.9545537233352661,
+                        "decision_rule": {
+                          "operator": "continuous.lessthan",
+                          "operand": 1,
+                          "property": "peopleCount"
+                        },
+                        "predicted_value": "OFF"
                       },
-                      "value": "OFF"
-                    },
-                    {
-                      "confidence": 0.8630361557006836,
-                      "predicate": {
-                        "op": "continuous.greaterthanorequal",
-                        "value": 1
-                      },
-                      "value": "ON"
+                      {
+                        "confidence": 0.8630361557006836,
+                        "decision_rule": {
+                          "operator": ">=",
+                          "operand": 1,
+                          "property": "peopleCount"
+                        },
+                        "predicted_value": "ON"
+                      }
+                    ],
+                    "decision_rule": {
+                      "operator": "<",
+                      "operand": 5.666666507720947,
+                      "property": "timeOfDay"
                     }
-                  ],
-                  "predicate": {
-                    "op": "continuous.lessthan",
-                    "value": 5.666666507720947
                   },
-                  "predicate_property": "peopleCount"
-                },
-                {
-                  "confidence": 0.9947378635406494,
-                  "predicate": {
-                    "op": "continuous.greaterthanorequal",
-                    "value": 5.666666507720947
-                  },
-                  "value": "OFF"
+                  {
+                    "confidence": 0.9947378635406494,
+                    "decision_rule": {
+                      "operator": ">=",
+                      "operand": 5.666666507720947,
+                      "property": "timeOfDay"
+                    },
+                    "predicted_value": "OFF"
+                  }
+                ],
+                "decision_rule": {
+                  "operator": "<",
+                  "operand": 20.66666603088379,
+                  "property": "timeOfDay"
                 }
-              ],
-              "predicate": {
-                "op": "continuous.lessthan",
-                "value": 20.66666603088379
               },
-              "predicate_property": "timeOfDay"
-            },
-            {
-              "confidence": 0.8630361557006836,
-              "predicate": {
-                "op": "continuous.greaterthanorequal",
-                "value": 20.66666603088379
-              },
-              "value": "ON"
-            }
-          ],
-          "output_property": "lightbulbState",
-          "predicate_property": "timeOfDay"
+              {
+                "confidence": 0.8630361557006836,
+                "decision_rule": {
+                  "operator": ">=",
+                  "operand": 20.66666603088379,
+                  "property": "timeOfDay"
+                },
+                "predicted_value": "ON"
+              }
+            ],
+          }
         }
       ]
       """
@@ -379,12 +381,12 @@ the room ?".
     print(decision_tree)
 
     context = {
-        "timezone": '+02:00',
+        "timezone": "+02:00",
         "timeOfDay": 7.25,
         "peopleCount": 2
     }
     resp = client.decide(decision_tree, context)
-    print("The anticipated lightbulb state is:", resp["decision"]["lightbulbState"])
+    print("The anticipated lightbulb state is:", resp["output"]["lightbulbState"]["predicted_value"])
 
 *For further information, check the `'take decision' reference
 documentation <#take-decision>`__.*
@@ -581,14 +583,14 @@ formats from various *datetime* representations, thanks to
     from craftai.time import Time
 
     # From a unix timestamp and an explicit UTC offset
-    t1 = Time(1465496929, '+10:00')
+    t1 = Time(1465496929, "+10:00")
 
     # t1 == {
-    #   utc: '2016-06-09T18:28:49.000Z',
+    #   utc: "2016-06-09T18:28:49.000Z",
     #   timestamp: 1465496929,
     #   day_of_week: 4,
     #   time_of_day: 4.480277777777778,
-    #   timezone: '+10:00'
+    #   timezone: "+10:00"
     # }
 
     # From a unix timestamp and using the local UTC offset.
@@ -596,29 +598,29 @@ formats from various *datetime* representations, thanks to
 
     # Value are valid if in Paris !
     # t2 == {
-    #   utc: '2016-06-09T18:28:49.000Z',
+    #   utc: "2016-06-09T18:28:49.000Z",
     #   timestamp: 1465496929,
     #   day_of_week: 3,
     #   time_of_day: 20.480277777777776,
-    #   timezone: '+02:00'
+    #   timezone: "+02:00"
     # }
 
-    # From a ISO 8601 string. Note that here it should not have any ':' in the timezone part
-    t3 = Time('1977-04-22T01:00:00-0500')
+    # From a ISO 8601 string. Note that here it should not have any ":" in the timezone part
+    t3 = Time("1977-04-22T01:00:00-0500")
 
     # t3 == {
-    #   utc: '1977-04-22T06:00:00.000Z',
+    #   utc: "1977-04-22T06:00:00.000Z",
     #   timestamp: 230536800,
     #   day_of_week: 4,
     #   time_of_day: 1,
-    #   timezone: '-05:00'
+    #   timezone: "-05:00"
     # }
 
     # Retrieve the current time with the local UTC offset
     now = Time()
 
     # Retrieve the current time with the given UTC offset
-    nowP5 = Time(timezone='+05:00')
+    nowP5 = Time(timezone="+05:00")
 
 Agent
 ~~~~~
@@ -634,19 +636,19 @@ Create a new agent, and create its `configuration <#configuration>`__.
         { # The configuration
             "context": {
               "peopleCount": {
-                "type": 'continuous'
+                "type": "continuous"
               },
               "timeOfDay": {
-                "type": 'time_of_day'
+                "type": "time_of_day"
               },
               "timezone": {
-                "type": 'timezone'
+                "type": "timezone"
               },
               "lightbulbState": {
-                "type": 'enum'
+                "type": "enum"
               }
             },
-            "output": [ 'lightbulbState' ],
+            "output": [ "lightbulbState" ],
             "time_quantum": 100,
             "learning_period": 108000
         },
@@ -688,52 +690,52 @@ Add operations
         [ # The list of context operations
             {
                 "timestamp": 1469410200,
-                "diff": {
-                    "timezone": '+02:00',
+                "context": {
+                    "timezone": "+02:00",
                     "peopleCount": 0,
-                    "lightbulbState": 'OFF'
+                    "lightbulbState": "OFF"
                 }
             },
             {
                 "timestamp": 1469415720,
-                "diff": {
+                "context": {
                     "peopleCount": 1,
-                    "lightbulbState": 'ON'
+                    "lightbulbState": "ON"
                 }
             },
             {
                 "timestamp": 1469416500,
-                "diff": {
+                "context": {
                     "peopleCount": 2
                 }
             },
             {
                 "timestamp": 1469417460,
-                "diff": {
-                    "lightbulbState": 'OFF'
+                "context": {
+                    "lightbulbState": "OFF"
                 }
             },
             {
                 "timestamp": 1469419920,
-                "diff": {
+                "context": {
                     "peopleCount": 0
                 }
             },
             {
                 "timestamp": 1469460180,
-                "diff": {
+                "context": {
                     "peopleCount": 2
                 }
             },
             {
                 "timestamp": 1469471700,
-                "diff": {
-                    "lightbulbState": 'ON'
+                "context": {
+                    "lightbulbState": "ON"
                 }
             },
             {
                 "timestamp": 1469473560,
-                "diff": {
+                "context": {
                     "peopleCount": 0
                 }
             }
@@ -767,32 +769,22 @@ ai** which learns from the context operations
 `added <#add-operations>`__ throughout time.
 
 When you `compute <#compute>`__ a decision tree, **craft ai** returns an
-array containing the **tree version** as the first element. This **tree
-version** determines what other information is included in the response
-body.
+object containing: - the **API version** - the agent's configuration as
+specified during the agent's `creation <#create-agent>`__ - the tree
+itself as a JSON object:
 
-In version ``"0.0.4"``, the other included elements are (in order):
-
--  the agent's configuration as specified during the agent's
-   `creation <#create-agent>`__
--  the tree itself as a JSON object:
-
--  Internal nodes are represented by a ``"predicate_property"`` and a
-   ``"children"`` array. The latter contains the children of the current
-   node and the criterion (``"predicate"``) on the
-   ``"predicate_property"``'s value, to decide which child matches a
-   context.
--  Leaves have an output ``"value"`` and a ``"confidence"`` for this
-   value, instead of a ``"predicate_property"`` and a ``"children"``
-   array. ``"value``" is an estimation of the output in the contexts
-   matching the node. ``"confidence"`` is a number between 0 and 1 that
-   indicates how confident **craft ai** is that the output is a reliable
-   prediction. When the output is a numerical type, leaves also have a
-   ``"standard_deviation"`` that indicates a margin of error around the
-   ``"value"``.
--  The root has one more key than regular nodes: the
-   ``"output_property"``, the ``"value"`` of leaves are values of this
-   property.
+-  Internal nodes are represented by a ``"decision_rule"`` object and a
+   ``"children"`` array. The first one, contains the ``"property``, and
+   the ``"property"``'s value, to decide which child matches a context.
+-  Leaves have a ``"predicted_value"``, ``"confidence"`` and
+   ``"decision_rule"`` object for this value, instead of a
+   ``"children"`` array. ``"predicted_value``" is an estimation of the
+   output in the contexts matching the node. ``"confidence"`` is a
+   number between 0 and 1 that indicates how confident **craft ai** is
+   that the output is a reliable prediction. When the output is a
+   numerical type, leaves also have a ``"standard_deviation"`` that
+   indicates a margin of error around the ``"predicted_value"``.
+-  The root only contains a ``"children"`` array.
 
 Compute
 ^^^^^^^
@@ -819,7 +811,7 @@ decision tree offline.
     decision = client.decide(
         tree,
         { # The context on which the decision is taken
-            "timezone": '+02:00',
+            "timezone": "+02:00",
             "timeOfDay": 7.5,
             "peopleCount": 3
         }
@@ -831,10 +823,10 @@ decision tree offline.
     decision = client.decide(
       tree,
       {
-        "timezone": '+02:00',
+        "timezone": "+02:00",
         "peopleCount": 3
       },
-      craftai.time.Time('2010-01-01T07:30:30')
+      craftai.time.Time("2010-01-01T07:30:30")
     )
 
 A computed ``decision`` on an ``enum`` output type would look like:
@@ -842,42 +834,55 @@ A computed ``decision`` on an ``enum`` output type would look like:
 .. code:: python
 
     {
-      context: { # In which context the decision was taken
-        "timezone": '+02:00',
+      "context": { # In which context the decision was taken
+        "timezone": "+02:00",
         "timeOfDay": 7.5,
         "peopleCount": 3
       },
-      decision: { # The decision itself
-        "lightbulbState": 'ON'
-      },
-      "confidence": 0.9937745256361138, # The confidence in the decision
-      "predicates": [ # The ordered list of predicates that were validated to reach this decision
-        {
-          "property": 'timeOfDay',
-          "op": 'continuous.greaterthanorequal',
-          "value": 6
+      "output": { # The decision itself
+        "lightbulbState": {
+          "predicted_value": "ON"
+          "confidence": 0.9937745256361138, # The confidence in the decision
+          "decision_rules": [ # The ordered list of decision_rules that were validated to reach this decision
+            {
+              "property": "timeOfDay",
+              "operator": ">=",
+              "operand": 6
+            },
+            {
+              "property": "peopleCount",
+              "operator": ">=",
+              "operand": 2
+            }
+          ]
         },
-        {
-          "property": 'peopleCount',
-          "op": 'continuous.greaterthanorequal',
-          "value": 2
-        }
-      ]
+      }
     }
 
 A ``decision`` for a numerical output type would look like:
 
-\`\`\`python decision: { lightbulbIntensity: 10.5, standard\_deviation:
-1.25, // For numerical types, this field is returned in decisions. }
+.. code:: python
+
+      "output": {
+        "lightbulbIntensity": {
+          "predicted_value": 10.5,
+          "standard_deviation": 1.25, // For numerical types, this field is returned in decisions.
+          "decision_rules": [ ... ],
+          "confidence": ...
+        }
+      }
 
 A ``decision`` in a case where the tree cannot make a prediction:
 
 .. code:: python
 
-      decision: {
-        lightbulbState: None, // No decision
-      },
-      confidence: 0 // Zero confidence if the decision is null
+      "output": {
+        "lightbulbState": {
+          "predicted_value": None,
+          "confidence": 0 // Zero confidence if the decision is null
+          "decision_rules": [ ... ]
+        }
+      }
 
 Error Handling
 ~~~~~~~~~~~~~~

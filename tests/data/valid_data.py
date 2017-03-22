@@ -25,7 +25,7 @@ VALID_TIMESTAMP = 1458741230
 VALID_OPERATIONS_SET = [
     {
         "timestamp": VALID_TIMESTAMP,
-        "diff": {
+        "context": {
             "tz": "+02:00",
             "presence": "occupant",
             "lightIntensity": 1,
@@ -34,27 +34,27 @@ VALID_OPERATIONS_SET = [
     },
     {
         "timestamp": 1458741231,
-        "diff": {
+        "context": {
             "presence": "player",
             "lightIntensity": 0.5,
         }
     },
     {
         "timestamp": 1458741232,
-        "diff": {
+        "context": {
             "presence": "none",
             "lightIntensity": 0,
         }
     },
     {
         "timestamp": 1458741242,
-        "diff": {
+        "context": {
             "presence": "occupant+player"
         }
     },
     {
         "timestamp": 1458741252,
-        "diff": {
+        "context": {
             "tz": "+01:00",
             "presence": "occupant",
             "lightIntensity": 0.8,
@@ -63,7 +63,7 @@ VALID_OPERATIONS_SET = [
     },
     {
         "timestamp": 1458741262,
-        "diff": {
+        "context": {
             "presence": "player",
             "lightIntensity": 0.5,
             "lightbulbColor": "#fff596"

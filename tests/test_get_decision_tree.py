@@ -28,14 +28,16 @@ class TestGetDecisionTreeSuccess(unittest.TestCase):
     def test_get_decision_tree_with_correct_input(self):
         """get_decision_tree should succeed when given proper ID and timestamp.
 
-        It should give a proper JSON list response with 3 elements.
+        It should give a proper JSON object response with 3 elements: _version, configuration and trees.
         """
         decision_tree = self.client.get_decision_tree(
             valid_data.VALID_ID,
             valid_data.VALID_TIMESTAMP)
 
-        self.assertIsInstance(decision_tree, list)
-        self.assertEqual(len(decision_tree), 3)
+        self.assertIsInstance(decision_tree, dict)
+        self.assertNotEqual(decision_tree.get("_version"), None)
+        self.assertNotEqual(decision_tree.get("configuration"), None)
+        self.assertNotEqual(decision_tree.get("trees"), None)
 
 
 class TestGetDecisionTreeFailure(unittest.TestCase):
