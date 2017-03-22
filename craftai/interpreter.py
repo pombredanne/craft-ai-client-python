@@ -89,12 +89,16 @@ class Interpreter(object):
   def _decide_recursion(node, context):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
-      return {
+      leaf = {
         "predicted_value": node.get("predicted_value"),
         "confidence": node.get("confidence") or 0,
-        "standard_deviation": node.get("standard_deviation", None),
         "decision_rules": []
       }
+
+      if node.get("standard_deviation", None) is not None:
+        leaf["standard_deviation"] = node.get("standard_deviation")
+
+      return leaf
 
     # Finding the first element in this node's childrens matching the
     # operator condition with given context
@@ -113,12 +117,17 @@ class Interpreter(object):
       "operator": matching_child["decision_rule"]["operator"],
       "operand": matching_child["decision_rule"]["operand"]
     }]
-    return {
+
+    final_result = {
       "predicted_value": result["predicted_value"],
       "confidence": result["confidence"],
-      "standard_deviation": result.get("standard_deviation", None),
       "decision_rules": new_predicates + result["decision_rules"]
     }
+
+    if result.get("standard_deviation", None) is not None:
+      final_result["standard_deviation"] = result.get("standard_deviation")
+
+    return final_result
 
   @staticmethod
   def _find_matching_child(node, context):
