@@ -64,15 +64,25 @@ class Interpreter(object):
               case_1 = "is_generated" in prop_attributes.keys() and prop[1]["is_generated"] == True
               case_2 = "is_generated" not in prop_attributes.keys()
               if case_1 or case_2:
-                  if prop_name not in state.keys(): # if a value is provided, it's not necessary to generate it
-                    to_generate.append(prop_name)
+                to_generate.append(prop_name)
 
       # Raise an exception if a time object is not provided but needed
       if (not isinstance(time, Time)) and len(to_generate) > 0:
-          raise CraftAIDecisionError(
-            """you must provide a Time object to decide() because"""
-            """ context properties {} need to be generated.""".format(to_generate)
-          )
+
+          # Check for missings (not provided and need to be generated)
+          missings = []
+          for prop in to_generate:
+              if prop_name not in state.keys():
+                  missings.append(prop_name)
+
+          # Raise an error if some need to be generated but not provided and no Time object
+          if len(missings) > 0:
+              raise CraftAIDecisionError(
+                """you must provide a Time object to decide() because"""
+                """ context properties {} need to be generated.""".format(missings)
+              )
+          else:
+              to_generate = []
 
       # Generate context properties which need to
       if len(to_generate) > 0:

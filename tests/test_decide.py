@@ -55,7 +55,6 @@ class TestDecide(unittest.TestCase):
                         timestamp)
                     print("Successfully raises CraftAIDecisionError.")
                 else:
-                    print(expectation)
                     decision = self.client.decide(tree, exp_context, t)
                     decision_output = decision["decision"]
                     expectation_output = expectation["output"]["decision"]
@@ -99,22 +98,6 @@ class TestDecide(unittest.TestCase):
         print("Successfully raises CraftAIDecisionError.")
 
         # Case 2:
-        # - we do provide a Time object while it's needed
-        # - in the context, we set a value that should be generated if not provided,
-        #   but we provide it and we don't want it to be replaced by generated value
-        state = { "car": "Renault", "day_of_week": 2, "timezone": "+02:00" }
-        time = Time(1489998174, "+01:00")
-        expected_context = {
-            "car": "Renault",
-            "day_of_week": 2,
-            "month_of_year": 3,
-            "timezone": "+02:00" # must not be replaced by +01:00
-        }
-        rebuilt_context = Interpreter._rebuild_context(configuration, state, time)
-        for x in expected_context.keys():
-            self.assertEqual(rebuilt_context[x], expected_context[x])
-
-        # Case 3:
         # - we provide none of the properties that should be generated
         state = { "car": "Renault", "day_of_week": 2 }
         time = Time(1489998174, "+01:00")
