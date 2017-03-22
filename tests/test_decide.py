@@ -58,7 +58,7 @@ class TestDecide(unittest.TestCase):
                     decision = self.client.decide(tree, exp_context, t)
                     decision_output = decision["decision"]
                     expectation_output = expectation["output"]["decision"]
-                    for x in expectation_output.keys():
+                    for x in list(expectation_output.keys()):
                         self.assertEqual(expectation_output[x], decision_output[x])
             print("--------------------------")
 
@@ -108,5 +108,5 @@ class TestDecide(unittest.TestCase):
             "month_of_year": 3,
             "timezone": "+01:00"
         }
-        for x in expected_context.keys():
+        for x in list(expected_context.keys()):
             self.assertEqual(rebuilt_context[x], expected_context[x])
