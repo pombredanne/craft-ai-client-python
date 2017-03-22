@@ -61,8 +61,8 @@ class Interpreter(object):
           if prop_attributes["type"] in ["time_of_day", "day_of_week", "day_of_month", "month_of_year", "timezone"]:
               # case 1: is_generated is at True, we must generate the time for the associated context property
               # case 2: is_generated is not given, by default at True, so we must generate it as well
-              case_1 = "is_generated" in prop_attributes.keys() and prop[1]["is_generated"] == True
-              case_2 = "is_generated" not in prop_attributes.keys()
+              case_1 = "is_generated" in list(prop_attributes.keys()) and prop[1]["is_generated"] == True
+              case_2 = "is_generated" not in list(prop_attributes.keys())
               if case_1 or case_2:
                 to_generate.append(prop_name)
 
@@ -72,7 +72,7 @@ class Interpreter(object):
           # Check for missings (not provided and need to be generated)
           missings = []
           for prop in to_generate:
-              if prop_name not in state.keys():
+              if prop_name not in list(state.keys()):
                   missings.append(prop_name)
 
           # Raise an error if some need to be generated but not provided and no Time object
