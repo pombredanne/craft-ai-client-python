@@ -61,7 +61,7 @@ class Interpreter(object):
           # Check for missings (not provided and need to be generated)
           missings = []
           for prop in to_generate:
-              if prop_name not in list(state.keys()):
+              if prop not in list(state.keys()):
                   missings.append(prop_name)
 
           # Raise an error if some need to be generated but not provided and no Time object
