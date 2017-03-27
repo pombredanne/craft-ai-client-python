@@ -75,7 +75,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
         # Asserting that an error is risen the second time
         self.assertRaises(
-            craft_err.CraftAIBadRequestError,
+            craft_err.CraftAiBadRequestError,
             self.client.create_agent,
             valid_data.VALID_CONFIGURATION,
             valid_data.VALID_ID)
@@ -98,7 +98,7 @@ class TestCreateAgentFailure(unittest.TestCase):
             }
             print(configuration)
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.create_agent,
                 configuration,
                 valid_data.VALID_ID)
@@ -118,7 +118,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         # Testing all non dict configuration cases
         for empty_configuration in invalid_data.UNDEFINED_KEY:
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.create_agent,
                 invalid_data.UNDEFINED_KEY[empty_configuration],
                 valid_data.VALID_ID)
@@ -142,7 +142,7 @@ class TestCreateAgentFailure(unittest.TestCase):
                 "time_quantum": invalid_data.INVALID_TIME_QUANTA[inv_tq]
             }
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.create_agent,
                 configuration,
                 valid_data.VALID_ID)

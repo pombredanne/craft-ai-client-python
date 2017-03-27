@@ -17,7 +17,7 @@ class CraftAIClient(object):
 
         try:
             self.config = cfg
-        except (CraftAICredentialsError, CraftAIBadRequestError) as e:
+        except (CraftAiCredentialsError, CraftAiBadRequestError) as e:
             raise e
 
     @property
@@ -28,10 +28,10 @@ class CraftAIClient(object):
     def config(self, cfg):
         cfg = cfg.copy()
         if (not isinstance(cfg.get("token"), six.string_types)):
-            raise CraftAICredentialsError("""Unable to create client with no"""
+            raise CraftAiCredentialsError("""Unable to create client with no"""
                                           """ or invalid token provided.""")
         if (not isinstance(cfg.get("project"), six.string_types)):
-            raise CraftAICredentialsError("""Unable to create client with no"""
+            raise CraftAiCredentialsError("""Unable to create client with no"""
                                           """ or invalid project provided.""")
         else:
             splittedProject = cfg.get("project").split('/')
@@ -39,17 +39,17 @@ class CraftAIClient(object):
                 cfg["owner"] = splittedProject[0];
                 cfg["project"] = splittedProject[1];
             elif (len(splittedProject) > 2):
-                raise CraftAICredentialsError("""Unable to create client with invalid"""
+                raise CraftAiCredentialsError("""Unable to create client with invalid"""
                                               """ project name.""")
         if (not isinstance(cfg.get("owner"), six.string_types)):
-            raise CraftAICredentialsError("""Unable to create client with no"""
+            raise CraftAiCredentialsError("""Unable to create client with no"""
                                           """ or invalid owner provided.""")
         if (not isinstance(cfg.get("operationsChunksSize"), six.integer_types)):
             cfg["operationsChunksSize"] = 200
         if (not isinstance(cfg.get("url"), six.string_types)):
             cfg["url"] = "https://beta.craft.ai"
         if cfg.get("url").endswith("/"):
-            raise CraftAIBadRequestError("""Unable to create client with"""
+            raise CraftAiBadRequestError("""Unable to create client with"""
                                          """ invalid url provided. The url"""
                                          """ should not terminate with a"""
                                          """ slash.""")
@@ -86,7 +86,7 @@ class CraftAIClient(object):
         try:
             json_pl = json.dumps(payload)
         except TypeError as e:
-            raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
+            raise CraftAiBadRequestError("Invalid configuration or agent id given. {}".
                                          format(e.__str__())
                                          )
 
@@ -146,7 +146,7 @@ class CraftAIClient(object):
             try:
                 json_pl = json.dumps(operations[offset:next_offset])
             except TypeError as e:
-                raise CraftAIBadRequestError("Invalid configuration or agent id given. {}".
+                raise CraftAiBadRequestError("Invalid configuration or agent id given. {}".
                                             format(e.__str__())
                                             )
 
@@ -221,20 +221,20 @@ class CraftAIClient(object):
     def _decode_response(self, response):
         # https://github.com/kennethreitz/requests/blob/master/requests/status_codes.py
         if response.status_code == requests.codes.not_found:
-            raise CraftAINotFoundError(response.text)
+            raise CraftAiNotFoundError(response.text)
         if response.status_code == requests.codes.bad_request:
-            raise CraftAIBadRequestError(response.text)
+            raise CraftAiBadRequestError(response.text)
         if response.status_code == requests.codes.unauthorized:
-            raise CraftAICredentialsError(response.text)
+            raise CraftAiCredentialsError(response.text)
         if response.status_code == requests.codes.request_timeout:
-            raise CraftAIBadRequestError('Request has timed out')
+            raise CraftAiBadRequestError('Request has timed out')
         if response.status_code == requests.codes.gateway_timeout:
-            raise CraftAIInternalError('Response has timed out')
+            raise CraftAiInternalError('Response has timed out')
 
         try:
             return response.json()
         except json.JSONDecodeError:
-            raise CraftAIUnknownError(response.text)
+            raise CraftAiUnknownError(response.text)
 
     def _check_agent_id(self, agent_id):
         """Checks that the given agent_id is a valid non-empty string.
@@ -244,5 +244,5 @@ class CraftAIClient(object):
         """
         if (not isinstance(agent_id, six.string_types) or
                 agent_id == ""):
-            raise CraftAIBadRequestError("""agent_id has to be a non-empty"""
+            raise CraftAiBadRequestError("""agent_id has to be a non-empty"""
                                          """string""")

@@ -7,7 +7,7 @@ from datetime import timedelta
 from pytz import utc as pyutc
 from tzlocal import get_localzone
 
-from craftai.errors import CraftAITimeError
+from craftai.errors import CraftAiTimeError
 
 _EPOCH = datetime(1970, 1, 1, tzinfo=pyutc)
 _ISO_FMT = "%Y-%m-%dT%H:%M:%S%z"
@@ -25,7 +25,7 @@ class Time(object):
             try:
                 time = datetime.fromtimestamp(t, get_localzone())
             except (OverflowError, OSError) as e:
-                raise CraftAITimeError(
+                raise CraftAiTimeError(
                     """Unable to instantiate Time from given timestamp. {}""".
                     format(e.__str__()))
         elif isinstance(t, six.string_types):
@@ -34,7 +34,7 @@ class Time(object):
             try:
                 time = datetime.strptime(t, _ISO_FMT)
             except ValueError as e:
-                raise CraftAITimeError(
+                raise CraftAiTimeError(
                     """Unable to instantiate Time from given string. {}""".
                     format(e.__str__()))
 
@@ -51,7 +51,7 @@ class Time(object):
                     offset = -offset
                 time = time.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
             else:
-                raise CraftAITimeError(
+                raise CraftAiTimeError(
                     """Unable to instantiate Time with the given timezone."""
                     """ {} is neither a string nor a timezone.""".format(timezone)
                 )
@@ -59,7 +59,7 @@ class Time(object):
         try:
             self.utc_iso = time.isoformat()
         except ValueError as e:
-            raise CraftAITimeError(
+            raise CraftAiTimeError(
                 """Unable to create ISO 8061 UTCstring. {}""".
                 format(e.__str__()))
 

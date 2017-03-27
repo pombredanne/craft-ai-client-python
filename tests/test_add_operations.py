@@ -86,7 +86,7 @@ class TestAddOperationsFailure(unittest.TestCase):
         """
         for empty_id in invalid_data.UNDEFINED_KEY:
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.add_operations,
                 invalid_data.UNDEFINED_KEY[empty_id],
                 valid_data.VALID_OPERATIONS_SET)
@@ -98,7 +98,7 @@ class TestAddOperationsFailure(unittest.TestCase):
 #        agent's configuration, for which the agent doesn't exist.
 #        """
 #        self.assertRaises(
-#            craft_err.CraftAINotFoundError,
+#            craft_err.CraftAiNotFoundError,
 #            self.client.add_operations,
 #            invalid_data.UNKNOWN_ID,
 #            valid_data.VALID_OPERATIONS_SET)
@@ -111,7 +111,7 @@ class TestAddOperationsFailure(unittest.TestCase):
         """
         for ops_set in invalid_data.UNDEFINED_KEY:
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.add_operations,
                 valid_data.VALID_ID,
                 invalid_data.UNDEFINED_KEY[ops_set])
@@ -119,7 +119,7 @@ class TestAddOperationsFailure(unittest.TestCase):
     def test_add_operations_with_invalid_operation_set(self):
         for ops_set in invalid_data.INVALID_OPS_SET:
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.add_operations,
                 valid_data.VALID_ID,
                 invalid_data.INVALID_OPS_SET[ops_set])

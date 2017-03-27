@@ -58,7 +58,7 @@ class TestGetAgentFailure(unittest.TestCase):
         """
         for empty_id in invalid_data.UNDEFINED_KEY:
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.get_agent,
                 invalid_data.UNDEFINED_KEY[empty_id])
 
@@ -69,6 +69,6 @@ class TestGetAgentFailure(unittest.TestCase):
         that doesn't exist.
         """
         self.assertRaises(
-            craft_err.CraftAINotFoundError,
+            craft_err.CraftAiNotFoundError,
             self.client.get_agent,
             invalid_data.UNKNOWN_ID)

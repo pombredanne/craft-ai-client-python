@@ -66,7 +66,7 @@ class Interpreter(object):
 
           # Raise an error if some need to be generated but not provided and no Time object
           if len(missings) > 0:
-              raise CraftAIDecisionError(
+              raise CraftAiDecisionError(
                 """you must provide a Time object to decide() because"""
                 """ context properties {} need to be generated.""".format(missings)
               )
@@ -105,9 +105,10 @@ class Interpreter(object):
     matching_child = Interpreter._find_matching_child(node, context)
 
     if not matching_child:
-      raise CraftAIDecisionError(
-        """Invalid decision tree format, no leaf matching the given"""
-        """ context could be found because the tree is malformed."""
+      prop = node.get("children")[0].get("decision_rule").get("property")
+      raise CraftAiDecisionError(
+        """Unable to take decision: '{}' not found """
+        """ amongst values for the '{}' property.""".format(context.get(prop), prop)
       )
 
     # If a matching child is found, recurse
@@ -137,13 +138,13 @@ class Interpreter(object):
           operator = child["decision_rule"]["operator"]
           context_value = context.get(property_name)
           if context_value is None:
-            raise CraftAIDecisionError(
-              """Property '{}' is not defined in the given context""".
+            raise CraftAiDecisionError(
+              """Unable to take decision, property '{}' is missing from the given context.""".
               format(property_name)
             )
           if (not isinstance(operator, six.string_types) or
                   not (operator in _OPERATORS)):
-              raise CraftAIDecisionError(
+              raise CraftAiDecisionError(
                   """Invalid decision tree format, {} is not a valid"""
                   """decision operator.""".
                   format(operator)
@@ -167,7 +168,7 @@ class Interpreter(object):
       try:
         joined_args.update(arg)
       except TypeError:
-        raise CraftAIDecisionError(
+        raise CraftAiDecisionError(
           """Invalid context args, the given objects aren't dicts"""
           """ or Time instances."""
         )
@@ -177,7 +178,7 @@ class Interpreter(object):
   def _parse_tree(tree_object):
     # Checking definition of tree_object
     if not (tree_object and isinstance(tree_object, object)):
-      raise CraftAIDecisionError(
+      raise CraftAiDecisionError(
         """Invalid decision tree format, the given object is not an"""
         """ object or is empty."""
       )
@@ -185,30 +186,30 @@ class Interpreter(object):
     # Checking version existence
     tree_version = tree_object.get("_version")
     if not tree_version:
-      raise CraftAIDecisionError(
+      raise CraftAiDecisionError(
         """Invalid decision tree format, unable to find the version"""
         """ information."""
       )
 
     # Checking version and tree validity according to version
     if re.compile('\d+.\d+.\d+').match(tree_version) is None:
-      raise CraftAIDecisionError(
+      raise CraftAiDecisionError(
         """Invalid decision tree format, {} is not a valid version.""".
         format(tree_version)
       )
     elif tree_version == "1.0.0":
       if (tree_object.get("configuration") is None):
-        raise CraftAIDecisionError(
+        raise CraftAiDecisionError(
           """Invalid decision tree format, no configuration found"""
         )
       if (tree_object.get("trees") is None):
-        raise CraftAIDecisionError(
+        raise CraftAiDecisionError(
           """Invalid decision tree format, no tree found."""
         )
       bare_tree = tree_object.get("trees")
       configuration = tree_object.get("configuration")
     else:
-      raise CraftAIDecisionError(
+      raise CraftAiDecisionError(
         """Invalid decision tree format, {} is not a supported"""
         """ version.""".
         format(tree_version)

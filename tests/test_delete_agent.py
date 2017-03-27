@@ -21,7 +21,7 @@ class TestDeleteAgentWithValidID(unittest.TestCase):
             self.client.create_agent(
                 valid_data.VALID_CONFIGURATION,
                 valid_data.VALID_ID)
-        except craft_err.CraftAIBadRequestError as e:
+        except craft_err.CraftAiBadRequestError as e:
             if "one already exists" not in e.message:
                 raise e
             else:
@@ -77,6 +77,6 @@ class TestDeleteAgentWithInvalidID(unittest.TestCase):
 
         for empty_id in invalid_data.UNDEFINED_KEY:
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.delete_agent,
                 invalid_data.UNDEFINED_KEY[empty_id])
