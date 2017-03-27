@@ -48,7 +48,7 @@ class TestDecide(unittest.TestCase):
 
                 if expectation.get("error"):
                     self.assertRaises(
-                        craft_err.CraftAIDecisionError,
+                        craft_err.CraftAiDecisionError,
                         self.client.decide,
                         tree,
                         exp_context,
@@ -90,11 +90,11 @@ class TestDecide(unittest.TestCase):
         # - we do not provide those properties directly in the context
         state = { "car": "Renault", "day_of_week": 2 }
         self.assertRaises(
-            craft_err.CraftAIDecisionError,
+            craft_err.CraftAiDecisionError,
             Interpreter._rebuild_context,
             configuration,
             state)
-        print("Successfully raises CraftAIDecisionError.")
+        print("Successfully raises CraftAiDecisionError.")
 
         # Case 2:
         # - we provide none of the properties that should be generated

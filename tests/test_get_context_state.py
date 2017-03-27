@@ -71,7 +71,7 @@ class TestGetContextStateFailure(unittest.TestCase):
         """
         for empty_id in invalid_data.UNDEFINED_KEY:
             self.assertRaises(
-                craft_err.CraftAIBadRequestError,
+                craft_err.CraftAiBadRequestError,
                 self.client.get_context_state,
                 invalid_data.UNDEFINED_KEY[empty_id],
                 valid_data.VALID_TIMESTAMP)
@@ -83,7 +83,7 @@ class TestGetContextStateFailure(unittest.TestCase):
         that doesn't exist.
         """
         self.assertRaises(
-            craft_err.CraftAINotFoundError,
+            craft_err.CraftAiNotFoundError,
             self.client.get_context_state,
             invalid_data.UNKNOWN_ID,
             valid_data.VALID_TIMESTAMP)
@@ -93,7 +93,7 @@ class TestGetContextStateFailure(unittest.TestCase):
             print(inv_ts)
             if not (inv_ts is None):
                 self.assertRaises(
-                    craft_err.CraftAIBadRequestError,
+                    craft_err.CraftAiBadRequestError,
                     self.client.get_context_state,
                     valid_data.VALID_ID,
                     invalid_data.INVALID_TIMESTAMPS[inv_ts])
