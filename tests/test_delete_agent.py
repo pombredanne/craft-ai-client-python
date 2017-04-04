@@ -12,6 +12,7 @@ class TestDeleteAgentWithValidID(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
         # Creating an agent may raise an error if one with the same ID
@@ -20,7 +21,7 @@ class TestDeleteAgentWithValidID(unittest.TestCase):
         try:
             self.client.create_agent(
                 valid_data.VALID_CONFIGURATION,
-                valid_data.VALID_ID)
+                self.agent_id)
         except craft_err.CraftAiBadRequestError as e:
             if "one already exists" not in e.message:
                 raise e
@@ -28,7 +29,7 @@ class TestDeleteAgentWithValidID(unittest.TestCase):
                 print("Warning: Deleting previously existing agent.")
 
     def test_delete_agent_with_valid_id(self):
-        resp = self.client.delete_agent(valid_data.VALID_ID)
+        resp = self.client.delete_agent(self.agent_id)
         self.assertIsInstance(resp, dict)
         self.assertTrue("id" in resp.keys())
 
@@ -40,6 +41,7 @@ class TestDeleteAgentWithUnknownID(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def test_delete_agent_with_unknown_id(self):
         """delete_agent should succeed when given a non-string/empty string ID
@@ -52,8 +54,8 @@ class TestDeleteAgentWithUnknownID(unittest.TestCase):
         # Calling delete twice to make sure the ID doesn't exist
         # Since it's the function we are testing, it wouldn't be clean
         # to do this in the setUp phase.
-        self.client.delete_agent(valid_data.VALID_ID)
-        resp = self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        resp = self.client.delete_agent(self.agent_id)
         self.assertIsInstance(resp, dict)
         self.assertTrue("message" in resp.keys())
 

@@ -14,16 +14,17 @@ class TestGetDecisionTreeSuccess(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
         self.client.add_operations(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_OPERATIONS_SET)
 
     def tearDown(self):
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_get_decision_tree_with_correct_input(self):
         """get_decision_tree should succeed when given proper ID and timestamp.
@@ -31,7 +32,7 @@ class TestGetDecisionTreeSuccess(unittest.TestCase):
         It should give a proper JSON object response with 3 elements: _version, configuration and trees.
         """
         decision_tree = self.client.get_decision_tree(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_TIMESTAMP)
 
         self.assertIsInstance(decision_tree, dict)
@@ -46,16 +47,17 @@ class TestGetDecisionTreeFailure(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
         self.client.add_operations(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_OPERATIONS_SET)
 
     def tearDown(self):
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_get_decision_tree_with_invalid_id(self):
         """get_decision_tree should fail when given a non-string/empty string ID
@@ -88,5 +90,5 @@ class TestGetDecisionTreeFailure(unittest.TestCase):
             self.assertRaises(
                 craft_err.CraftAiBadRequestError,
                 self.client.get_decision_tree,
-                valid_data.VALID_ID,
+                self.agent_id,
                 invalid_data.INVALID_TIMESTAMPS[inv_ts])

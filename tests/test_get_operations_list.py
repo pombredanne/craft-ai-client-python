@@ -15,23 +15,24 @@ class TestGetOperationsListSuccess(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
         self.client.add_operations(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_OPERATIONS_SET)
 
     def tearDown(self):
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_get_operations_list_with_correct_data(self):
         """get_operations_list should succeed when given a correct agent ID
 
         It should give a proper JSON response as a list of dicts.
         """
-        ops = self.client.get_operations_list(valid_data.VALID_ID)
+        ops = self.client.get_operations_list(self.agent_id)
         self.assertIsInstance(ops, list)
 
 
@@ -41,16 +42,17 @@ class TestGetOperationsListFailure(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
         self.client.add_operations(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_OPERATIONS_SET)
 
     def tearDown(self):
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_get_operations_list_with_invalid_id(self):
         """get_operations_list should fail when given a non-string/empty ID
