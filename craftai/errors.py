@@ -65,3 +65,9 @@ class CraftAiTimeError(CraftAiError):
     def __init__(self, message):
         self.message = "".join(("Can't create time object: ", message))
         super(CraftAiError, self).__init__(message)
+
+class CraftAiTokenError(CraftAiError):
+    """Raised when the given token is invalid"""
+    def __init__(self, message):
+        self.message = "".join(("Invalid Token: ", message))
+        super(CraftAiError, self).__init__(message)

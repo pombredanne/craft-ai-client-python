@@ -12,14 +12,15 @@ class TestGetAgentSuccess(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
 
     def tearDown(self):
         # Makes sure that no agent with the standard ID remains
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_get_agent_with_correct_id(self):
         """get_agent should succeed when given a correct agent ID
@@ -27,7 +28,7 @@ class TestGetAgentSuccess(unittest.TestCase):
         It should give a proper JSON response with `configuration` field being a
         string.
         """
-        agent = self.client.get_agent(valid_data.VALID_ID)
+        agent = self.client.get_agent(self.agent_id)
         self.assertIsInstance(agent, dict)
         agent_keys = agent.keys()
         self.assertTrue("configuration" in agent_keys)
@@ -39,15 +40,16 @@ class TestGetAgentFailure(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
         # Makes sure that no agent exists with the test id
         # (especially for test_get_agent_with_unknown_id)
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def tearDown(self):
         # Makes sure that no agent with the standard ID remains
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_get_agent_with_invalid_id(self):
         """get_agent should fail when given a non-string/empty string ID

@@ -15,13 +15,14 @@ class TestAddOperationsSuccess(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
 
     def tearDown(self):
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_add_operations_with_correct_input(self):
         """add_operations should succeed when given correct input data
@@ -30,7 +31,7 @@ class TestAddOperationsSuccess(unittest.TestCase):
         string.
         """
         resp = self.client.add_operations(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_OPERATIONS_SET)
 
         self.assertIsInstance(resp, dict)
@@ -54,7 +55,7 @@ class TestAddOperationsSuccess(unittest.TestCase):
             length = length + 1
 
         resp = self.client.add_operations(
-            valid_data.VALID_ID,
+            self.agent_id,
             sorted(operations, key=lambda operation: operation["timestamp"]))
 
         self.assertIsInstance(resp, dict)
@@ -69,13 +70,14 @@ class TestAddOperationsFailure(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
 
     def tearDown(self):
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_add_operations_with_invalid_agent_id(self):
         """add_operations should fail when given a non-string/empty string ID
@@ -113,7 +115,7 @@ class TestAddOperationsFailure(unittest.TestCase):
             self.assertRaises(
                 craft_err.CraftAiBadRequestError,
                 self.client.add_operations,
-                valid_data.VALID_ID,
+                self.agent_id,
                 invalid_data.UNDEFINED_KEY[ops_set])
 
     def test_add_operations_with_invalid_operation_set(self):
@@ -121,5 +123,5 @@ class TestAddOperationsFailure(unittest.TestCase):
             self.assertRaises(
                 craft_err.CraftAiBadRequestError,
                 self.client.add_operations,
-                valid_data.VALID_ID,
+                self.agent_id,
                 invalid_data.INVALID_OPS_SET[ops_set])

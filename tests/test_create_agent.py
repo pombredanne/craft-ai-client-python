@@ -15,10 +15,11 @@ class TestCreateAgentSuccess(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
         # Makes sure that no agent with the same ID already exists
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def clean_up_agent(self, aid):
         # Makes sure that no agent with the standard ID remains
@@ -43,9 +44,9 @@ class TestCreateAgentSuccess(unittest.TestCase):
         """
         resp = self.client.create_agent(
             valid_data.VALID_CONFIGURATION,
-            valid_data.VALID_ID)
-        self.assertEqual(resp.get("id"), valid_data.VALID_ID)
-        self.addCleanup(self.clean_up_agent, valid_data.VALID_ID)
+            self.agent_id)
+        self.assertEqual(resp.get("id"), self.agent_id)
+        self.addCleanup(self.clean_up_agent, self.agent_id)
 
 
 class TestCreateAgentFailure(unittest.TestCase):
@@ -54,10 +55,11 @@ class TestCreateAgentFailure(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
         # Makes sure that no agent with the same ID already exists
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def clean_up_agent(self, aid):
         print(aid)
@@ -72,16 +74,16 @@ class TestCreateAgentFailure(unittest.TestCase):
         should always be unique.
         """
         # Calling create_agent a first time
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
         # Asserting that an error is risen the second time
         self.assertRaises(
             craft_err.CraftAiBadRequestError,
             self.client.create_agent,
             valid_data.VALID_CONFIGURATION,
-            valid_data.VALID_ID)
+            self.agent_id)
         self.addCleanup(
             self.clean_up_agent,
-            valid_data.VALID_ID
+            self.agent_id
         )
 
     def test_create_agent_with_invalid_context(self):
@@ -101,10 +103,10 @@ class TestCreateAgentFailure(unittest.TestCase):
                 craft_err.CraftAiBadRequestError,
                 self.client.create_agent,
                 configuration,
-                valid_data.VALID_ID)
+                self.agent_id)
             self.addCleanup(
                 self.clean_up_agent,
-                valid_data.VALID_ID
+                self.agent_id
             )
 
     def test_create_agent_with_undefined_configuration(self):
@@ -121,10 +123,10 @@ class TestCreateAgentFailure(unittest.TestCase):
                 craft_err.CraftAiBadRequestError,
                 self.client.create_agent,
                 invalid_data.UNDEFINED_KEY[empty_configuration],
-                valid_data.VALID_ID)
+                self.agent_id)
             self.addCleanup(
                 self.clean_up_agent,
-                valid_data.VALID_ID
+                self.agent_id
             )
 
     def test_create_agent_with_invalid_time_quantum(self):
@@ -145,8 +147,8 @@ class TestCreateAgentFailure(unittest.TestCase):
                 craft_err.CraftAiBadRequestError,
                 self.client.create_agent,
                 configuration,
-                valid_data.VALID_ID)
+                self.agent_id)
             self.addCleanup(
                 self.clean_up_agent,
-                valid_data.VALID_ID
+                self.agent_id
             )

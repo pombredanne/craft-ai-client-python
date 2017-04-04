@@ -15,16 +15,17 @@ class TestGetContextStateSuccess(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
         self.client.add_operations(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_OPERATIONS_SET)
 
     def tearDown(self):
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_get_context_state_with_correct_input(self):
         """get_context_state should succeed when given proper ID and timestamp.
@@ -34,7 +35,7 @@ class TestGetContextStateSuccess(unittest.TestCase):
         a dict.
         """
         context_state = self.client.get_context_state(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_TIMESTAMP)
         self.assertIsInstance(context_state, dict)
         context_state_keys = context_state.keys()
@@ -51,16 +52,17 @@ class TestGetContextStateFailure(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = CraftAIClient(settings.CRAFT_CFG)
+        self.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
     def setUp(self):
-        self.client.delete_agent(valid_data.VALID_ID)
-        self.client.create_agent(valid_data.VALID_CONFIGURATION, valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
+        self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
         self.client.add_operations(
-            valid_data.VALID_ID,
+            self.agent_id,
             valid_data.VALID_OPERATIONS_SET)
 
     def tearDown(self):
-        self.client.delete_agent(valid_data.VALID_ID)
+        self.client.delete_agent(self.agent_id)
 
     def test_get_context_state_with_invalid_id(self):
         """get_context_state should fail when given a non-string/empty string ID
@@ -95,5 +97,5 @@ class TestGetContextStateFailure(unittest.TestCase):
                 self.assertRaises(
                     craft_err.CraftAiBadRequestError,
                     self.client.get_context_state,
-                    valid_data.VALID_ID,
+                    self.agent_id,
                     invalid_data.INVALID_TIMESTAMPS[inv_ts])

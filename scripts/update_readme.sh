@@ -13,5 +13,5 @@ echo "Downloading the README.md..."
 curl -s -o README.md http://www.craft.ai/content/api/python.md
 # Convert to rst
 echo "Converting to README.rst..."
-pandoc --from=markdown --to=rst --output=README.rst README.md
+pandoc --from=markdown_github --to=rst --output=README.rst README.md
 echo "Success!"
