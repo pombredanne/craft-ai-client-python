@@ -3,10 +3,9 @@ import json
 import six
 
 from craftai import helpers
-
 from craftai.errors import *
 from craftai.interpreter import Interpreter
-
+from craftai.jwt_decode import jwt_decode
 
 class CraftAIClient(object):
     """Client class for craft ai's API"""
@@ -27,9 +26,11 @@ class CraftAIClient(object):
     @config.setter
     def config(self, cfg):
         cfg = cfg.copy()
-        if (not isinstance(cfg.get("token"), six.string_types)):
-            raise CraftAiCredentialsError("""Unable to create client with no"""
-                                          """ or invalid token provided.""")
+        (payload, signing_input, header, signature) = jwt_decode(cfg.get("token"))
+        cfg["owner"] = payload.get("owner");
+        cfg["project"] = payload.get("project")
+        cfg["url"] = payload.get("platform")
+
         if (not isinstance(cfg.get("project"), six.string_types)):
             raise CraftAiCredentialsError("""Unable to create client with no"""
                                           """ or invalid project provided.""")
