@@ -19,8 +19,8 @@ If you're reading this you are probably already registered with **craft
 ai**, if not, head to
 ```https://beta.craft.ai/signup`` <https://beta.craft.ai/signup>`__.
 
-    :construction: **craft ai** is currently in private beta, as such we
-    validate accounts, this step should be quick.
+    🚧 **craft ai** is currently in private beta, as such we validate
+    accounts, this step should be quick.
 
 1 - Create a project
 ~~~~~~~~~~~~~~~~~~~~
@@ -61,8 +61,6 @@ Initialize
 .. code:: python
 
     config = {
-        "owner": "{owner}",
-        "project": "{project}",
         "token": "{token}"
     }
     client = craftai.CraftAIClient(config)
@@ -145,15 +143,15 @@ ai** these are called context operations.
 
 In the following we add 8 operations:
 
-1. The initial one sets the initial state of the agent, on July 25 2016
+#. The initial one sets the initial state of the agent, on July 25 2016
    at 5:30, in Paris, nobody is there and the light is off;
-2. At 7:02, someone enters the room the light is turned on;
-3. At 7:15, someone else enters the room;
-4. At 7:31, the light is turned off;
-5. At 8:12, everyone leaves the room;
-6. At 19:23, 2 persons enter the room;
-7. At 22:35, the light is turned on;
-8. At 23:06, everyone leaves the room and the light is turned off.
+#. At 7:02, someone enters the room the light is turned on;
+#. At 7:15, someone else enters the room;
+#. At 7:31, the light is turned off;
+#. At 8:12, everyone leaves the room;
+#. At 19:23, 2 persons enter the room;
+#. At 22:35, the light is turned on;
+#. At 23:06, everyone leaves the room and the light is turned off.
 
 .. code:: python
 
@@ -399,7 +397,7 @@ Python starter kit can get you there! Retrieve the sources locally and
 follow the "readme" to get a fully working **Wellness Coach** example
 using *real-world* data.
 
-    `:package: *Get the **craft ai** Python Starter
+    `📦 *Get the **craft ai** Python Starter
     Kit* <https://github.com/craft-ai/craft-ai-starterkit-python>`__
 
 API
@@ -422,8 +420,7 @@ Each agent has a configuration defining:
 -  the output properties, i.e. the list of property keys on which the
    agent takes decisions,
 
-    :warning: In the current version, only one output property can be
-    provided.
+    ⚠️ In the current version, only one output property can be provided.
 
 -  the ``time_quantum`` is the minimum amount of time, in seconds, that
    is meaningful for an agent; context updates occurring faster than
@@ -435,11 +432,10 @@ Each agent has a configuration defining:
    context that is older than this duration. You should generally choose
    the smallest value that fits this description.
 
-    :warning: if no time\_quantum is specified, the default value is
-    600.
+    ⚠️ if no time\_quantum is specified, the default value is 600.
 
-    :warning: if no learning\_period is specified, the default value is
-    15000 time quantums.
+    ⚠️ if no learning\_period is specified, the default value is 15000
+    time quantums.
 
 Context properties types
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -452,62 +448,87 @@ Base types: ``enum`` and ``continuous``
 -  ``enum`` properties can take any string value;
 -  ``continuous`` properties can take any real number value.
 
+    ⚠️ the absolute value of a ``continuous`` property must be less than
+    1020.
+
 Time types: ``timezone``, ``time_of_day``, ``day_of_week``, ``day_of_month`` and ``month_of_year``
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-**craft ai** defines 3 types related to time:
+**craft ai** defines the following types related to time:
 
 -  ``time_of_day`` properties can take any real number belonging to
-   **[0.0; 24.0[** representing the number of hours in the day since
-   midnight (e.g. 13.5 means 13:30),
+   **[0.0; 24.0[**
+   representing the number of hours in the day since midnight (e.g. 13.5
+   means
+   13:30),
 -  ``day_of_week`` properties can take any integer belonging to **[0,
-   6]**, each value represents a day of the week starting from Monday (0
-   is Monday, 6 is Sunday).
+   6]**, each
+   value represents a day of the week starting from Monday (0 is Monday,
+   6 is
+   Sunday).
 -  ``day_of_month`` properties can take any integer belonging to **[1,
    31]**, each value represents a day of the month.
 -  ``month_of_year`` properties can take any integer belonging to **[1,
    12]**, each value represents a month of the year.
 -  ``timezone`` properties can take string values representing the
-   timezone as an offset from UTC, the expected format is **±[hh]:[mm]**
-   where ``hh`` represent the hour and ``mm`` the minutes from UTC (eg.
-   ``+01:30``)), between ``-12:00`` and ``+14:00``.
+   timezone as an
+   offset from UTC, the expected format is **±[hh]:[mm]** where ``hh``
+   represent the
+   hour and ``mm`` the minutes from UTC (eg. ``+01:30``)), between
+   ``-12:00`` and
+   ``+14:00``.
 
-    :information\_source: By default, the values of the ``time_of_day``
-    and ``day_of_week`` properties are generated from the
-    ```timestamp`` <#timestamp>`__ of an agent's state and the agent's
-    current ``timezone``. Therefore, whenever you use generated
-    ``time_of_day`` and/or ``day_of_week`` in your configuration, you
-    **must** provide a ``timezone`` value in the context. There can only
-    be one ``timezone`` property.
+    | ℹ️ By default, the values of the ``time_of_day`` and
+      ``day_of_week``
+    | properties are generated from the ```timestamp`` <#timestamp>`__
+      of an agent's
+    | state and the agent's current ``timezone``. Therefore, whenever
+      you use generated
+    | ``time_of_day`` and/or ``day_of_week`` in your configuration, you
+      **must** provide a
+    | ``timezone`` value in the context. There can only be one
+      ``timezone`` property.
 
-    If you wish to provide their values manually, add
-    ``is_generated: false`` to the time types properties in your
-    configuration. In this case, since you provide the values, the
-    ``timezone`` property is not required, and you must update the
-    context whenever one of these time values changes in a way that is
-    significant for your system.
+    | If you wish to provide their values manually, add
+      ``is_generated: false`` to the
+    | time types properties in your configuration. In this case, since
+      you provide the values, the
+    | ``timezone`` property is not required, and you must update the
+      context whenever
+    | one of these time values changes in a way that is significant for
+      your system.
 
 Examples
 ''''''''
 
-Let's take a look at the following configuration. It is designed to
-model the **color** of a lightbulb (the ``lightbulbColor`` property,
-defined as an output) depending on the **outside light intensity** (the
-``lightIntensity`` property), the **time of the day** (the ``time``
-property) and the **day of the week** (the ``day`` property).
+| Let's take a look at the following configuration. It is designed to
+  model the **color**
+| of a lightbulb (the ``lightbulbColor`` property, defined as an output)
+  depending
+| on the **outside light intensity** (the ``lightIntensity`` property),
+  the **time
+  of the day** (the ``time`` property) and the **day of the week** (the
+  ``day``
+| property).
 
-``day`` and ``time`` values will be generated automatically, hence the
-need for ``timezone``, the current Time Zone, to compute their value
-from given ```timestamps`` <#timestamp>`__.
+| ``day`` and ``time`` values will be generated automatically, hence the
+  need for
+| ``timezone``, the current Time Zone, to compute their value from given
+| ```timestamps`` <#timestamp>`__.
 
-The ``time_quantum`` is set to 100 seconds, which means that if the
-lightbulb color is changed from red to blue then from blue to purple in
-less that 1 minutes and 40 seconds, only the change from red to purple
-will be taken into account.
+| The ``time_quantum`` is set to 100 seconds, which means that if the
+  lightbulb
+| color is changed from red to blue then from blue to purple in less
+  that 1
+| minutes and 40 seconds, only the change from red to purple will be
+  taken into
+| account.
 
-The ``learning_period`` is set to 108 000 seconds (one month) , which
-means that the state of the lightbulb from more than a month ago can be
-ignored when learning the decision model.
+| The ``learning_period`` is set to 108 000 seconds (one month) , which
+  means that
+| the state of the lightbulb from more than a month ago can be ignored
+  when learning
+| the decision model.
 
 .. code:: json
 
@@ -534,9 +555,11 @@ ignored when learning the decision model.
       "learning_period": 108000
     }
 
-In this second example, the ``time`` property is not generated, no
-property of type ``timezone`` is therefore needed. However values of
-``time`` must be manually provided continuously.
+| In this second example, the ``time`` property is not generated, no
+  property of
+| type ``timezone`` is therefore needed. However values of ``time`` must
+  be manually
+| provided continuously.
 
 .. code:: json
 
@@ -769,9 +792,12 @@ ai** which learns from the context operations
 `added <#add-operations>`__ throughout time.
 
 When you `compute <#compute>`__ a decision tree, **craft ai** returns an
-object containing: - the **API version** - the agent's configuration as
-specified during the agent's `creation <#create-agent>`__ - the tree
-itself as a JSON object:
+object containing:
+
+-  the **API version**
+-  the agent's configuration as specified during the agent's
+   `creation <#create-agent>`__
+-  the tree itself as a JSON object:
 
 -  Internal nodes are represented by a ``"decision_rule"`` object and a
    ``"children"`` array. The first one, contains the ``"property``, and
@@ -894,12 +920,12 @@ with ``try/except`` blocks, in accordance with the
 The **craft ai** python client has its specific exception types, all of
 them inheriting from the ``CraftAIError`` type.
 
-All methods which have to send an http request (all of them except
-``decide``) may raise either of these exceptions:
-``CraftAINotFoundError``, ``CraftAIBadRequestError``,
-``CraftAICredentialsError`` or ``CraftAIUnknownError``. The
-``decide`` method should only raise ``CrafAIDecisionError`` type of
-exceptions.
+| All methods which have to send an http request (all of them except
+  ``decide``) may raise either of these exceptions:
+  ``CraftAINotFoundError``, ``CraftAIBadRequestError``,
+  ``CraftAICredentialsError`` or ``CraftAIUnknownError``.
+| The ``decide`` method should only raise ``CrafAIDecisionError`` type
+  of exceptions.
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/craft-ai.svg?style=flat-square
    :target: https://pypi.python.org/pypi?:action=display&name=craft-ai

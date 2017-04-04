@@ -39,8 +39,6 @@ from craftai import client as craftai
 
 ```python
 config = {
-    "owner": "{owner}",
-    "project": "{project}",
     "token": "{token}"
 }
 client = craftai.CraftAIClient(config)
@@ -370,9 +368,11 @@ Each agent has a configuration defining:
 - `enum` properties can take any string value;
 - `continuous` properties can take any real number value.
 
+> :warning: the absolute value of a `continuous` property must be less than 10<sup>20</sup>.
+
 ##### Time types: `timezone`, `time_of_day`, `day_of_week`, `day_of_month` and `month_of_year` #####
 
-**craft ai** defines 3 types related to time:
+**craft ai** defines the following types related to time:
 
 - `time_of_day` properties can take any real number belonging to **[0.0; 24.0[**
 representing the number of hours in the day since midnight (e.g. 13.5 means
