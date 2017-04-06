@@ -37,6 +37,11 @@ class Time(object):
                 raise CraftAiTimeError(
                     """Unable to instantiate Time from given string. {}""".
                     format(e.__str__()))
+        else:
+            raise CraftAiTimeError(
+                """Unable to instantiate Time from given timestamp."""
+                """ It must be integer or string."""
+            )
 
         if timezone:
             # If a timezone is specified we can try to use it
