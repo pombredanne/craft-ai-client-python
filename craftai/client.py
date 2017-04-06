@@ -6,7 +6,6 @@ from craftai import helpers
 from craftai.errors import *
 from craftai.interpreter import Interpreter
 from craftai.jwt_decode import jwt_decode
-from craftai.time import Time
 
 class CraftAIClient(object):
     """Client class for craft ai's API"""
@@ -151,7 +150,7 @@ class CraftAIClient(object):
 
         return agents_list["agentsList"]
 
-    def shared_agent_inspector_url(self, agent_id, timestamp=None):
+    def get_shared_agent_inspector_url(self, agent_id, timestamp=None):
         # Raises an error when agent_id is invalid
         self._check_agent_id(agent_id)
 

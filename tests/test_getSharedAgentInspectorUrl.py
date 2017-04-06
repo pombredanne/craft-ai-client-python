@@ -6,7 +6,7 @@ from craftai.client import CraftAIClient
 from craftai import errors as craft_err
 
 
-class TestSharedAgentsInspectorUrlSuccess(unittest.TestCase):
+class TestGetSharedAgentsInspectorUrlSuccess(unittest.TestCase):
     """Checks that the client succeeds when getting the agents list"""
     @classmethod
     def setUpClass(self):
@@ -21,37 +21,37 @@ class TestSharedAgentsInspectorUrlSuccess(unittest.TestCase):
         # Makes sure that no agent with the standard ID remains
         self.client.delete_agent(self.agent_id)
 
-    def test_sharable_url(self):
-        """shared_agent_inspector_url should create a new shareable url for the given agent"""
+    def test_get_sharable_url(self):
+        """get_shared_agent_inspector_url should create a new shareable url for the given agent"""
         timestamp = 1234567890987
-        url = self.client.shared_agent_inspector_url(self.agent_id, timestamp)
+        url = self.client.get_shared_agent_inspector_url(self.agent_id, timestamp)
         self.assertTrue(url != "")
         url_split = url.split('?');
         self.assertTrue(len(url_split) == 2)
         self.assertTrue(url_split[1] == 't=' + str(timestamp))
-        url2 = self.client.shared_agent_inspector_url(self.agent_id)
+        url2 = self.client.get_shared_agent_inspector_url(self.agent_id)
         self.assertTrue(url_split[0] == url2)
 
-    def test_sharable_url_with_no_timestamp(self):
-        """shared_agent_inspector_url should create a new shareable url for the given agent"""
-        url = self.client.shared_agent_inspector_url(self.agent_id)
+    def test_get_sharable_url_with_no_timestamp(self):
+        """shared_agent_inspector_url should create a new shareable url for the given agent with a timestamp in the query string"""
+        url = self.client.get_shared_agent_inspector_url(self.agent_id)
         self.assertTrue(url != "")
         url_split = url.split('?');
         self.assertTrue(len(url_split) == 1)
-        url2 = self.client.shared_agent_inspector_url(self.agent_id)
+        url2 = self.client.get_shared_agent_inspector_url(self.agent_id)
         self.assertTrue(url == url2)
 
     def test_delete_sharable_url(self):
-        """shared_agent_inspector_url should create a new shareable url for the given agent"""
-        url = self.client.shared_agent_inspector_url(self.agent_id)
+        """delete_shared_agent_inspector_url should delete the sharable url so the new sharable_url wouldn't be like the previous one"""
+        url = self.client.get_shared_agent_inspector_url(self.agent_id)
         print(url)
         self.assertTrue(url != "")
         url_split = url.split('?');
         self.assertTrue(len(url_split) == 1)
-        url2 = self.client.shared_agent_inspector_url(self.agent_id)
+        url2 = self.client.get_shared_agent_inspector_url(self.agent_id)
         print(url2)
         self.assertTrue(url == url2)
-        self.client.delete_shared_agent_inspector_url(self.agent_id)
-        url3 = self.client.shared_agent_inspector_url(self.agent_id)
+        self.client.get_shared_agent_inspector_url(self.agent_id)
+        url3 = self.client.get_shared_agent_inspector_url(self.agent_id)
         self.assertTrue(url != url3)
 
