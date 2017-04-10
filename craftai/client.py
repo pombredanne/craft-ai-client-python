@@ -27,9 +27,9 @@ class CraftAIClient(object):
     def config(self, cfg):
         cfg = cfg.copy()
         (payload, signing_input, header, signature) = jwt_decode(cfg.get("token"))
-        cfg["owner"] = payload.get("owner");
-        cfg["project"] = payload.get("project")
-        cfg["url"] = payload.get("platform")
+        cfg["owner"] = cfg["owner"] || payload.get("owner");
+        cfg["project"] = cfg["project"] || payload.get("project")
+        cfg["url"] = cfg["url"] || payload.get("platform")
 
         if (not isinstance(cfg.get("project"), six.string_types)):
             raise CraftAiCredentialsError("""Unable to create client with no"""
