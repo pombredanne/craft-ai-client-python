@@ -27,8 +27,8 @@ class TestListAgents(unittest.TestCase):
 
     def test_list_agents(self):
         """list_agents should returns the list of agents in the current project."""
-        agents = self.client.list_agents()
-        self.assertTrue('agentsList' in agents.keys())
-        self.assertIsInstance(agents, dict)
+        agents_list = self.client.list_agents()
+        self.assertIsInstance(agents_list, list)
+        self.assertTrue(len(agents_list) == self.n_agents)
         for agent_id in self.agents_id:
-            self.assertTrue(agent_id in agents['agentsList'])
+            self.assertTrue(agent_id in agents_list)

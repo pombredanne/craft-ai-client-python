@@ -121,7 +121,7 @@ class CraftAIClient(object):
 
         agents = self._decode_response(resp)
 
-        return agents
+        return agents["agentsList"]
 
     def delete_agent(self, agent_id):
         # Raises an error when agent_id is invalid
