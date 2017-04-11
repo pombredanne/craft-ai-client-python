@@ -9,11 +9,16 @@
   CRAFT_TOKEN=<retrieved_token>
   ```
 
-3. Run `pip3 install -r requirements.txt` to install dependencies
-4. You can run the following script:
+3. To run the tests, run the following: 
 
   ```console
-  $ ./run-tests.sh
+  $ make init
+  ```
+
+4. To run the tests, run the following:
+
+  ```console
+  $ make test
   ```
 
 ## Releasing a new version (needs administrator rights) ##
