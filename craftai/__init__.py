@@ -1,3 +1,5 @@
+"""craft ai API python 2/3 client"""
+
 __title__ = 'craft-ai'
 __version__ = '1.1.0'
 __author__ = 'craft ai'

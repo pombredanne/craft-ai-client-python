@@ -4,7 +4,7 @@ disable=missing-docstring,locally-enabled,locally-disabled,duplicate-code
 
 [BASIC]
 
-good-names=i,j,k,ex,Run,_,e
+good-names=i,j,k,Run,_,e,f
 bad-names=foo,bar,baz,toto,tutu,tata
 
 method-rgx=(test_)?[a-z_][a-z0-9_]{2,40}$
