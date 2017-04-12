@@ -137,19 +137,6 @@ class CraftAIClient(object):
 
         return decoded_resp
 
-    def list_agents(self):
-        # No supplementary headers needed
-        headers = self._headers.copy()
-
-        req_url = "{}/agents".format(self._base_url)
-        resp = requests.get(req_url, headers=headers)
-
-        agents_list = self._decode_response(resp)
-
-        print (agents_list)
-
-        return agents_list["agentsList"]
-
     def get_shared_agent_inspector_url(self, agent_id, timestamp=None):
         # Raises an error when agent_id is invalid
         self._check_agent_id(agent_id)
