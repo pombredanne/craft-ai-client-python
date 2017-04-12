@@ -1,9 +1,28 @@
 import six
 import re
+import numbers
 
 from craftai.errors import *
-from craftai.operators import _OPERATORS
 from craftai.time import Time
+
+_OPERATORS = {
+    "is": lambda context, value: context == value,
+    ">=": lambda context, value: context >= value,
+    "<": lambda context, value: context < value,
+    "[in[": lambda context, value: context >= value[0] and context < value[1] if value[0] < value[1] else context >= value[0] or context < value[1]
+}
+
+_TIMEZONE_REGEX = re.compile('[+-]\d\d:\d\d')
+
+_VALUE_VALIDATORS = {
+    "continuous": lambda value: isinstance(value, numbers.Real),
+    "enum": lambda value: isinstance(value, six.string_types),
+    "timezone": lambda value: isinstance(value, six.string_types) and _TIMEZONE_REGEX.match(value) is not None,
+    "time_of_day": lambda value: isinstance(value, numbers.Real) and value >= 0 and value < 24,
+    "day_of_week": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 7,
+    "day_of_month": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 31,
+    "month_of_year": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 12
+}
 
 class Interpreter(object):
 
@@ -16,7 +35,8 @@ class Interpreter(object):
         context = Interpreter._rebuild_context(configuration, state, time)
     else:
         context = Interpreter.join_decide_args(args)
-    # self._check_context(configuration, context, version)
+    
+    Interpreter._check_context(configuration, context)
 
     decision = {}
     decision["output"] = {}
@@ -129,6 +149,41 @@ class Interpreter(object):
       final_result["standard_deviation"] = result.get("standard_deviation")
 
     return final_result
+
+  @staticmethod
+  def _check_context(configuration, context):
+    # Extract the required properties (i.e. those that are not the output)
+    expected_properties = [
+      p for p in configuration["context"] 
+      if not p in configuration["output"]
+    ]
+
+    # Retrieve the missing properties
+    missing_properties = [
+      p for p in expected_properties
+      if not p in context
+    ]
+
+    # Validate the values
+    bad_properties = [
+      p for p in expected_properties
+      if p in context and not _VALUE_VALIDATORS[configuration["context"][p]["type"]](context[p])
+    ]
+
+    if missing_properties or bad_properties:
+      missing_properties_messages = [
+        "expected property '{}' is not defined"
+        .format(p) for p in missing_properties
+      ]
+      bad_properties_messages = [
+        "'{}' is not a valid value for property '{}' of type '{}'"
+        .format(context[p], p, configuration["context"][p]["type"]) for p in bad_properties
+      ]
+
+      raise CraftAiDecisionError(
+        """Unable to take decision, the given context is not valid: {}.""".
+        format(", ".join(missing_properties_messages + bad_properties_messages))
+      )
 
   @staticmethod
   def _find_matching_child(node, context):
