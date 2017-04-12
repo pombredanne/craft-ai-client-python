@@ -26,6 +26,8 @@ _VALUE_VALIDATORS = {
   "month_of_year": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 12
 }
 
+_DECISION_VERSION = "1.0.0"
+
 class Interpreter(object):
 
   @staticmethod
@@ -45,6 +47,7 @@ class Interpreter(object):
     for output in configuration.get("output"):
       decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context)
     decision["context"] = context
+    decision["_version"] = _DECISION_VERSION
 
     return decision
 
@@ -235,10 +238,7 @@ class Interpreter(object):
   def _parse_tree(tree_object):
     # Checking definition of tree_object
     if not (tree_object and isinstance(tree_object, object)):
-      raise CraftAiDecisionError(
-        """Invalid decision tree format, the given object is not an"""
-        """ object or is empty."""
-      )
+      raise CraftAiDecisionError("Invalid decision tree format, the given json is not an object.")
 
     # Checking version existence
     tree_version = tree_object.get("_version")
@@ -251,7 +251,7 @@ class Interpreter(object):
     # Checking version and tree validity according to version
     if re.compile(r'\d+.\d+.\d+').match(tree_version) is None:
       raise CraftAiDecisionError(
-        """Invalid decision tree format, {} is not a valid version.""".
+        """Invalid decision tree format, "{}" is not a valid version.""".
         format(tree_version)
       )
     elif tree_version == "1.0.0":
