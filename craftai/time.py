@@ -1,5 +1,11 @@
+#
+# Ugly manual deactivation of these checks because python 2 wrongly believes the
+# system's 'time' package is the same than this time.py
+#
+#pylint: disable=import-self,ungrouped-imports,wrong-import-order,no-member
+import time as _time
+
 from datetime import datetime, tzinfo, timedelta
-from time import mktime
 
 import six
 
@@ -89,9 +95,9 @@ class Time(object):
   def timestamp_from_datetime(date_time):
     """Returns POSIX timestamp as float"""
     if date_time.tzinfo is None:
-      return mktime((date_time.year, date_time.month, date_time.day, date_time.hour,
-                     date_time.minute, date_time.second,
-                     -1, -1, -1)) + date_time.microsecond / 1e6
+      return _time.mktime((date_time.year, date_time.month, date_time.day, date_time.hour,
+                           date_time.minute, date_time.second,
+                           -1, -1, -1)) + date_time.microsecond / 1e6
     else:
       return (date_time - _EPOCH).total_seconds()
 
@@ -213,3 +219,5 @@ dt_timezone.utc = dt_timezone._create(timedelta(0))
 dt_timezone.min = dt_timezone._create(dt_timezone._minoffset)
 dt_timezone.max = dt_timezone._create(dt_timezone._maxoffset)
 #pylint: enable=C0103,W0212
+
+#pylint: enable=import-self,ungrouped-imports,wrong-import-order,no-member
