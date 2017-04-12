@@ -163,21 +163,21 @@ class Interpreter(object):
       p for p in expected_properties
       if not p in context
     ]
-    
-    # Validate the values 
+
+    # Validate the values
     bad_properties = [
-      p for p in expected_properties 
+      p for p in expected_properties
       if p in context and not _VALUE_VALIDATORS[configuration["context"][p]["type"]](context[p])
     ]
 
     if missing_properties or bad_properties:
       missing_properties_messages = [
-        "property '{}' is not defined"
+        "expected property '{}' is not defined"
         .format(p) for p in missing_properties
       ]
       bad_properties_messages = [
-        "property '{}' value, '{}', is not valid for type '{}'"
-        .format(p, context[p], configuration["context"][p]["type"]) for p in bad_properties
+        "'{}' is not a valid value for property '{}' of type '{}'"
+        .format(context[p], p, configuration["context"][p]["type"]) for p in bad_properties
       ]
 
       raise CraftAiDecisionError(
