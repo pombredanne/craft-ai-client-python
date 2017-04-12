@@ -6,7 +6,6 @@ from .data import invalid_data
 from craftai.client import CraftAIClient
 from craftai import errors as craft_err
 
-
 class TestListAgents(unittest.TestCase):
     """Checks that the client succeeds when getting an agent with OK input"""
     @classmethod

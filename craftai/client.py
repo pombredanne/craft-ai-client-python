@@ -137,6 +137,37 @@ class CraftAIClient(object):
 
         return decoded_resp
 
+    def get_shared_agent_inspector_url(self, agent_id, timestamp=None):
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
+
+        # No supplementary headers needed
+        headers = self._headers.copy()
+
+        req_url = "{}/agents/{}/shared".format(self._base_url, agent_id)
+        resp = requests.get(req_url, headers=headers)
+
+        url = self._decode_response(resp)
+
+        if timestamp != None:
+            return "{}?t={}".format(url["shortUrl"], str(timestamp))
+        else:
+            return url["shortUrl"]
+
+    def delete_shared_agent_inspector_url(self, agent_id):
+        # Raises an error when agent_id is invalid
+        self._check_agent_id(agent_id)
+
+        # No supplementary headers needed
+        headers = self._headers.copy()
+
+        req_url = "{}/agents/{}/shared".format(self._base_url, agent_id)
+        resp = requests.delete(req_url, headers=headers)
+
+        decoded_resp = self._decode_response(resp)
+
+        return decoded_resp
+
     ###################
     # Context methods #
     ###################
