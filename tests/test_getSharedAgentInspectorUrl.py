@@ -51,7 +51,7 @@ class TestGetSharedAgentsInspectorUrlSuccess(unittest.TestCase):
         url2 = self.client.get_shared_agent_inspector_url(self.agent_id)
         print(url2)
         self.assertTrue(url == url2)
-        self.client.get_shared_agent_inspector_url(self.agent_id)
+        self.client.delete_shared_agent_inspector_url(self.agent_id)
         url3 = self.client.get_shared_agent_inspector_url(self.agent_id)
+        print(url3)
         self.assertTrue(url != url3)
-
