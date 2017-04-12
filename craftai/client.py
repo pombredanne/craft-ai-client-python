@@ -112,6 +112,17 @@ class CraftAIClient(object):
 
         return agent
 
+    def list_agents(self):
+        # No supplementary headers needed
+        headers = self._headers.copy()
+
+        req_url = "{}/agents".format(self._base_url)
+        resp = requests.get(req_url, headers=headers)
+
+        agents = self._decode_response(resp)
+
+        return agents["agentsList"]
+
     def delete_agent(self, agent_id):
         # Raises an error when agent_id is invalid
         self._check_agent_id(agent_id)
