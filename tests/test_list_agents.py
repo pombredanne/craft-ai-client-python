@@ -29,6 +29,6 @@ class TestListAgents(unittest.TestCase):
         """list_agents should returns the list of agents in the current project."""
         agents_list = self.client.list_agents()
         self.assertIsInstance(agents_list, list)
-        self.assertTrue(len(agents_list) == self.n_agents)
+        self.assertEqual(len(agents_list), self.n_agents)
         for agent_id in self.agents_id:
             self.assertTrue(agent_id in agents_list)
