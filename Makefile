@@ -13,10 +13,10 @@ update-readme:
 	./scripts/update_readme.sh
 
 version-increment-major:
-	./scripts/update_version major
+	./scripts/update_version.sh major
 
 version-increment-minor:
-	./scripts/update_version minor
+	./scripts/update_version.sh minor
 
 version-increment-patch:
-	./scripts/update_version patch
+	./scripts/update_version.sh patch
