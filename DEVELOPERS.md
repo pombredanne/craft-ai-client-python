@@ -9,16 +9,21 @@
   CRAFT_TOKEN=<retrieved_token>
   ```
 
-3. Run `pip3 install -r requirements.txt` to install dependencies
-4. You can run the following script:
+3. To run the tests, run the following:
 
   ```console
-  $ ./run-tests.sh
+  $ make init
+  ```
+
+4. To run the tests, run the following:
+
+  ```console
+  $ make test
   ```
 
 ## Releasing a new version (needs administrator rights) ##
 
-1. Make sure the build of the master branch is passing  
+1. Make sure the build of the master branch is passing
   [![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-python/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-python)
 
 2. Checkout the master branch locally
@@ -29,20 +34,19 @@
   $ git reset --hard origin/master
   ```
 
-3. Updade the readme
+3. Updade the readme (this creates a git commit for you)
 
   ```console
-  $ ./scripts/update_readme.sh
-  $ git add README.* && git commit -m "Updated README files"
+  $ make update-readme
   ```
 
-4. Update to the new version vX.Y.Z (this should follow [semver](http://semver.org) guidelines)
+4. Increment the version
 
   ```console
-  $ edit ./craftai/__init__.py
-  $ git add ./craftai/__init__.py && git commit -m "Bumping to version vX.Y.Z"
-  $ git tag -a vX.Y.Z
+  $ make version-increment-patch
   ```
+
+  `version-increment-minor` and `version-increment-major` are also available.
 
 5. Push!
 

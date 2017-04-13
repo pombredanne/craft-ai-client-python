@@ -54,17 +54,11 @@ setup(
 
     packages=["craftai"],
     install_requires=[
-        "requests",
-        "six",
-        "datetime",
-        "pytz",
-        "tzlocal"
+        "requests==2.13.0",
+        "six==1.10",
+        "datetime==4.1.1",
+        "tzlocal==1.2.2"
     ],
-
-    extras_require={
-        "dev": ["python-dotenv"],
-        "test": ["tox", "nose"],
-    },
 
     include_package_data=True
 )

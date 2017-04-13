@@ -1,41 +1,45 @@
-import six
-import re
 import numbers
+import re
+import six
 
-from craftai.errors import *
+from craftai.errors import CraftAiDecisionError
 from craftai.time import Time
 
 _OPERATORS = {
-    "is": lambda context, value: context == value,
-    ">=": lambda context, value: context >= value,
-    "<": lambda context, value: context < value,
-    "[in[": lambda context, value: context >= value[0] and context < value[1] if value[0] < value[1] else context >= value[0] or context < value[1]
+  "is": lambda context, value: context == value,
+  ">=": lambda context, value: context >= value,
+  "<": lambda context, value: context < value,
+  "[in[": lambda context, value: context >= value[0] and
+          context < value[1] if value[0] < value[1] else context >= value[0] or context < value[1]
 }
 
-_TIMEZONE_REGEX = re.compile('[+-]\d\d:\d\d')
+_TIMEZONE_REGEX = re.compile(r'[+-]\d\d:\d\d')
 
 _VALUE_VALIDATORS = {
-    "continuous": lambda value: isinstance(value, numbers.Real),
-    "enum": lambda value: isinstance(value, six.string_types),
-    "timezone": lambda value: isinstance(value, six.string_types) and _TIMEZONE_REGEX.match(value) is not None,
-    "time_of_day": lambda value: isinstance(value, numbers.Real) and value >= 0 and value < 24,
-    "day_of_week": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 7,
-    "day_of_month": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 31,
-    "month_of_year": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 12
+  "continuous": lambda value: isinstance(value, numbers.Real),
+  "enum": lambda value: isinstance(value, six.string_types),
+  "timezone": lambda value: isinstance(value, six.string_types) and
+              _TIMEZONE_REGEX.match(value) is not None,
+  "time_of_day": lambda value: isinstance(value, numbers.Real) and value >= 0 and value < 24,
+  "day_of_week": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 7,
+  "day_of_month": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 31,
+  "month_of_year": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 12
 }
+
+_DECISION_VERSION = "1.0.0"
 
 class Interpreter(object):
 
   @staticmethod
   def decide(tree, args):
-    bare_tree, configuration, version = Interpreter._parse_tree(tree)
+    bare_tree, configuration, _ = Interpreter._parse_tree(tree)
     if configuration != {}:
-        state = args[0]
-        time = None if len(args) == 1 else args[1]
-        context = Interpreter._rebuild_context(configuration, state, time)
+      state = args[0]
+      time = None if len(args) == 1 else args[1]
+      context = Interpreter._rebuild_context(configuration, state, time)
     else:
-        context = Interpreter.join_decide_args(args)
-    
+      context = Interpreter.join_decide_args(args)
+
     Interpreter._check_context(configuration, context)
 
     decision = {}
@@ -43,6 +47,7 @@ class Interpreter(object):
     for output in configuration.get("output"):
       decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context)
     decision["context"] = context
+    decision["_version"] = _DECISION_VERSION
 
     return decision
 
@@ -52,58 +57,59 @@ class Interpreter(object):
 
   @staticmethod
   def _rebuild_context(configuration, state, time=None):
-      # Model should come from _parse_tree and is assumed to be checked upon
-      # already
-      mo = configuration["output"]
-      mc = configuration["context"]
+    # Model should come from _parse_tree and is assumed to be checked upon
+    # already
+    output = configuration["output"]
+    context = configuration["context"]
 
-      # We should not use the output key(s) to compare against
-      configuration_ctx = {
-          key: mc[key] for (key, value) in mc.items() if (key not in mo)
-      }
+    # We should not use the output key(s) to compare against
+    configuration_ctx = {
+      key: context[key] for (key, value) in context.items() if (key not in output)
+    }
 
-      # Check if we need the time object
-      to_generate = []
-      for prop in configuration_ctx.items():
-          prop_name = prop[0]
-          prop_attributes = prop[1]
-          if prop_attributes["type"] in ["time_of_day", "day_of_week", "day_of_month", "month_of_year", "timezone"]:
-              # case 1: is_generated is at True, we must generate the time for the associated context property
-              # case 2: is_generated is not given, by default at True, so we must generate it as well
-              case_1 = "is_generated" in list(prop_attributes.keys()) and prop[1]["is_generated"] == True
-              case_2 = "is_generated" not in list(prop_attributes.keys())
-              if case_1 or case_2:
-                to_generate.append(prop_name)
+    # Check if we need the time object
+    to_generate = []
+    for prop in configuration_ctx.items():
+      prop_name = prop[0]
+      prop_attributes = prop[1]
+      if prop_attributes["type"] in ["time_of_day", "day_of_week", "day_of_month",
+                                     "month_of_year", "timezone"]:
+        # is_generated is at True, we must generate the time for the associated context property
+        case_1 = "is_generated" in list(prop_attributes.keys()) and prop[1]["is_generated"]
+        # is_generated is not given, by default at True, so we must generate it as well
+        case_2 = "is_generated" not in list(prop_attributes.keys())
+        if case_1 or case_2:
+          to_generate.append(prop_name)
 
-      # Raise an exception if a time object is not provided but needed
-      if (not isinstance(time, Time)) and len(to_generate) > 0:
+    # Raise an exception if a time object is not provided but needed
+    if (not isinstance(time, Time)) and len(to_generate) > 0:
 
-          # Check for missings (not provided and need to be generated)
-          missings = []
-          for prop in to_generate:
-              if prop not in list(state.keys()):
-                  missings.append(prop_name)
+      # Check for missings (not provided and need to be generated)
+      missings = []
+      for prop in to_generate:
+        if prop not in list(state.keys()):
+          missings.append(prop_name)
 
-          # Raise an error if some need to be generated but not provided and no Time object
-          if len(missings) > 0:
-              raise CraftAiDecisionError(
-                """you must provide a Time object to decide() because"""
-                """ context properties {} need to be generated.""".format(missings)
-              )
-          else:
-              to_generate = []
+      # Raise an error if some need to be generated but not provided and no Time object
+      if len(missings) > 0:
+        raise CraftAiDecisionError(
+          """you must provide a Time object to decide() because"""
+          """ context properties {} need to be generated.""".format(missings)
+        )
+      else:
+        to_generate = []
 
-      # Generate context properties which need to
-      if len(to_generate) > 0:
-          for prop in to_generate:
-              state[prop] = time.to_dict()[configuration_ctx[prop]["type"]]
+    # Generate context properties which need to
+    if len(to_generate) > 0:
+      for prop in to_generate:
+        state[prop] = time.to_dict()[configuration_ctx[prop]["type"]]
 
-      # Rebuild the context with generated and non-generated values
-      context = {
-          feature: state.get(feature) for feature, properties in configuration_ctx.items()
-      }
+    # Rebuild the context with generated and non-generated values
+    context = {
+      feature: state.get(feature) for feature, properties in configuration_ctx.items()
+    }
 
-      return context
+    return context
 
   @staticmethod
   def _decide_recursion(node, context):
@@ -154,7 +160,7 @@ class Interpreter(object):
   def _check_context(configuration, context):
     # Extract the required properties (i.e. those that are not the output)
     expected_properties = [
-      p for p in configuration["context"] 
+      p for p in configuration["context"]
       if not p in configuration["output"]
     ]
 
@@ -187,32 +193,31 @@ class Interpreter(object):
 
   @staticmethod
   def _find_matching_child(node, context):
-      for child in node["children"]:
-          property_name = child["decision_rule"]["property"]
-          operand = child["decision_rule"]["operand"]
-          operator = child["decision_rule"]["operator"]
-          context_value = context.get(property_name)
-          if context_value is None:
-            raise CraftAiDecisionError(
-              """Unable to take decision, property '{}' is missing from the given context.""".
-              format(property_name)
-            )
-          if (not isinstance(operator, six.string_types) or
-                  not (operator in _OPERATORS)):
-              raise CraftAiDecisionError(
-                  """Invalid decision tree format, {} is not a valid"""
-                  """decision operator.""".
-                  format(operator)
-              )
+    for child in node["children"]:
+      property_name = child["decision_rule"]["property"]
+      operand = child["decision_rule"]["operand"]
+      operator = child["decision_rule"]["operator"]
+      context_value = context.get(property_name)
+      if context_value is None:
+        raise CraftAiDecisionError(
+          """Unable to take decision, property '{}' is missing from the given context.""".
+          format(property_name)
+        )
+      if (not isinstance(operator, six.string_types) or
+          not operator in _OPERATORS):
+        raise CraftAiDecisionError(
+          """Invalid decision tree format, {} is not a valid"""
+          """decision operator.""".format(operator)
+        )
 
-          # To be compared, continuous parameters should not be strings
-          if "continuous" in operator:
-              context_value = float(context_value)
-              operand = float(operand)
+      # To be compared, continuous parameters should not be strings
+      if "continuous" in operator:
+        context_value = float(context_value)
+        operand = float(operand)
 
-          if _OPERATORS[operator](context_value, operand):
-              return child
-      return {}
+      if _OPERATORS[operator](context_value, operand):
+        return child
+    return {}
 
   @staticmethod
   def join_decide_args(args):
@@ -233,10 +238,7 @@ class Interpreter(object):
   def _parse_tree(tree_object):
     # Checking definition of tree_object
     if not (tree_object and isinstance(tree_object, object)):
-      raise CraftAiDecisionError(
-        """Invalid decision tree format, the given object is not an"""
-        """ object or is empty."""
-      )
+      raise CraftAiDecisionError("Invalid decision tree format, the given json is not an object.")
 
     # Checking version existence
     tree_version = tree_object.get("_version")
@@ -247,17 +249,17 @@ class Interpreter(object):
       )
 
     # Checking version and tree validity according to version
-    if re.compile('\d+.\d+.\d+').match(tree_version) is None:
+    if re.compile(r'\d+.\d+.\d+').match(tree_version) is None:
       raise CraftAiDecisionError(
-        """Invalid decision tree format, {} is not a valid version.""".
+        """Invalid decision tree format, "{}" is not a valid version.""".
         format(tree_version)
       )
     elif tree_version == "1.0.0":
-      if (tree_object.get("configuration") is None):
+      if tree_object.get("configuration") is None:
         raise CraftAiDecisionError(
           """Invalid decision tree format, no configuration found"""
         )
-      if (tree_object.get("trees") is None):
+      if tree_object.get("trees") is None:
         raise CraftAiDecisionError(
           """Invalid decision tree format, no tree found."""
         )

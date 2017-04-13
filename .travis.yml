@@ -1,25 +1,20 @@
 language: python
-python: '3.5'
+python:
+  - "2.7"
+  - "3.3"
+  - "3.5"
 git:
   submodules: false
 before_install:
 - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
 - git submodule update --init --recursive
-install:
-- pip install --upgrade pip
-- pip install -r requirements.txt
-script: sh run-tests.sh
+- sudo apt-get -qq update
+- sudo apt-get install -y pandoc
+install: make init
+script: make test
 env:
-  matrix:
-  - TOXENV=py27
-  - TOXENV=py33
-  - TOXENV=py35
   global:
-  - secure: mekTrjLDQ0+GJqyGvcxLJ9L6TgKQu4O6mzke5nBAfedWZL21HuN/Qr7OJUrZ6MmdYWgo5t6yZZyybwBtK4+eodOmRuA7BNDg5bsGyrdCEB18B09BONwcxErbPHUJKbHmXir2oOSyG/BdB3THpzzZ8uj3mZmhbD+/uX0ghpVJaarxvvgaoRJt2Vv73LfmOgd2CWN4PBhSxYiNYRcH+wheiCFoMVaUDVFYbeHjyY/Abd8XS1DEeh3GAJHgo3gt7ImjhKZd3EVquRoqfR/gy1JKnSvzzDAWF1d8+hue0Cd73Rq7Nw55cXaWqdseQ9nf4HeX/tmcJno/yYundShXZj3EX0qSQeB8wAf+SmGxPk+zF1x1MAMsXtJaWqfQSefXNiBOPRjN+hVDIdzMudD8tY4f4s6wfIwMCs7X5O0n3hgDPkhes1xHvad3puueTrxLVdSRxm+50z2hZRnbHdSHrWmxYuNsRRGh3GrOEeeQoLEwbOScVlGlZ600GqJXdCRI4XDqN/XyiwcRK2O3LDw0vbq9TxMfLPNtIaFWmYIRhQ5+kkssSXtkVsVakig2kBJjCxuexUu5e4B/2e/tzBxIRxnWlwECD9U9ALGP6fv5O0rB1PmRGEil4BhW06bZNfnB0PXS7R6qH2BiKow4/Txq7k6bg/YCbkep+rr2lT4Ha5nReFI=
-  - secure: pt4GJmwRl22YrFpfs7oLAqM2Ebiicp6rxaFk2b0C1vWpzdRyTAq9tS2NiZnpXXJGVsi5wd1N2J0BlUsuOpvENZsRg9XkBv3u0xRNpPwPcKBo7MXJYsKpXHlIvr3AMlWtyZ042g8h6xVrw3vH/ocLiiJAoMh46p9lM832QOFkD9gK6PyR5VdwEQ9swtQclOkvOUe9xmmjCiUGGV7naiVmCILP9HMJS7/quRmshTLRj3/vvCoidcONEHNVcB4d+Quyw5CwD6F+rGpE1RGcfYIQeVzgPL2xnteZdCaxkWpnEoSJws8nRnd/7rBLT9Z6g3Iei7we4DeVGHVDCML5BAsSsCh1nsDpFCpgWvMS/dDtqWbuYCHMukh89gswdumwPZhaHSrF6yPxLN3Ix2ka0Sb/3GhIn9mdnzGGMKjzuUV/bexFEXYaxmgQmhYrsh3E4kJWolwaoPIcXUs0UbBgHnD+ayRrr/FfYtRTlSjmAukzhsS+FtgTIvMkx59kA/32mThtKE/GKAM6EEJ49a//3PuWu7Bo0SZUJGDjrwzvNsda6G0jzbcNhnn4cncoSr4k2uaE5e4sNgPm4fHYtTZIxjftwftUtF2nac+y+6kiDbU2LQDTw/NuTFhA3LjSaqKUXfHVcF/XN7YGuXdfds82noydTjADTbnuF7jdghtudgjV3ik=
   - secure: V7dR6IVAnEAGqcEVOaH97jzB2qxUssqRY7jHt6HbgJWVYrdmZ3r2F42UVCUFK/8w5WHlpg4v/HKew+G8FXVIq0jhtJuNz6sA6ODsd+VldmjddtACa+t7opvwfgdcXRibeI0MZ1YW9Y/tYVkIj5zeinxfiMWCykzvRAALXD9CxrMrdmVR2XBfk5KGgAQQGUnZNoZsI17Ojzz+4CXQhZOwo/giZP6xxa5bPPQ7wgu6h3Q2aOiMQfFYHqx91lrZSnlQVjzxpH7MI7GTQZBs/1mqP4vFtjwyAdkcGKqEY8N+yvQjNRABv1Vhr8AGphDe1hPx8dm8A8L7knEvuQoYKL3RPTXKqpWPHWSJ9dRFhj4O9A4zOFK39cCAkRCRW42V1mvwmTWArWh/MoHXJjdLa+pBNls2fEwoUg4lQBxPLwuka+UWQfUMbBiq4Z4pU78V8BHd6e32yDaeh4HRP+w6K0K74n99PSF4tERxyIvY8gxX0y8ENN7PTxI61tVZP6ABOAaUUV23KhC3LHleUjmXbdOQzbYF5glr3HlUTC0pYd7fj9MjbL6seT/A7WARqKC4YGp64r71dmy5E/U7A3PmlCOAvDouvJwdNA1iE+nGPeMkuTACrC8fS2ZwlqL2vv0mKzmpNSOXCsQM+QIn8/kY5/ZIoFFz7omayMP2UNN7QMpSssI=
-before_deploy:
-- git describe --tags --match='v*'
 deploy:
   provider: pypi
   user: ops
@@ -29,10 +24,7 @@ deploy:
   on:
     tags: true
     branch: master
-sudo: false
-addons:
-  apt_packages:
-  - pandoc
+    python: "3.5"
 notifications:
   slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
   email:
