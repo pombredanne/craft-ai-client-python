@@ -17,6 +17,7 @@ pandoc --from=markdown_github --to=rst --output=README.rst README.md
 
 # Commit!
 echo "Commiting the two README files"
-git add README.md README.rst && git commit -m "Updated README files"
+git add README.md README.rst
+git commit -m "Updated README files"
 
 echo "Success!"

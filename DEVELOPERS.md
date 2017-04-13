@@ -40,13 +40,13 @@
   $ make update-readme
   ```
 
-4. Update to the new version vX.Y.Z (this should follow [semver](http://semver.org) guidelines)
+4. Increment the version
 
   ```console
-  $ edit ./craftai/__init__.py
-  $ git add ./craftai/__init__.py && git commit -m "Bumping to version vX.Y.Z"
-  $ git tag -a vX.Y.Z
+  $ make version-increment-patch
   ```
+
+  `version-increment-minor` and `version-increment-major` are also available.
 
 5. Push!
 
