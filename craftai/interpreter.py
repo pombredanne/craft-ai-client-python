@@ -21,7 +21,7 @@ _VALUE_VALIDATORS = {
   "timezone": lambda value: isinstance(value, six.string_types) and
               _TIMEZONE_REGEX.match(value) is not None,
   "time_of_day": lambda value: isinstance(value, numbers.Real) and value >= 0 and value < 24,
-  "day_of_week": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 7,
+  "day_of_week": lambda value: isinstance(value, six.integer_types) and value >= 0 and value <= 6,
   "day_of_month": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 31,
   "month_of_year": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 12
 }
