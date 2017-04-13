@@ -698,7 +698,36 @@ Retrieve
 List
 ^^^^
 
-Not implemented, yet.
+.. code:: python
+
+    client.list_agents()
+    # Return a list of agents' name
+    # Example: [ "impervious_kraken", "joyful_octopus", ... ]
+
+Create and retrieve shared url
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+| Create and get a shareable url to view an agent tree.
+| Only one url can be created at a time.
+
+.. code:: python
+
+    client.get_shared_agent_inspector_url(
+        "impervious_kraken", # The agent id.
+        1464600256 # optional, the timestamp for which you want to inspect the tree.
+    )
+
+Delete shared url
+^^^^^^^^^^^^^^^^^
+
+| Delete a shareable url.
+| The previous url cannot access the agent tree anymore.
+
+.. code:: python
+
+    client.delete_shared_agent_inspector_url(
+        'impervious_kraken' # The agent id.
+    )
 
 Context
 ~~~~~~~
