@@ -150,8 +150,8 @@ class CraftAIClient(object):
 
     if timestamp != None:
       return "{}?t={}".format(url["shortUrl"], str(timestamp))
-    else:
-      return url["shortUrl"]
+
+    return url["shortUrl"]
 
   def delete_shared_agent_inspector_url(self, agent_id):
     # Raises an error when agent_id is invalid
