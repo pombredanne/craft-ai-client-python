@@ -82,7 +82,7 @@ class Interpreter(object):
           to_generate.append(prop_name)
 
     # Raise an exception if a time object is not provided but needed
-    if (not isinstance(time, Time)) and len(to_generate) > 0:
+    if to_generate and not isinstance(time, Time):
 
       # Check for missings (not provided and need to be generated)
       missings = []
@@ -91,7 +91,7 @@ class Interpreter(object):
           missings.append(prop_name)
 
       # Raise an error if some need to be generated but not provided and no Time object
-      if len(missings) > 0:
+      if missings:
         raise CraftAiDecisionError(
           """you must provide a Time object to decide() because"""
           """ context properties {} need to be generated.""".format(missings)
@@ -100,7 +100,7 @@ class Interpreter(object):
         to_generate = []
 
     # Generate context properties which need to
-    if len(to_generate) > 0:
+    if to_generate:
       for prop in to_generate:
         state[prop] = time.to_dict()[configuration_ctx[prop]["type"]]
 
