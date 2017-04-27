@@ -194,10 +194,14 @@ class CraftAIClient(object):
       req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
       resp = session.post(req_url, headers=headers, data=json_pl)
 
-      decoded_resp = self._decode_response(resp)
+      self._decode_response(resp)
 
       if next_offset >= len(operations):
-        return decoded_resp
+        return {
+          'message': 'Successfully added %i operation(s) to the agent "%s/%s/%s" context.'
+                     % (len(operations), self.config['owner'], self.config['project'], agent_id)
+        }
+
       offset = next_offset
 
   def get_operations_list(self, agent_id):
