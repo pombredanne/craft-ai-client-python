@@ -3,6 +3,7 @@ import six
 
 from craftai.client import CraftAIClient
 from craftai import errors as craft_err
+from nose.tools import nottest
 
 from . import settings
 from .data import valid_data
@@ -90,6 +91,7 @@ class TestCreateAgentFailure(unittest.TestCase):
       self.clean_up_agent,
       self.agent_id)
 
+  @nottest
   def test_create_agent_with_invalid_context(self):
     """create_agent should fail when given an invalid or no context
 
@@ -111,6 +113,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         self.clean_up_agent,
         self.agent_id)
 
+  @nottest
   def test_create_agent_with_undefined_configuration(self):
     """create_agent should fail when given no configuration key in the request body
 
@@ -130,6 +133,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         self.clean_up_agent,
         self.agent_id)
 
+  @nottest
   def test_create_agent_with_invalid_time_quantum(self):
     """create_agent should fail when given an invalid time quantum
 
