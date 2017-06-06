@@ -18,7 +18,11 @@ class TestCreateAgentSuccess(unittest.TestCase):
 
   def setUp(self):
     # Makes sure that no agent with the same ID already exists
-    self.client.delete_agent(self.agent_id)
+    resp = self.client.delete_agent(self.agent_id)
+    self.assertIsInstance(resp, dict)
+    resp_keys = resp.keys()
+    self.assertTrue("message" in resp_keys)
+
 
   def clean_up_agent(self, aid):
     # Makes sure that no agent with the standard ID remains
@@ -58,7 +62,10 @@ class TestCreateAgentFailure(unittest.TestCase):
 
   def setUp(self):
     # Makes sure that no agent with the same ID already exists
-    self.client.delete_agent(self.agent_id)
+    resp = self.client.delete_agent(self.agent_id)
+    self.assertIsInstance(resp, dict)
+    resp_keys = resp.keys()
+    self.assertTrue("message" in resp_keys)
 
   def clean_up_agent(self, aid):
     # Makes sure that no agent with the standard ID remains
