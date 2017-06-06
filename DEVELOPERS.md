@@ -2,20 +2,23 @@
 
 ## Running the tests locally ##
 
-1. Retrieve your **craft ai** _owner_ and _token_.
-2. On your dev machine, at the root of your clone, create a file named `.env` with the following content
+1. Make sure you have the following installed:
+  - [Python](https://www.python.org) (any version >2.7 should work),
+  - bash, make and sed (needed for the build scripts).
+2. Create a test **craft ai** project and retrieve its **write token**.
+3. At the root of your local clone, create a file named `.env` with the following content.
 
   ```
   CRAFT_TOKEN=<retrieved_token>
   ```
 
-3. To run the tests, run the following:
+4. Install the dependencies.
 
   ```console
   $ make init
   ```
 
-4. To run the tests, run the following:
+5. Run the tests!
 
   ```console
   $ make test
@@ -24,9 +27,10 @@
 ## Releasing a new version (needs administrator rights) ##
 
 1. Make sure the build of the master branch is passing
+
   [![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-python/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-python)
 
-2. Checkout the master branch locally
+2. Checkout the master branch locally.
 
   ```console
   $ git fetch
@@ -34,23 +38,34 @@
   $ git reset --hard origin/master
   ```
 
-3. Updade the readme (this creates a git commit for you)
+3. Updade the readme from **craft ai** internal _"CMS"_.
 
   ```console
   $ make update-readme
   ```
 
-4. Increment the version
+  > This will create a git commit.
+
+
+4. Increment the version.
 
   ```console
   $ make version-increment-patch
   ```
 
-  `version-increment-minor` and `version-increment-major` are also available.
+  `make version-increment-minor` and `make version-increment-major` are also
+  available - see [semver](http://semver.org) for a guideline on when to use
+  which.
 
-5. Push!
+  > This will create a git commit and a git tag
+
+5. Push everything!
 
   ```console
-  $ git push -f origin master
+  $ git push origin master
   $ git push --tags
   ```
+
+  > This will trigger the publishing of this new version to
+  [PyPI](https://pypi.python.org/pypi/craft-ai) by
+  [Travis](https://travis-ci.org/craft-ai/craft-ai-client-python)
