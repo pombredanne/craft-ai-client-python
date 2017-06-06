@@ -3,6 +3,7 @@ import six
 
 from craftai.client import CraftAIClient
 from craftai import errors as craft_err
+from nose.tools import nottest
 
 from . import settings
 from .data import valid_data
@@ -18,7 +19,11 @@ class TestCreateAgentSuccess(unittest.TestCase):
 
   def setUp(self):
     # Makes sure that no agent with the same ID already exists
-    self.client.delete_agent(self.agent_id)
+    resp = self.client.delete_agent(self.agent_id)
+    self.assertIsInstance(resp, dict)
+    resp_keys = resp.keys()
+    self.assertTrue("message" in resp_keys)
+
 
   def clean_up_agent(self, aid):
     # Makes sure that no agent with the standard ID remains
@@ -58,7 +63,10 @@ class TestCreateAgentFailure(unittest.TestCase):
 
   def setUp(self):
     # Makes sure that no agent with the same ID already exists
-    self.client.delete_agent(self.agent_id)
+    resp = self.client.delete_agent(self.agent_id)
+    self.assertIsInstance(resp, dict)
+    resp_keys = resp.keys()
+    self.assertTrue("message" in resp_keys)
 
   def clean_up_agent(self, aid):
     # Makes sure that no agent with the standard ID remains
@@ -83,6 +91,7 @@ class TestCreateAgentFailure(unittest.TestCase):
       self.clean_up_agent,
       self.agent_id)
 
+  @nottest
   def test_create_agent_with_invalid_context(self):
     """create_agent should fail when given an invalid or no context
 
@@ -104,6 +113,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         self.clean_up_agent,
         self.agent_id)
 
+  @nottest
   def test_create_agent_with_undefined_configuration(self):
     """create_agent should fail when given no configuration key in the request body
 
@@ -123,6 +133,7 @@ class TestCreateAgentFailure(unittest.TestCase):
         self.clean_up_agent,
         self.agent_id)
 
+  @nottest
   def test_create_agent_with_invalid_time_quantum(self):
     """create_agent should fail when given an invalid time quantum
 
