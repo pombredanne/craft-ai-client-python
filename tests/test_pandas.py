@@ -1,8 +1,9 @@
 import pandas as pd
-import numpy as np
+from numpy.random import randn
 
 import craftai.pandas
-from nose.tools import assert_raises, assert_equal, with_setup
+
+from nose.tools import assert_raises, with_setup
 
 from . import settings
 
@@ -38,8 +39,8 @@ def teardown():
   CLIENT.delete_agent(AGENT_ID)
 
 @with_setup(setup, teardown)
-def test_add_operations_df_no_time_index():
-  df = pd.DataFrame(np.random.randn(10, 5),
+def test_add_operations_df_bad_index():
+  df = pd.DataFrame(randn(10, 5),
                     columns=['a', 'b', 'c', 'd', 'e'])
 
   assert_raises(
@@ -51,7 +52,7 @@ def test_add_operations_df_no_time_index():
 
 @with_setup(setup, teardown)
 def test_add_operations_df():
-  df = pd.DataFrame(np.random.randn(300,5),
+  df = pd.DataFrame(randn(300, 5),
                     columns=['a', 'b', 'c', 'd', 'e'],
                     index=pd.date_range('20130101', periods=300, freq='T'))
 
@@ -59,7 +60,7 @@ def test_add_operations_df():
 
 @with_setup(setup, teardown)
 def test_add_operations_df_unexpected_property():
-  df = pd.DataFrame(np.random.randn(300,6),
+  df = pd.DataFrame(randn(300, 6),
                     columns=['a', 'b', 'c', 'd', 'e', 'f'],
                     index=pd.date_range('20130101', periods=300, freq='T'))
 

@@ -4,9 +4,10 @@ disable=missing-docstring,locally-enabled,locally-disabled,duplicate-code
 
 [BASIC]
 
-good-names=i,j,k,Run,_,e,f
+good-names=i,j,k,Run,_,e,f,df
 bad-names=foo,bar,baz,toto,tutu,tata
 
+function-rgx=(test_)?[a-z_][a-z0-9_]{2,40}$
 method-rgx=(test_)?[a-z_][a-z0-9_]{2,40}$
 
 [FORMAT]
