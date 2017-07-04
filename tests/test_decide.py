@@ -1,10 +1,7 @@
 import json
 import os
 
-from craftai import errors as craft_err
-from craftai.client import CraftAIClient
-from craftai.interpreter import Interpreter
-from craftai.time import Time
+from craftai import Client, Interpreter, Time, errors as craft_err
 from nose.tools import assert_raises, assert_equal
 
 from . import settings
@@ -20,7 +17,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 EXPECS_DIR = os.path.join(HERE, "data", "interpreter", "expectations")
 TREES_DIR = os.path.join(HERE, "data", "interpreter", "trees")
 
-CLIENT = CraftAIClient(settings.CRAFT_CFG)
+CLIENT = Client(settings.CRAFT_CFG)
 
 def interpreter_tests_generator():
   tree_files = os.listdir(TREES_DIR)

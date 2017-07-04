@@ -1,7 +1,6 @@
 import unittest
 
-from craftai.client import CraftAIClient
-from craftai import errors as craft_err
+import craftai
 
 from . import settings
 from .data import valid_data
@@ -13,7 +12,7 @@ class TestGetDecisionTreeSuccess(unittest.TestCase):
   """
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = craftai.Client(settings.CRAFT_CFG)
     cls.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
   def setUp(self):
@@ -46,7 +45,7 @@ class TestGetDecisionTreeFailure(unittest.TestCase):
   tree at a given timestamp with bad input."""
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = craftai.Client(settings.CRAFT_CFG)
     cls.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
   def setUp(self):
@@ -68,7 +67,7 @@ class TestGetDecisionTreeFailure(unittest.TestCase):
     """
     for empty_id in invalid_data.UNDEFINED_KEY:
       self.assertRaises(
-        craft_err.CraftAiBadRequestError,
+        craftai.errors.CraftAiBadRequestError,
         self.client.get_decision_tree,
         invalid_data.UNDEFINED_KEY[empty_id],
         valid_data.VALID_TIMESTAMP)
@@ -80,7 +79,7 @@ class TestGetDecisionTreeFailure(unittest.TestCase):
     that doesn't exist.
     """
     self.assertRaises(
-      craft_err.CraftAiNotFoundError,
+      craftai.errors.CraftAiNotFoundError,
       self.client.get_decision_tree,
       invalid_data.UNKNOWN_ID,
       valid_data.VALID_TIMESTAMP)
@@ -88,7 +87,7 @@ class TestGetDecisionTreeFailure(unittest.TestCase):
   def test_get_decision_tree_with_invalid_timestamp(self):
     for inv_ts in invalid_data.INVALID_TIMESTAMPS:
       self.assertRaises(
-        craft_err.CraftAiBadRequestError,
+        craftai.errors.CraftAiBadRequestError,
         self.client.get_decision_tree,
         self.agent_id,
         invalid_data.INVALID_TIMESTAMPS[inv_ts])

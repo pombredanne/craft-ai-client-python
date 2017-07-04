@@ -1,6 +1,6 @@
 import unittest
 
-from craftai.time import Time
+from craftai import Time
 
 class TestTime(unittest.TestCase):
 
