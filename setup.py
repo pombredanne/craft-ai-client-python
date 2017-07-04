@@ -59,6 +59,11 @@ setup(
     "datetime==4.1.1",
     "tzlocal==1.2.2"
   ],
+  extras_require = {
+    "pandas_support":  [
+      "pandas>=0.20"
+    ]
+  },
 
   include_package_data=True
 )
