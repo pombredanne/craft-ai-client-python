@@ -1,5 +1,6 @@
 import unittest
 
+# Preserving the 'old' way to do the imports here to ensure retrocompatibility
 from craftai.client import CraftAIClient
 from craftai import errors as craft_err
 

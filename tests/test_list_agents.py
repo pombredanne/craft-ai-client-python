@@ -1,6 +1,6 @@
 import unittest
 
-from craftai.client import CraftAIClient
+import craftai
 
 from . import settings
 from .data import valid_data
@@ -9,7 +9,7 @@ class TestListAgents(unittest.TestCase):
   """Checks that the client succeeds when getting an agent with OK input"""
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = craftai.Client(settings.CRAFT_CFG)
     cls.n_agents = 5
     cls.agents_id = ['{}_{}_{}'.format(valid_data.VALID_ID, i, settings.RUN_ID)
                      for i in range(cls.n_agents)]

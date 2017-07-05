@@ -1,7 +1,6 @@
 import unittest
 
-from craftai.client import CraftAIClient
-from craftai import errors as craft_err
+import craftai
 
 from . import settings
 from .data import valid_data, invalid_data
@@ -11,7 +10,7 @@ class TestDeleteAgentWithValidID(unittest.TestCase):
   """Checks that the client succeeds when deleting an agent with OK input"""
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = craftai.Client(settings.CRAFT_CFG)
     cls.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
   def setUp(self):
@@ -20,7 +19,7 @@ class TestDeleteAgentWithValidID(unittest.TestCase):
     # it is necessary to catch this kind of errors.
     try:
       self.client.create_agent(valid_data.VALID_CONFIGURATION, self.agent_id)
-    except craft_err.CraftAiBadRequestError as e:
+    except craftai.errors.CraftAiBadRequestError as e:
       if "one already exists" not in e.message:
         raise e
 
@@ -35,7 +34,7 @@ class TestDeleteAgentWithUnknownID(unittest.TestCase):
 
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = craftai.Client(settings.CRAFT_CFG)
     cls.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
   def test_delete_agent_with_unknown_id(self):
@@ -59,10 +58,10 @@ class TestDeleteAgentWithInvalidID(unittest.TestCase):
   """Checks that the client fails when trying to delete an invalid agent"""
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = craftai.Client(settings.CRAFT_CFG)
 
   def setUp(self):
-    self.client = CraftAIClient(settings.CRAFT_CFG)
+    self.client = craftai.Client(settings.CRAFT_CFG)
 
   def test_delete_agent_with_invalid_id(self):
     """delete_agent should fail when given a non-string/empty string ID
@@ -74,6 +73,6 @@ class TestDeleteAgentWithInvalidID(unittest.TestCase):
 
     for empty_id in invalid_data.UNDEFINED_KEY:
       self.assertRaises(
-        craft_err.CraftAiBadRequestError,
+        craftai.errors.CraftAiBadRequestError,
         self.client.delete_agent,
         invalid_data.UNDEFINED_KEY[empty_id])

@@ -1,8 +1,7 @@
 import unittest
 import six
 
-from craftai.client import CraftAIClient
-from craftai import errors as craft_err
+from craftai import Client, errors as craft_err
 from nose.tools import nottest
 
 from . import settings
@@ -14,7 +13,7 @@ class TestCreateAgentSuccess(unittest.TestCase):
 
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = Client(settings.CRAFT_CFG)
     cls.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
   def setUp(self):
@@ -58,7 +57,7 @@ class TestCreateAgentFailure(unittest.TestCase):
 
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = Client(settings.CRAFT_CFG)
     cls.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
   def setUp(self):

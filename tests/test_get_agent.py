@@ -1,7 +1,6 @@
 import unittest
 
-from craftai.client import CraftAIClient
-from craftai import errors as craft_err
+import craftai
 
 from . import settings
 from .data import valid_data
@@ -11,7 +10,7 @@ class TestGetAgentSuccess(unittest.TestCase):
   """Checks that the client succeeds when getting an agent with OK input"""
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = craftai.Client(settings.CRAFT_CFG)
     cls.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
   def setUp(self):
@@ -38,7 +37,7 @@ class TestGetAgentFailure(unittest.TestCase):
   """Checks that the client fails properly when getting an agent with bad input"""
   @classmethod
   def setUpClass(cls):
-    cls.client = CraftAIClient(settings.CRAFT_CFG)
+    cls.client = craftai.Client(settings.CRAFT_CFG)
     cls.agent_id = valid_data.VALID_ID  + "_" + settings.RUN_ID
 
   def setUp(self):
@@ -59,7 +58,7 @@ class TestGetAgentFailure(unittest.TestCase):
     """
     for empty_id in invalid_data.UNDEFINED_KEY:
       self.assertRaises(
-        craft_err.CraftAiBadRequestError,
+        craftai.errors.CraftAiBadRequestError,
         self.client.get_agent,
         invalid_data.UNDEFINED_KEY[empty_id])
 
@@ -70,6 +69,6 @@ class TestGetAgentFailure(unittest.TestCase):
     that doesn't exist.
     """
     self.assertRaises(
-      craft_err.CraftAiNotFoundError,
+      craftai.errors.CraftAiNotFoundError,
       self.client.get_agent,
       invalid_data.UNKNOWN_ID)
