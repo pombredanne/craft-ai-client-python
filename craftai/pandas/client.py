@@ -4,6 +4,7 @@ import pandas as pd
 
 from .. import Client as VanillaClient
 from ..errors import CraftAiBadRequestError
+from .interpreter import Interpreter
 
 def chunker(to_be_chunked_df, chunk_size):
   return (to_be_chunked_df[pos:pos + chunk_size]
@@ -43,3 +44,7 @@ class Client(VanillaClient):
       [operation['context'] for operation in operations_list],
       index=pd.to_datetime([operation['timestamp'] for operation in operations_list], unit='s')
     )
+
+  @staticmethod
+  def decide(tree, *args):
+    return Interpreter.decide(tree, args)

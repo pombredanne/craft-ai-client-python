@@ -22,7 +22,8 @@ indent-after-paren=2
 
 [TYPECHECK]
 
-generated-members=requests.*
+generated-members=requests\..*
+ignored-classes=dict
 
 [REPORTS]
 

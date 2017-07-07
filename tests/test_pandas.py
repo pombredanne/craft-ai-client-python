@@ -149,3 +149,29 @@ def test_get_operations_list_df_complex_agent():
   assert_equal(len(df.dtypes), 3)
   assert_equal(df.first_valid_index(), pd.Timestamp('2013-01-01 00:00:00'))
   assert_equal(df.last_valid_index(), pd.Timestamp('2013-01-10 00:00:00'))
+
+@with_setup(setup_complex_agent_with_data, teardown)
+def test_decide_df_complex_agent():
+  tree = CLIENT.get_decision_tree(AGENT_ID, COMPLEX_AGENT_DATA.last_valid_index().value // 10 ** 9)
+  df = CLIENT.decide(tree, COMPLEX_AGENT_DATA)
+
+  assert_equal(len(df), 10)
+  assert_equal(len(df.dtypes), 3)
+  assert_equal(df.first_valid_index(), pd.Timestamp('2013-01-01 00:00:00'))
+  assert_equal(df.last_valid_index(), pd.Timestamp('2013-01-10 00:00:00'))
+  assert_equal(
+    df['b_predicted_value'].tolist(),
+    [
+      'Pierre',
+      'Paul', 'Paul', 'Paul',
+      'Jacques', 'Jacques', 'Jacques', 'Jacques', 'Jacques', 'Jacques'
+    ]
+  )
+
+  # Also works as before, with a plain context
+  output = CLIENT.decide(tree, {
+    'a': 1,
+    'tz': '+02:00'
+  })
+
+  assert_equal(output['output']['b']['predicted_value'], 'Pierre')
