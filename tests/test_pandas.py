@@ -8,7 +8,7 @@ from nose.tools import assert_equal, assert_raises, with_setup
 from . import settings
 
 AGENT_ID = "test_pandas_" + settings.RUN_ID
-AGENT_CONFIGURATION = {
+SIMPLE_AGENT_CONFIGURATION = {
   "context": {
     "a": {
       "type": "continuous"
@@ -29,16 +29,21 @@ AGENT_CONFIGURATION = {
   "output": ["a"],
   "time_quantum": 100
 }
+SIMPLE_AGENT_DATA = pd.DataFrame(
+  randn(300, 5),
+  columns=['a', 'b', 'c', 'd', 'e'],
+  index=pd.date_range('20130101', periods=300, freq='T')
+)
 CLIENT = craftai.pandas.Client(settings.CRAFT_CFG)
 
-def setup():
+def setup_simple_agent():
   CLIENT.delete_agent(AGENT_ID)
-  CLIENT.create_agent(AGENT_CONFIGURATION, AGENT_ID)
+  CLIENT.create_agent(SIMPLE_AGENT_CONFIGURATION, AGENT_ID)
 
 def teardown():
   CLIENT.delete_agent(AGENT_ID)
 
-@with_setup(setup, teardown)
+@with_setup(setup_simple_agent, teardown)
 def test_add_operations_df_bad_index():
   df = pd.DataFrame(randn(10, 5),
                     columns=['a', 'b', 'c', 'd', 'e'])
@@ -50,15 +55,14 @@ def test_add_operations_df_bad_index():
     df
   )
 
-@with_setup(setup, teardown)
+@with_setup(setup_simple_agent, teardown)
 def test_add_operations_df():
-  df = pd.DataFrame(randn(300, 5),
-                    columns=['a', 'b', 'c', 'd', 'e'],
-                    index=pd.date_range('20130101', periods=300, freq='T'))
+  CLIENT.add_operations(AGENT_ID, SIMPLE_AGENT_DATA)
+  agent = CLIENT.get_agent(AGENT_ID)
+  assert_equal(agent['firstTimestamp'], SIMPLE_AGENT_DATA.first_valid_index().value // 10 ** 9)
+  assert_equal(agent['lastTimestamp'], SIMPLE_AGENT_DATA.last_valid_index().value // 10 ** 9)
 
-  CLIENT.add_operations(AGENT_ID, df)
-
-@with_setup(setup, teardown)
+@with_setup(setup_simple_agent, teardown)
 def test_add_operations_df_unexpected_property():
   df = pd.DataFrame(randn(300, 6),
                     columns=['a', 'b', 'c', 'd', 'e', 'f'],
@@ -71,21 +75,16 @@ def test_add_operations_df_unexpected_property():
     df
   )
 
-def setup_with_data():
+def setup_simple_agent_with_data():
   CLIENT.delete_agent(AGENT_ID)
-  CLIENT.create_agent(AGENT_CONFIGURATION, AGENT_ID)
+  CLIENT.create_agent(SIMPLE_AGENT_CONFIGURATION, AGENT_ID)
+  CLIENT.add_operations(AGENT_ID, SIMPLE_AGENT_DATA)
 
-  df = pd.DataFrame(randn(100, 5),
-                    columns=['a', 'b', 'c', 'd', 'e'],
-                    index=pd.date_range('20130101', periods=100, freq='T'))
-
-  CLIENT.add_operations(AGENT_ID, df)
-
-@with_setup(setup_with_data, teardown)
+@with_setup(setup_simple_agent_with_data, teardown)
 def test_get_operations_list_df():
   df = CLIENT.get_operations_list(AGENT_ID)
 
-  assert_equal(len(df), 100)
+  assert_equal(len(df), 300)
   assert_equal(len(df.dtypes), 5)
   assert_equal(df.first_valid_index(), pd.Timestamp('2013-01-01 00:00:00'))
-  assert_equal(df.last_valid_index(), pd.Timestamp('2013-01-01 01:39:00'))
+  assert_equal(df.last_valid_index(), pd.Timestamp('2013-01-01 04:59:00'))
