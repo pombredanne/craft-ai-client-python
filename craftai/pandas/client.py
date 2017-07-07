@@ -33,3 +33,11 @@ class Client(VanillaClient):
       }
     else:
       return super(Client, self).add_operations(agent_id, operations)
+
+  def get_operations_list(self, agent_id):
+    operations_list = super(Client, self).get_operations_list(agent_id)
+
+    return pd.DataFrame(
+      [operation['context'] for operation in operations_list],
+      index=pd.to_datetime([operation['timestamp'] for operation in operations_list], unit='s')
+    )
