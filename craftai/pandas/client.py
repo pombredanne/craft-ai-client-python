@@ -22,7 +22,9 @@ class Client(VanillaClient):
         chunk_operations = [
           {
             'timestamp': row.name.value // 10 ** 9, # Timestamp.value returns nanoseconds
-            'context': {col: row[col] for col in operations.columns}
+            'context': {
+              col: row[col] for col in operations.columns if pd.notnull(row[col])
+            }
           } for _, row in chunk.iterrows()
         ]
         super(Client, self).add_operations(agent_id, chunk_operations)
