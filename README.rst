@@ -53,7 +53,10 @@ Then import it in your code
 
 .. code:: python
 
-    from craftai import client as craftai
+    import craftai
+
+    This client also provides helpers to use it in conjuction with
+    `pandas <#pandas-support>`__
 
 Initialize
 ^^^^^^^^^^
@@ -63,7 +66,7 @@ Initialize
     config = {
         "token": "{token}"
     }
-    client = craftai.CraftAIClient(config)
+    client = craftai.Client(config)
 
 3 - Create an agent
 ~~~~~~~~~~~~~~~~~~~
@@ -593,20 +596,18 @@ retrieve, you can refer to `**this
 page** <https://github.com/techgaun/unix-time/blob/master/README.md>`__
 to find out how.
 
-``craftai.time``
+``craftai.Time``
 ^^^^^^^^^^^^^^^^
 
-The ``craftai.time.Time`` class facilitates the handling of time types
-in **craft ai**. It is able to extract the different **craft ai**
-formats from various *datetime* representations, thanks to
+The ``craftai.Time`` class facilitates the handling of time types in
+**craft ai**. It is able to extract the different **craft ai** formats
+from various *datetime* representations, thanks to
 `datetime <https://docs.python.org/3.5/library/datetime.html>`__.
 
 .. code:: python
 
-    from craftai.time import Time
-
     # From a unix timestamp and an explicit UTC offset
-    t1 = Time(1465496929, "+10:00")
+    t1 = craftai.Time(1465496929, "+10:00")
 
     # t1 == {
     #   utc: "2016-06-09T18:28:49.000Z",
@@ -617,7 +618,7 @@ formats from various *datetime* representations, thanks to
     # }
 
     # From a unix timestamp and using the local UTC offset.
-    t2 = Time(1465496929)
+    t2 = craftai.Time(1465496929)
 
     # Value are valid if in Paris !
     # t2 == {
@@ -629,7 +630,7 @@ formats from various *datetime* representations, thanks to
     # }
 
     # From a ISO 8601 string. Note that here it should not have any ":" in the timezone part
-    t3 = Time("1977-04-22T01:00:00-0500")
+    t3 = craftai.Time("1977-04-22T01:00:00-0500")
 
     # t3 == {
     #   utc: "1977-04-22T06:00:00.000Z",
@@ -640,10 +641,10 @@ formats from various *datetime* representations, thanks to
     # }
 
     # Retrieve the current time with the local UTC offset
-    now = Time()
+    now = craftai.Time()
 
     # Retrieve the current time with the given UTC offset
-    nowP5 = Time(timezone="+05:00")
+    nowP5 = craftai.Time(timezone="+05:00")
 
 Agent
 ~~~~~
@@ -881,7 +882,7 @@ decision tree offline.
         "timezone": "+02:00",
         "peopleCount": 3
       },
-      craftai.time.Time("2010-01-01T07:30:30")
+      craftai.Time("2010-01-01T07:30:30")
     )
 
 A computed ``decision`` on an ``enum`` output type would look like:
@@ -955,6 +956,102 @@ them inheriting from the ``CraftAIError`` type.
   ``CraftAICredentialsError`` or ``CraftAIUnknownError``.
 | The ``decide`` method should only raise ``CrafAIDecisionError`` type
   of exceptions.
+
+Pandas support
+~~~~~~~~~~~~~~
+
+The craft ai python client optionally supports
+`pandas <http://pandas.pydata.org/>`__ a very popular library used for
+all things data.
+
+Basically instead of importing the default module, you can do the
+following
+
+.. code:: python
+
+    import craftai.pandas
+
+The craft ai pandas module is derived for the *vanilla* one, with the
+following methods are overriden to support pandas'
+```DataFrame`` <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`__.
+
+``craftai.pandas.Client.get_operations_list``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Retrieves the desired operations as a ``DataFrame`` where:
+
+-  each operation is a row,
+-  each context property is a column,
+-  the index is `*time
+   based* <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`__
+   matching the operations timestamps,
+-  ``np.NaN`` means no value were given at this property for this
+   timestamp.
+
+.. code:: ipython
+
+    In [1]: client.get_operations_list("impervious_kraken")
+    Out[1]: 
+                 peopleCount  lightbulbState   timezone
+    2013-01-01   0            OFF              +02:00
+    2013-01-02   1            ON               NaN
+    2013-01-03   2            NaN              NaN
+    2013-01-04   NaN          OFF              NaN
+    2013-01-05   0            NaN              NaN
+
+``craftai.pandas.Client.add_operations``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Add a ``DataFrame`` of operations to the desired agent. The format is
+the same as above.
+
+.. code:: python
+
+      import pandas as pd
+      import numpy as np
+      
+      df = pd.DataFrame(
+        [
+          [0, "OFF", "+02:00"],
+          [1, "ON", np.nan],
+          [2, np.nan, np.nan],
+          [np.nan, "OFF", np.nan],
+          [0, np.nan, np.nan]
+        ],
+        columns=['peopleCount', 'lightbulbState', 'timezone'],
+        index=pd.date_range('20130101', periods=5, freq='D')
+      )
+      client.add_operations("impervious_kraken", df)
+
+Given something that is not a ``DataFrame`` this method behave like the
+*vanilla* ``craftai.Client.add_operations``.
+
+``craftai.pandas.Client.decide``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Take multiple decisions on a given ``DataFrame`` following the same
+format as above.
+
+.. code:: ipython
+
+    In [2]: client.decide(tree, pd.DataFrame(
+      [
+        [0, "+02:00"],
+        [1, np.nan],
+        [2, np.nan],
+        [np.nan, np.nan],
+        [0, np.nan]
+      ],
+      columns=['peopleCount', 'timezone'],
+      index=pd.date_range('20130101', periods=5, freq='D')
+    ))
+    Out[2]: 
+                 lightbulbState_predicted_value   lightbulbState_confidence ...
+    2013-01-01   OFF                              0.999449                  ...
+    2013-01-02   ON                               0.970325                  ...
+    2013-01-03   ON                               0.970325                  ...
+    2013-01-04   ON                               0.970325                  ...
+    2013-01-05   OFF                              0.999449                  ...
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/craft-ai.svg?style=flat-square
    :target: https://pypi.python.org/pypi?:action=display&name=craft-ai
