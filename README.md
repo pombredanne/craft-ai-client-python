@@ -208,7 +208,7 @@ print("The full decision tree at timestamp", dt_timestamp, "is the following:")
 print(decision_tree)
 """ Outputed tree is the following
   {
-    "_version": "1.0.0",
+    "_version": "1.1.0",
     "configuration": {
       "context": {
         "peopleCount": {
