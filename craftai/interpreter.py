@@ -2,7 +2,7 @@ import numbers
 import re
 import six
 
-from craftai.errors import CraftAiDecisionError
+from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
 from craftai.time import Time
 
 _OPERATORS = {
@@ -115,8 +115,15 @@ class Interpreter(object):
   def _decide_recursion(node, context):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
+      predicted_value = node.get("predicted_value")
+      if predicted_value is None:
+        raise CraftAiNullDecisionError(
+          """Unable to take decision: the decision tree has no valid"""
+          """ predicted value for the given context."""
+        )
+
       leaf = {
-        "predicted_value": node.get("predicted_value"),
+        "predicted_value": predicted_value,
         "confidence": node.get("confidence") or 0,
         "decision_rules": []
       }
@@ -132,9 +139,9 @@ class Interpreter(object):
 
     if not matching_child:
       prop = node.get("children")[0].get("decision_rule").get("property")
-      raise CraftAiDecisionError(
-        """Unable to take decision: '{}' not found """
-        """ amongst values for the '{}' property.""".format(context.get(prop), prop)
+      raise CraftAiNullDecisionError(
+        """Unable to take decision: value '{}' for property '{}' doesn't"""
+        """ validate any of the decision rules.""".format(context.get(prop), prop)
       )
 
     # If a matching child is found, recurse
