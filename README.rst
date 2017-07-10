@@ -971,6 +971,10 @@ following
 
     import craftai.pandas
 
+    # Most of the time you'll need the following
+    import numpy as np
+    import pandas as pd
+
 The craft ai pandas module is derived for the *vanilla* one, with the
 following methods are overriden to support pandas'
 ```DataFrame`` <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`__.
@@ -988,16 +992,18 @@ Retrieves the desired operations as a ``DataFrame`` where:
 -  ``np.NaN`` means no value were given at this property for this
    timestamp.
 
-.. code:: ipython
+.. code:: python
 
-    In [1]: client.get_operations_list("impervious_kraken")
-    Out[1]: 
-                 peopleCount  lightbulbState   timezone
-    2013-01-01   0            OFF              +02:00
-    2013-01-02   1            ON               NaN
-    2013-01-03   2            NaN              NaN
-    2013-01-04   NaN          OFF              NaN
-    2013-01-05   0            NaN              NaN
+    df = client.get_operations_list("impervious_kraken")
+
+    # `df` is a pd.DataFrame looking like
+    #
+    #              peopleCount  lightbulbState   timezone
+    # 2013-01-01   0            OFF              +02:00
+    # 2013-01-02   1            ON               NaN
+    # 2013-01-03   2            NaN              NaN
+    # 2013-01-04   NaN          OFF              NaN
+    # 2013-01-05   0            NaN              NaN
 
 ``craftai.pandas.Client.add_operations``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1007,21 +1013,18 @@ the same as above.
 
 .. code:: python
 
-      import pandas as pd
-      import numpy as np
-      
-      df = pd.DataFrame(
-        [
-          [0, "OFF", "+02:00"],
-          [1, "ON", np.nan],
-          [2, np.nan, np.nan],
-          [np.nan, "OFF", np.nan],
-          [0, np.nan, np.nan]
-        ],
-        columns=['peopleCount', 'lightbulbState', 'timezone'],
-        index=pd.date_range('20130101', periods=5, freq='D')
-      )
-      client.add_operations("impervious_kraken", df)
+    df = pd.DataFrame(
+      [
+        [0, "OFF", "+02:00"],
+        [1, "ON", np.nan],
+        [2, np.nan, np.nan],
+        [np.nan, "OFF", np.nan],
+        [0, np.nan, np.nan]
+      ],
+      columns=['peopleCount', 'lightbulbState', 'timezone'],
+      index=pd.date_range('20130101', periods=5, freq='D')
+    )
+    client.add_operations("impervious_kraken", df)
 
 Given something that is not a ``DataFrame`` this method behave like the
 *vanilla* ``craftai.Client.add_operations``.
@@ -1032,9 +1035,9 @@ Given something that is not a ``DataFrame`` this method behave like the
 Take multiple decisions on a given ``DataFrame`` following the same
 format as above.
 
-.. code:: ipython
+.. code:: python
 
-    In [2]: client.decide(tree, pd.DataFrame(
+    decisions_df = client.decide(tree, pd.DataFrame(
       [
         [0, "+02:00"],
         [1, np.nan],
@@ -1045,13 +1048,14 @@ format as above.
       columns=['peopleCount', 'timezone'],
       index=pd.date_range('20130101', periods=5, freq='D')
     ))
-    Out[2]: 
-                 lightbulbState_predicted_value   lightbulbState_confidence ...
-    2013-01-01   OFF                              0.999449                  ...
-    2013-01-02   ON                               0.970325                  ...
-    2013-01-03   ON                               0.970325                  ...
-    2013-01-04   ON                               0.970325                  ...
-    2013-01-05   OFF                              0.999449                  ...
+    # `decisions_df` is a pd.DataFrame looking like
+    #
+    #              lightbulbState_predicted_value   lightbulbState_confidence ...
+    # 2013-01-01   OFF                              0.999449                  ...
+    # 2013-01-02   ON                               0.970325                  ...
+    # 2013-01-03   ON                               0.970325                  ...
+    # 2013-01-04   ON                               0.970325                  ...
+    # 2013-01-05   OFF                              0.999449                  ...
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/craft-ai.svg?style=flat-square
    :target: https://pypi.python.org/pypi?:action=display&name=craft-ai
