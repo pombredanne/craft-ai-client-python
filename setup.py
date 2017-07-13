@@ -57,6 +57,7 @@ setup(
     "requests==2.13.0",
     "six==1.10",
     "datetime==4.1.1",
+    "semver==2.7.7",
     "tzlocal==1.2.2"
   ],
   extras_require = {

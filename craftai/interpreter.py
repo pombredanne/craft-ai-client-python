@@ -1,5 +1,6 @@
 import numbers
 import re
+import semver
 import six
 
 from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
@@ -26,7 +27,7 @@ _VALUE_VALIDATORS = {
   "month_of_year": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 12
 }
 
-_DECISION_VERSION = "1.0.0"
+_DECISION_VERSION = "1.1.0"
 
 class Interpreter(object):
 
@@ -261,7 +262,7 @@ class Interpreter(object):
         """Invalid decision tree format, "{}" is not a valid version.""".
         format(tree_version)
       )
-    elif tree_version == "1.0.0":
+    elif semver.match(tree_version, ">=1.0.0") and semver.match(tree_version, "<2.0.0"):
       if tree_object.get("configuration") is None:
         raise CraftAiDecisionError(
           """Invalid decision tree format, no configuration found"""
