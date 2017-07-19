@@ -7,7 +7,7 @@ unit-tests:
 	nosetests
 
 lint:
-	pylint craftai tests
+	pylint --load-plugins pylint_quotes craftai tests
 
 update-readme:
 	./scripts/update_readme.sh

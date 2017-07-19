@@ -57,7 +57,7 @@ fi
 # Make sure we are at the root directory of the repository
 cd ${BASH_SOURCE%/*}/..
 
-current_version=$(sed -n "s/^__version__ *= *'\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)'/\1/p" $INIT_PY_FILE)
+current_version=$(sed -n "s/^__version__ *= *\"\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)\"/\1/p" $INIT_PY_FILE)
 IFS='.' read -r -a current_version_array <<< "$current_version"
 unset IFS
 

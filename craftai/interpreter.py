@@ -14,7 +14,7 @@ _OPERATORS = {
           context < value[1] if value[0] < value[1] else context >= value[0] or context < value[1]
 }
 
-_TIMEZONE_REGEX = re.compile(r'[+-]\d\d:\d\d')
+_TIMEZONE_REGEX = re.compile(r"[+-]\d\d:\d\d")
 
 _VALUE_VALIDATORS = {
   "continuous": lambda value: isinstance(value, numbers.Real),
@@ -257,7 +257,7 @@ class Interpreter(object):
       )
 
     # Checking version and tree validity according to version
-    if re.compile(r'\d+.\d+.\d+').match(tree_version) is None:
+    if re.compile(r"\d+.\d+.\d+").match(tree_version) is None:
       raise CraftAiDecisionError(
         """Invalid decision tree format, "{}" is not a valid version.""".
         format(tree_version)

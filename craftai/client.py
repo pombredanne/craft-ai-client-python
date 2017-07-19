@@ -37,7 +37,7 @@ class CraftAIClient(object):
       raise CraftAiCredentialsError("""Unable to create client with no"""
                                     """ or invalid project provided.""")
     else:
-      splitted_project = cfg.get("project").split('/')
+      splitted_project = cfg.get("project").split("/")
       if len(splitted_project) == 2:
         cfg["owner"] = splitted_project[0]
         cfg["project"] = splitted_project[1]
@@ -198,8 +198,8 @@ class CraftAIClient(object):
 
       if next_offset >= len(operations):
         return {
-          'message': 'Successfully added %i operation(s) to the agent "%s/%s/%s" context.'
-                     % (len(operations), self.config['owner'], self.config['project'], agent_id)
+          "message": "Successfully added %i operation(s) to the agent \"%s/%s/%s\" context."
+                     % (len(operations), self.config["owner"], self.config["project"], agent_id)
         }
 
       offset = next_offset
@@ -267,9 +267,9 @@ class CraftAIClient(object):
     if response.status_code == requests.codes.unauthorized:
       raise CraftAiCredentialsError(response.text)
     if response.status_code == requests.codes.request_timeout:
-      raise CraftAiBadRequestError('Request has timed out')
+      raise CraftAiBadRequestError("Request has timed out")
     if response.status_code == requests.codes.gateway_timeout:
-      raise CraftAiInternalError('Response has timed out')
+      raise CraftAiInternalError("Response has timed out")
 
     try:
       return response.json()

@@ -25,9 +25,9 @@ class TestGetSharedAgentsInspectorUrlSuccess(unittest.TestCase):
     timestamp = 1234567890987
     url = self.client.get_shared_agent_inspector_url(self.agent_id, timestamp)
     self.assertTrue(url != "")
-    url_split = url.split('?')
+    url_split = url.split("?")
     self.assertTrue(len(url_split) == 2)
-    self.assertTrue(url_split[1] == 't=' + str(timestamp))
+    self.assertTrue(url_split[1] == "t=" + str(timestamp))
     url2 = self.client.get_shared_agent_inspector_url(self.agent_id)
     self.assertTrue(url_split[0] == url2)
 
@@ -38,7 +38,7 @@ class TestGetSharedAgentsInspectorUrlSuccess(unittest.TestCase):
     """
     url = self.client.get_shared_agent_inspector_url(self.agent_id)
     self.assertTrue(url != "")
-    url_split = url.split('?')
+    url_split = url.split("?")
     self.assertTrue(len(url_split) == 1)
     url2 = self.client.get_shared_agent_inspector_url(self.agent_id)
     self.assertTrue(url == url2)
@@ -50,7 +50,7 @@ class TestGetSharedAgentsInspectorUrlSuccess(unittest.TestCase):
     """
     url = self.client.get_shared_agent_inspector_url(self.agent_id)
     self.assertTrue(url != "")
-    url_split = url.split('?')
+    url_split = url.split("?")
     self.assertTrue(len(url_split) == 1)
     url2 = self.client.get_shared_agent_inspector_url(self.agent_id)
     self.assertTrue(url == url2)

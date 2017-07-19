@@ -11,7 +11,7 @@ class TestListAgents(unittest.TestCase):
   def setUpClass(cls):
     cls.client = craftai.Client(settings.CRAFT_CFG)
     cls.n_agents = 5
-    cls.agents_id = ['{}_{}_{}'.format(valid_data.VALID_ID, i, settings.RUN_ID)
+    cls.agents_id = ["{}_{}_{}".format(valid_data.VALID_ID, i, settings.RUN_ID)
                      for i in range(cls.n_agents)]
 
   def setUp(self):
