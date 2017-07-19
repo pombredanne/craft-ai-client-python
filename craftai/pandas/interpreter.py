@@ -15,7 +15,7 @@ def decide_from_row(tree, columns, row):
     decision = VanillaInterpreter.decide(tree, [context, time])
 
     keys, values = zip(*[
-      (output + '_' + key, value)
+      (output + "_" + key, value)
       for output, output_decision in decision["output"].items()
       for key, value in output_decision.items()
     ])

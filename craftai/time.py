@@ -76,7 +76,7 @@ class Time(object):
     self.time_of_day = time.hour + time.minute / 60 + time.second / 3600
     self.day_of_month = time.day
     self.month_of_year = time.month
-    self.timezone = time.strftime("%z")[:3] + ':' + time.strftime("%z")[3:]
+    self.timezone = time.strftime("%z")[:3] + ":" + time.strftime("%z")[3:]
     self.timestamp = Time.timestamp_from_datetime(time)
 
   def to_dict(self):
@@ -109,7 +109,7 @@ class dt_timezone(tzinfo):
     versions earlier than 3.2.
   """
 
-  __slots__ = '_offset', '_name'
+  __slots__ = "_offset", "_name"
 
   # Sentinel value to disallow None
   _Omitted = object()
@@ -156,17 +156,17 @@ class dt_timezone(tzinfo):
 
     >>> tz = dt_timezone.utc
     >>> repr(tz)
-    'datetime.dt_timezone.utc'
+    "datetime.dt_timezone.utc"
     >>> tz = dt_timezone(timedelta(hours=-5), 'EST')
     >>> repr(tz)
     "datetime.dt_timezone(datetime.timedelta(-1, 68400), 'EST')"
     """
     if self is self.utc:
-      return 'datetime.dt_timezone.utc'
+      return "datetime.dt_timezone.utc"
     if self._name is None:
-      return "%s(%r)" % ('datetime.' + self.__class__.__name__,
+      return "%s(%r)" % ("datetime." + self.__class__.__name__,
                          self._offset)
-    return "%s(%r, %r)" % ('datetime.' + self.__class__.__name__,
+    return "%s(%r, %r)" % ("datetime." + self.__class__.__name__,
                            self._offset, self._name)
 
   def __str__(self):
@@ -207,13 +207,13 @@ class dt_timezone(tzinfo):
   @staticmethod
   def _name_from_offset(delta):
     if delta < timedelta(0):
-      sign = '-'
+      sign = "-"
       delta = -delta
     else:
-      sign = '+'
+      sign = "+"
     hours, rest = divmod(delta, timedelta(hours=1))
     minutes = rest // timedelta(minutes=1)
-    return 'UTC{}{:02d}:{:02d}'.format(sign, hours, minutes)
+    return "UTC{}{:02d}:{:02d}".format(sign, hours, minutes)
 
 dt_timezone.utc = dt_timezone._create(timedelta(0))
 dt_timezone.min = dt_timezone._create(dt_timezone._minoffset)

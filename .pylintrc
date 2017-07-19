@@ -20,6 +20,12 @@ indent-string='  '
 
 indent-after-paren=2
 
+[QUOTES]
+
+string-quote=double
+triple-quote=double
+docstring-quote=double
+
 [TYPECHECK]
 
 generated-members=requests\..*
