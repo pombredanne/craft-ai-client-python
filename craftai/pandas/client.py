@@ -46,5 +46,5 @@ class Client(VanillaClient):
     )
 
   @staticmethod
-  def decide(tree, *args):
-    return Interpreter.decide(tree, args)
+  def decide_from_contexts_df(tree, contexts_df):
+    return Interpreter.decide_from_contexts_df(tree, contexts_df)
