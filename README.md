@@ -10,11 +10,9 @@
 
 If you're reading this you are probably already registered with **craft ai**, if not, head to [`https://beta.craft.ai/signup`](https://beta.craft.ai/signup).
 
-> :construction: **craft ai** is currently in private beta, as such we validate accounts, this step should be quick.
-
 ### 1 - Create a project ###
 
-Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/settings), and press **Create a project**. 
+Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/projects), and press **Create a project**. 
 
 Once it's done, you can click on your newly created project to retrieve its tokens. There are two types of tokens: **read** and **write**. You'll need the **write** token to create, update and delete your agent.
 
@@ -800,7 +798,8 @@ When using this client, you should be careful wrapping calls to the API with `tr
 The **craft ai** python client has its specific exception types, all of them inheriting from the `CraftAIError` type.
 
 All methods which have to send an http request (all of them except `decide`) may raise either of these exceptions: `CraftAINotFoundError`, `CraftAIBadRequestError`, `CraftAICredentialsError` or `CraftAIUnknownError`.
-The `decide` method should only raise `CrafAIDecisionError` type of exceptions.
+
+The `decide` method only raises `CrafAIDecisionError` of `CraftAiNullDecisionError` type of exceptions. The latter is raised when no the given context is valid but no decision can be taken.
 
 ### Pandas support ###
 
@@ -861,7 +860,7 @@ client.add_operations("impervious_kraken", df)
 
 Given something that is not a `DataFrame` this method behave like the _vanilla_ `craftai.Client.add_operations`.
 
-#### `craftai.pandas.Client.decide` #####
+#### `craftai.pandas.Client.decide_from_contexts_df` #####
 
 Take multiple decisions on a given `DataFrame` following the same format as above.
 
@@ -886,3 +885,5 @@ decisions_df = client.decide(tree, pd.DataFrame(
 # 2013-01-04   ON                               0.970325                  ...
 # 2013-01-05   OFF                              0.999449                  ...
 ```
+
+This function never raises `CraftAiNullDecisionError`, instead it inserts these errors in the result `Dataframe` in a specific `error` column.

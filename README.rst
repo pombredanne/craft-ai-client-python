@@ -19,15 +19,12 @@ If you're reading this you are probably already registered with **craft
 ai**, if not, head to
 ```https://beta.craft.ai/signup`` <https://beta.craft.ai/signup>`__.
 
-    🚧 **craft ai** is currently in private beta, as such we validate
-    accounts, this step should be quick.
-
 1 - Create a project
 ~~~~~~~~~~~~~~~~~~~~
 
 Once your account is setup, let's create your first **project**! Go in
 the 'Projects' tab in the **craft ai** control center at
-```https://beta.craft.ai/projects`` <https://beta.craft.ai/settings>`__,
+```https://beta.craft.ai/projects`` <https://beta.craft.ai/projects>`__,
 and press **Create a project**.
 
 Once it's done, you can click on your newly created project to retrieve
@@ -982,12 +979,14 @@ with ``try/except`` blocks, in accordance with the
 The **craft ai** python client has its specific exception types, all of
 them inheriting from the ``CraftAIError`` type.
 
-| All methods which have to send an http request (all of them except
-  ``decide``) may raise either of these exceptions:
-  ``CraftAINotFoundError``, ``CraftAIBadRequestError``,
-  ``CraftAICredentialsError`` or ``CraftAIUnknownError``.
-| The ``decide`` method should only raise ``CrafAIDecisionError`` type
-  of exceptions.
+All methods which have to send an http request (all of them except
+``decide``) may raise either of these exceptions:
+``CraftAINotFoundError``, ``CraftAIBadRequestError``,
+``CraftAICredentialsError`` or ``CraftAIUnknownError``.
+
+The ``decide`` method only raises ``CrafAIDecisionError`` of
+``CraftAiNullDecisionError`` type of exceptions. The latter is raised
+when no the given context is valid but no decision can be taken.
 
 Pandas support
 ~~~~~~~~~~~~~~
@@ -1061,8 +1060,8 @@ the same as above.
 Given something that is not a ``DataFrame`` this method behave like the
 *vanilla* ``craftai.Client.add_operations``.
 
-``craftai.pandas.Client.decide``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``craftai.pandas.Client.decide_from_contexts_df``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Take multiple decisions on a given ``DataFrame`` following the same
 format as above.
@@ -1088,6 +1087,10 @@ format as above.
     # 2013-01-03   ON                               0.970325                  ...
     # 2013-01-04   ON                               0.970325                  ...
     # 2013-01-05   OFF                              0.999449                  ...
+
+This function never raises ``CraftAiNullDecisionError``, instead it
+inserts these errors in the result ``Dataframe`` in a specific ``error``
+column.
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/craft-ai.svg?style=flat-square
    :target: https://pypi.python.org/pypi?:action=display&name=craft-ai
