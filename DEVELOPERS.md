@@ -38,7 +38,9 @@
   $ git reset --hard origin/master
   ```
 
-3. Updade the readme from **craft ai** internal _"CMS"_.
+3. Update `README.md` from **craft ai** documentation found
+   at <https://beta.craft.ai/doc/python>.
+
 
   ```console
   $ make update-readme
@@ -47,17 +49,18 @@
   > This will create a git commit.
 
 
-4. Increment the version.
+4. Increment the version in `craftai/__init__.py` and move _Unreleased_ section
+   of `CHANGELOG.md` to a newly created section for this version.
 
   ```console
   $ make version-increment-patch
   ```
 
-  `make version-increment-minor` and `make version-increment-major` are also
-  available - see [semver](http://semver.org) for a guideline on when to use
-  which.
+  `make version-increment-minor` and `make version-increment-major` are
+  also available - see [semver](http://semver.org) for a guideline on when to
+  use which.
 
-  > This will create a git commit and a git tag
+  > This will create a git commit and a git tag.
 
 5. Push everything!
 
@@ -67,5 +70,5 @@
   ```
 
   > This will trigger the publishing of this new version to
-  [PyPI](https://pypi.python.org/pypi/craft-ai) by
-  [Travis](https://travis-ci.org/craft-ai/craft-ai-client-python)
+  > [PyPI](https://pypi.python.org/pypi/craft-ai) by
+  > [Travis](https://travis-ci.org/craft-ai/craft-ai-client-python)
