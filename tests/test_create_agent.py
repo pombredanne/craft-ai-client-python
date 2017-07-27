@@ -90,6 +90,19 @@ class TestCreateAgentFailure(unittest.TestCase):
       self.clean_up_agent,
       self.agent_id)
 
+  def test_create_agent_with_invalid_agent_id(self):
+    """create_agent should fail whith an invalid agent id
+
+    It should raise an error upon request for creation of
+    an agent with an invalid id.
+    """
+    # Asserting that an error is risen the second time
+    self.assertRaises(
+      craft_err.CraftAiBadRequestError,
+      self.client.create_agent,
+      valid_data.VALID_CONFIGURATION,
+      "toto/tutu")
+
   @nottest
   def test_create_agent_with_invalid_context(self):
     """create_agent should fail when given an invalid or no context

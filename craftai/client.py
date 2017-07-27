@@ -1,4 +1,5 @@
 import json
+import re
 import requests
 import six
 
@@ -81,7 +82,12 @@ class CraftAIClient(object):
     payload = {"configuration": configuration}
 
     if agent_id != "":
-      payload["id"] = agent_id
+      pattern = re.compile("^[a-zA-Z0-9_-]+$")
+      if pattern.match(agent_id) is None:
+        raise CraftAiBadRequestError("Invalid agent id given." +
+                                     "It must only contain characters in \"a-zA-Z0-9_-\".")
+      else:
+        payload["id"] = agent_id
 
     try:
       json_pl = json.dumps(payload)
