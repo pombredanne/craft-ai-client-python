@@ -82,10 +82,11 @@ class CraftAIClient(object):
     payload = {"configuration": configuration}
 
     if agent_id != "":
-      pattern = re.compile("^[a-zA-Z0-9_-]+$")
+      pattern = re.compile("^([a-zA-Z0-9_-]){1,36}$")
       if pattern.match(agent_id) is None:
         raise CraftAiBadRequestError("Invalid agent id given." +
-                                     "It must only contain characters in \"a-zA-Z0-9_-\".")
+                                     "It must only contain characters in \"a-zA-Z0-9_-\"" +
+                                     " and must be between 1 and 36 characters.")
       else:
         payload["id"] = agent_id
 
