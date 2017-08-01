@@ -8,6 +8,7 @@ __copyright__ = "Copyright (c) 2016, craft ai"
 
 
 from . import errors
+from . import constants
 from .client import CraftAIClient as Client
 from .interpreter import Interpreter
 from .time import Time
