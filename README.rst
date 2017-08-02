@@ -3,11 +3,9 @@
 
 |PyPI| |Build Status| |License| |python|
 
-`**craft ai** *AI-as-a-service* <http://craft.ai>`__ enables developers
-to create Apps and Things that adapt to each user. To go beyond useless
-dashboards and spammy notifications, **craft ai** learns how users
-behave to automate recurring tasks, make personalized recommendations,
-or detect anomalies.
+`**craft ai** *AI-as-a-service* <http://craft.ai>`__ enables your
+services to learn every day: provide a personalized experience to each
+user and automate complex tasks.
 
 Get Started!
 ------------
