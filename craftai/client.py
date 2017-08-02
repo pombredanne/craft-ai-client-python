@@ -3,6 +3,7 @@ import requests
 import six
 
 from craftai import helpers
+from craftai.constants import AGENT_ID_PATTERN
 from craftai.errors import CraftAiCredentialsError, CraftAiBadRequestError, CraftAiNotFoundError
 from craftai.errors import CraftAiUnknownError, CraftAiInternalError
 from craftai.interpreter import Interpreter
@@ -81,6 +82,9 @@ class CraftAIClient(object):
     payload = {"configuration": configuration}
 
     if agent_id != "":
+      # Raises an error when agent_id is invalid
+      self._check_agent_id(agent_id)
+
       payload["id"] = agent_id
 
     try:
@@ -284,6 +288,8 @@ class CraftAIClient(object):
     an empty string.
     """
     if (not isinstance(agent_id, six.string_types) or
-        agent_id == ""):
-      raise CraftAiBadRequestError("""agent_id has to be a non-empty"""
-                                   """string""")
+        AGENT_ID_PATTERN.match(agent_id) is None):
+      raise CraftAiBadRequestError("""Invalid agent id given."""
+                                   """It must be a string containaing only"""
+                                   """characters in \"a-zA-Z0-9_-\""""
+                                   """and must be between 1 and 36 characters.""")
