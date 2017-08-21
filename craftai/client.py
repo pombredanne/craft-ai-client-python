@@ -208,19 +208,26 @@ class CraftAIClient(object):
 
       offset = next_offset
 
+  def _get_operations_list_pages(self, url, ops_list):
+    if url is None:
+      return ops_list
+
+    headers = self._headers.copy()
+
+    resp = requests.get(url, headers=headers)
+
+    new_ops_list = self._decode_response(resp)
+    next_page_url = resp.headers.get("x-craft-ai-next-page-url")
+
+    return self._get_operations_list_pages(next_page_url, ops_list + new_ops_list)
+
   def get_operations_list(self, agent_id):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
 
-    resp = requests.get(req_url, headers=headers)
-
-    ops_list = self._decode_response(resp)
-
-    return ops_list
+    return self._get_operations_list_pages(req_url, [])
 
   def get_context_state(self, agent_id, timestamp):
     # Raises an error when agent_id is invalid
