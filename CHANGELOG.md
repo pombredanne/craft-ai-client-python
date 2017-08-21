@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.5.0...HEAD) ##
+### Added ###
+- `client.get_operations_list` takes two new optional parameters defining time bounds for the desired operations.
+
 ### Changed ###
 - `client.get_operations_list` handles the pagination automatically, making as many requests as necessary to the API.
 

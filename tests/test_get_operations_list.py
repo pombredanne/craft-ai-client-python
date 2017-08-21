@@ -36,6 +36,35 @@ class TestGetOperationsListSuccess(unittest.TestCase):
     self.assertIsInstance(ops, list)
     self.assertEqual(ops, LARGE_VALID_OPERATIONS_SET)
 
+  def test_get_operations_list_with_lower_bound(self):
+    lower_bound = 1464356844
+    ops = self.client.get_operations_list(self.agent_id, lower_bound)
+    self.assertIsInstance(ops, list)
+    expected_ops = [op for op in LARGE_VALID_OPERATIONS_SET if op["timestamp"] >= lower_bound]
+    self.assertEqual(ops, expected_ops)
+
+  def test_get_operations_list_with_upper_bound(self):
+    upper_bound = 1462824549
+    ops = self.client.get_operations_list(self.agent_id, None, upper_bound)
+    self.assertIsInstance(ops, list)
+    expected_ops = [op for op in LARGE_VALID_OPERATIONS_SET if op["timestamp"] <= upper_bound]
+    self.assertEqual(ops, expected_ops)
+
+  def test_get_operations_list_with_both_bounds(self):
+    lower_bound = 1462824549
+    upper_bound = 1464356844
+    ops = self.client.get_operations_list(self.agent_id, lower_bound, upper_bound)
+    self.assertIsInstance(ops, list)
+    expected_ops = [op for op in LARGE_VALID_OPERATIONS_SET if (op["timestamp"] >= lower_bound and
+                                                                op["timestamp"] <= upper_bound)]
+    self.assertEqual(ops, expected_ops)
+
+  def test_get_operations_list_with_inverted_bounds(self):
+    lower_bound = 1464356844
+    upper_bound = 1462824549
+    ops = self.client.get_operations_list(self.agent_id, lower_bound, upper_bound)
+    self.assertIsInstance(ops, list)
+    self.assertEqual(ops, [])
 
 class TestGetOperationsListFailure(unittest.TestCase):
   @classmethod

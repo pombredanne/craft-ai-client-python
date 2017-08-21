@@ -221,13 +221,23 @@ class CraftAIClient(object):
 
     return self._get_operations_list_pages(next_page_url, ops_list + new_ops_list)
 
-  def get_operations_list(self, agent_id):
+  def get_operations_list(self, agent_id, start=None, end=None):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
+    headers = self._headers.copy()
 
-    return self._get_operations_list_pages(req_url, [])
+    req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
+    req_params = {
+      "start": start,
+      "end": end
+    }
+    resp = requests.get(req_url, params=req_params, headers=headers)
+
+    initial_ops_list = self._decode_response(resp)
+    next_page_url = resp.headers.get("x-craft-ai-next-page-url")
+
+    return self._get_operations_list_pages(next_page_url, initial_ops_list)
 
   def get_context_state(self, agent_id, timestamp):
     # Raises an error when agent_id is invalid
