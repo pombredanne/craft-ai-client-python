@@ -1,13 +1,18 @@
 import json
+from platform import python_implementation, python_version
 import requests
 import six
 
-from craftai import helpers
+from craftai import helpers, __version__ as pkg_version
 from craftai.constants import AGENT_ID_PATTERN
 from craftai.errors import CraftAiCredentialsError, CraftAiBadRequestError, CraftAiNotFoundError
 from craftai.errors import CraftAiUnknownError, CraftAiInternalError
 from craftai.interpreter import Interpreter
 from craftai.jwt_decode import jwt_decode
+
+USER_AGENT = "craft-ai-client-python/{} [{} {}]".format(pkg_version,
+                                                        python_implementation(),
+                                                        python_version())
 
 class CraftAIClient(object):
   """Client class for craft ai's API"""
@@ -67,6 +72,7 @@ class CraftAIClient(object):
     # of the 'Authorization' header if config is modified
     self._headers = {}
     self._headers["Authorization"] = "Bearer " + self.config.get("token")
+    self._headers["User-Agent"] = USER_AGENT
 
   #################
   # Agent methods #
