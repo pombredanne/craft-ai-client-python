@@ -828,8 +828,15 @@ List operations
 .. code:: python
 
     client.get_operations_list(
-        "impervious_kraken" # The agent id
+        "impervious_kraken", # The agent id
+        1478894153, # Optional, the **start** timestamp from which the
+                    # operations are retrieved (inclusive bound)
+        1478895266, # Optional, the **end** timestamp up to which the
+                    # operations are retrieved (inclusive bound)
     )
+
+    This call can generate multiple requests to the craft ai API as
+    results are paginated.
 
 Retrieve state
 ^^^^^^^^^^^^^^
