@@ -1,13 +1,18 @@
 import json
+from platform import python_implementation, python_version
 import requests
 import six
 
-from craftai import helpers
+from craftai import helpers, __version__ as pkg_version
 from craftai.constants import AGENT_ID_PATTERN
 from craftai.errors import CraftAiCredentialsError, CraftAiBadRequestError, CraftAiNotFoundError
 from craftai.errors import CraftAiUnknownError, CraftAiInternalError
 from craftai.interpreter import Interpreter
 from craftai.jwt_decode import jwt_decode
+
+USER_AGENT = "craft-ai-client-python/{} [{} {}]".format(pkg_version,
+                                                        python_implementation(),
+                                                        python_version())
 
 class CraftAIClient(object):
   """Client class for craft ai's API"""
@@ -67,6 +72,7 @@ class CraftAIClient(object):
     # of the 'Authorization' header if config is modified
     self._headers = {}
     self._headers["Authorization"] = "Bearer " + self.config.get("token")
+    self._headers["User-Agent"] = USER_AGENT
 
   #################
   # Agent methods #
@@ -208,19 +214,36 @@ class CraftAIClient(object):
 
       offset = next_offset
 
-  def get_operations_list(self, agent_id):
+  def _get_operations_list_pages(self, url, ops_list):
+    if url is None:
+      return ops_list
+
+    headers = self._headers.copy()
+
+    resp = requests.get(url, headers=headers)
+
+    new_ops_list = self._decode_response(resp)
+    next_page_url = resp.headers.get("x-craft-ai-next-page-url")
+
+    return self._get_operations_list_pages(next_page_url, ops_list + new_ops_list)
+
+  def get_operations_list(self, agent_id, start=None, end=None):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
     headers = self._headers.copy()
 
     req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
+    req_params = {
+      "start": start,
+      "end": end
+    }
+    resp = requests.get(req_url, params=req_params, headers=headers)
 
-    resp = requests.get(req_url, headers=headers)
+    initial_ops_list = self._decode_response(resp)
+    next_page_url = resp.headers.get("x-craft-ai-next-page-url")
 
-    ops_list = self._decode_response(resp)
-
-    return ops_list
+    return self._get_operations_list_pages(next_page_url, initial_ops_list)
 
   def get_context_state(self, agent_id, timestamp):
     # Raises an error when agent_id is invalid

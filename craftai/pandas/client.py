@@ -37,8 +37,8 @@ class Client(VanillaClient):
     else:
       return super(Client, self).add_operations(agent_id, operations)
 
-  def get_operations_list(self, agent_id):
-    operations_list = super(Client, self).get_operations_list(agent_id)
+  def get_operations_list(self, agent_id, start=None, end=None):
+    operations_list = super(Client, self).get_operations_list(agent_id, start, end)
 
     return pd.DataFrame(
       [operation["context"] for operation in operations_list],
