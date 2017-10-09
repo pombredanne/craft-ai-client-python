@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.6.0...HEAD) ##
+### Added ###
+- Add new function `client.get_state_history`. Take a look a the [documentation](https://beta.craft.ai/doc/python#retrieve-state-history) for more informations.
+
 ### Fixed ###
 - Fix the interpreter error messages to fit the [test suite](https://github.com/craft-ai/craft-ai-interpreter-test-suite) expectations.
 

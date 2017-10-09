@@ -245,6 +245,37 @@ class CraftAIClient(object):
 
     return self._get_operations_list_pages(next_page_url, initial_ops_list)
 
+  def _get_state_history_pages(self, url, state_history):
+    if url is None:
+      return state_history
+
+    headers = self._headers.copy()
+
+    resp = requests.get(url, headers=headers)
+
+    new_state_history = self._decode_response(resp)
+    next_page_url = resp.headers.get("x-craft-ai-next-page-url")
+
+    return self._get_state_history_pages(next_page_url, state_history + new_state_history)
+
+  def get_state_history(self, agent_id, start=None, end=None):
+    # Raises an error when agent_id is invalid
+    self._check_agent_id(agent_id)
+
+    headers = self._headers.copy()
+
+    req_url = "{}/agents/{}/context/state/history".format(self._base_url, agent_id)
+    req_params = {
+      "start": start,
+      "end": end
+    }
+    resp = requests.get(req_url, params=req_params, headers=headers)
+
+    initial_states_history = self._decode_response(resp)
+    next_page_url = resp.headers.get("x-craft-ai-next-page-url")
+
+    return self._get_state_history_pages(next_page_url, initial_states_history)
+
   def get_context_state(self, agent_id, timestamp):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
