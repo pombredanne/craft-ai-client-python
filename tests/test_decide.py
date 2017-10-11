@@ -46,12 +46,11 @@ def check_expectation(tree, expectation):
   time = Time(exp_time["t"], exp_time["tz"]) if exp_time else {}
 
   if expectation.get("error"):
-    assert_raises(
-      craft_err.CraftAiDecisionError,
-      CLIENT.decide,
-      tree,
-      exp_context,
-      timestamp)
+    with assert_raises(craft_err.CraftAiDecisionError) as context_manager:
+      CLIENT.decide(tree, exp_context, timestamp)
+
+    exception = context_manager.exception
+    assert_equal(exception.message, expectation["error"]["message"].encode("utf8"))
   else:
     expected_decision = expectation["output"]
     decision = CLIENT.decide(tree, exp_context, time)
