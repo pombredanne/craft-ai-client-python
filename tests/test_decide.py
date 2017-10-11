@@ -82,21 +82,11 @@ def test_rebuild_context():
 
 #pylint: disable=W0212
 
-  # Case 1:
-  # - don't provide a Time object while properties in configuration need to be generated from it
-  # - don't provide those properties directly in the context
-  state = {"car": "Renault", "day_of_week": 2}
-  assert_raises(
-    craft_err.CraftAiDecisionError,
-    Interpreter._rebuild_context,
-    configuration,
-    state)
-
   # Case 2:
   # - provide none of the properties that should be generated
   state = {"car": "Renault", "day_of_week": 2}
   time = Time(1489998174, "+01:00")
-  rebuilt_context = Interpreter._rebuild_context(configuration, state, time)
+  rebuilt_context = Interpreter._rebuild_context(configuration, state, time)["context"]
   expected_context = {
     "car": "Renault",
     "day_of_week": 2,

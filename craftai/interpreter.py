@@ -40,11 +40,13 @@ class Interpreter(object):
       time = None if len(args) == 1 else args[1]
       context_result = Interpreter._rebuild_context(configuration, state, time)
       context = context_result["context"]
-      errors = context_result["errors"]
+      # errors = context_result["errors"]
     else:
       context = Interpreter.join_decide_args(args)
 
-    errors = errors + Interpreter._check_context(configuration, context)
+    errors = Interpreter._check_context(configuration, context)
+
+    print("errors", errors)
 
     # deal with missing properties
     if errors:
@@ -254,7 +256,7 @@ class Interpreter(object):
   @staticmethod
   def _parse_tree(tree_object):
     # Checking definition of tree_object
-    if not (tree_object and isinstance(tree_object, object)):
+    if not isinstance(tree_object, dict):
       raise CraftAiDecisionError("Invalid decision tree format, the given json is not an object.")
 
     # Checking version existence
@@ -262,7 +264,7 @@ class Interpreter(object):
     if not tree_version:
       raise CraftAiDecisionError(
         """Invalid decision tree format, unable to find the version"""
-        """ information."""
+        """ informations."""
       )
 
     # Checking version and tree validity according to version
