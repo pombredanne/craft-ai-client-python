@@ -45,6 +45,14 @@ class Client(VanillaClient):
       index=pd.to_datetime([operation["timestamp"] for operation in operations_list], unit="s")
     )
 
+  def get_state_history(self, agent_id, start=None, end=None):
+    state_history = super(Client, self).get_state_history(agent_id, start, end)
+
+    return pd.DataFrame(
+      [state["sample"] for state in state_history],
+      index=pd.to_datetime([state["timestamp"] for state in state_history], unit="s")
+    )
+
   @staticmethod
   def decide_from_contexts_df(tree, contexts_df):
     return Interpreter.decide_from_contexts_df(tree, contexts_df)
