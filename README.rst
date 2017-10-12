@@ -848,6 +848,19 @@ Retrieve state
         1469473600 # The timestamp at which the context state is retrieved
     )
 
+Retrieve state history
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    client.get_state_history(
+        "impervious_kraken", # The agent id
+        1478894153, # Optional, the **start** timestamp from which the
+                    # operations are retrieved (inclusive bound)
+        1478895266, # Optional, the **end** timestamp up to which the
+                    # operations are retrieved (inclusive bound)
+    )
+
 Decision tree
 ~~~~~~~~~~~~~
 
@@ -886,7 +899,7 @@ Compute
         1469473600 # The timestamp at which the decision tree is retrieved
     )
 
-Take Decision
+Take decision
 ^^^^^^^^^^^^^
 
 To get a chance to store and reuse the decision tree, use
@@ -1065,6 +1078,30 @@ the same as above.
 Given something that is not a ``DataFrame`` this method behave like the
 *vanilla* ``craftai.Client.add_operations``.
 
+``craftai.pandas.Client.get_state_history``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Retrieves the desired state history as a ``DataFrame`` where:
+
+-  each state is a row,
+-  each context property is a column,
+-  the index is `*time
+   based* <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`__
+   matching the state timestamps
+
+.. code:: python
+
+    df = client.get_state_history("impervious_kraken")
+
+    # `df` is a pd.DataFrame looking like
+    #
+    #              peopleCount  lightbulbState   timezone
+    # 2013-01-01   0            OFF              +02:00
+    # 2013-01-02   1            ON               +02:00
+    # 2013-01-03   2            ON               +02:00
+    # 2013-01-04   2            OFF              +02:00
+    # 2013-01-05   0            OFF              +02:00
+
 ``craftai.pandas.Client.decide_from_contexts_df``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1073,7 +1110,7 @@ format as above.
 
 .. code:: python
 
-    decisions_df = client.decide(tree, pd.DataFrame(
+    decisions_df = client.decide_from_contexts_df(tree, pd.DataFrame(
       [
         [0, "+02:00"],
         [1, np.nan],
