@@ -50,7 +50,12 @@ def check_expectation(tree, expectation):
       CLIENT.decide(tree, exp_context, timestamp)
 
     exception = context_manager.exception
-    assert_equal(exception.message, expectation["error"]["message"].encode("utf8"))
+    expected_message = ""
+    if isinstance(expectation["error"]["message"], str):
+      expected_message = expectation["error"]["message"]
+    else:
+      expected_message = expectation["error"]["message"].encode("utf8")
+    assert_equal(exception.message, expected_message)
   else:
     expected_decision = expectation["output"]
     decision = CLIENT.decide(tree, exp_context, time)

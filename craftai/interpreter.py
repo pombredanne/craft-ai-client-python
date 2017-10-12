@@ -40,20 +40,17 @@ class Interpreter(object):
       time = None if len(args) == 1 else args[1]
       context_result = Interpreter._rebuild_context(configuration, state, time)
       context = context_result["context"]
-      # errors = context_result["errors"]
     else:
       context = Interpreter.join_decide_args(args)
 
     errors = Interpreter._check_context(configuration, context)
-
-    print("errors", errors)
 
     # deal with missing properties
     if errors:
       message = "Unable to take decision, the given context is not valid: " + errors.pop(0)
 
       for error in errors:
-        message = message + ", " + error
+        message = "".join((message, ", ", error))
       message = message + "."
 
       raise CraftAiDecisionError(message)
