@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.6.0...HEAD) ##
 ### Fixed ###
-- Fix interpreter test suite to check message expectation (check issue [here](https://github.com/craft-ai/craft-ai-client-python/issues/59)). Some error messages have been updated to fit the interpreter expectation.
+- Fix the interpreter error messages to fit the [test suite](https://github.com/craft-ai/craft-ai-interpreter-test-suite) expectations.
 
 ## [1.6.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.5.0...v1.6.0) - 2017-08-22 ##
 ### Added ###
