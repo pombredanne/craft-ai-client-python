@@ -33,15 +33,27 @@ class Interpreter(object):
 
   @staticmethod
   def decide(tree, args):
+    errors = []
     bare_tree, configuration, _ = Interpreter._parse_tree(tree)
     if configuration != {}:
       state = args[0]
       time = None if len(args) == 1 else args[1]
-      context = Interpreter._rebuild_context(configuration, state, time)
+      context_result = Interpreter._rebuild_context(configuration, state, time)
+      context = context_result["context"]
     else:
       context = Interpreter.join_decide_args(args)
 
-    Interpreter._check_context(configuration, context)
+    errors = Interpreter._check_context(configuration, context)
+
+    # deal with missing properties
+    if errors:
+      message = "Unable to take decision, the given context is not valid: " + errors.pop(0)
+
+      for error in errors:
+        message = "".join((message, ", ", error))
+      message = message + "."
+
+      raise CraftAiDecisionError(message)
 
     decision = {}
     decision["output"] = {}
@@ -58,6 +70,7 @@ class Interpreter(object):
 
   @staticmethod
   def _rebuild_context(configuration, state, time=None):
+    missings = []
     # Model should come from _parse_tree and is assumed to be checked upon
     # already
     output = configuration["output"]
@@ -70,6 +83,7 @@ class Interpreter(object):
 
     # Check if we need the time object
     to_generate = []
+
     for prop in configuration_ctx.items():
       prop_name = prop[0]
       prop_attributes = prop[1]
@@ -82,35 +96,29 @@ class Interpreter(object):
         if case_1 or case_2:
           to_generate.append(prop_name)
 
-    # Raise an exception if a time object is not provided but needed
-    if to_generate and not isinstance(time, Time):
-
-      # Check for missings (not provided and need to be generated)
-      missings = []
-      for prop in to_generate:
-        if prop not in list(state.keys()):
-          missings.append(prop_name)
-
-      # Raise an error if some need to be generated but not provided and no Time object
-      if missings:
-        raise CraftAiDecisionError(
-          """you must provide a Time object to decide() because"""
-          """ context properties {} need to be generated.""".format(missings)
-        )
-      else:
-        to_generate = []
-
-    # Generate context properties which need to
+    # Propagate missings properties to next function
     if to_generate:
-      for prop in to_generate:
-        state[prop] = time.to_dict()[configuration_ctx[prop]["type"]]
+      # Can't generate from time -> missings properties are errors
+      if not isinstance(time, Time):
+        # Check for missings properties
+        for prop in to_generate:
+          if prop not in list(state.keys()):
+            missings.append("expected property '{}' is not defined".format(prop))
+
+      # Generate context properties which need to
+      else:
+        for prop in to_generate:
+          state[prop] = time.to_dict()[configuration_ctx[prop]["type"]]
 
     # Rebuild the context with generated and non-generated values
     context = {
       feature: state.get(feature) for feature, properties in configuration_ctx.items()
     }
 
-    return context
+    return {
+      "context": context,
+      "errors": missings
+    }
 
   @staticmethod
   def _decide_recursion(node, context):
@@ -175,29 +183,31 @@ class Interpreter(object):
     # Retrieve the missing properties
     missing_properties = [
       p for p in expected_properties
-      if not p in context
+      if not p in context or context[p] is None
     ]
 
     # Validate the values
     bad_properties = [
       p for p in expected_properties
-      if p in context and not _VALUE_VALIDATORS[configuration["context"][p]["type"]](context[p])
+      if p in context and
+      not context[p] is None and
+      not _VALUE_VALIDATORS[configuration["context"][p]["type"]](context[p])
     ]
 
     if missing_properties or bad_properties:
+      missing_properties = sorted(missing_properties)
       missing_properties_messages = [
         "expected property '{}' is not defined"
         .format(p) for p in missing_properties
       ]
+      bad_properties = sorted(bad_properties)
       bad_properties_messages = [
         "'{}' is not a valid value for property '{}' of type '{}'"
         .format(context[p], p, configuration["context"][p]["type"]) for p in bad_properties
       ]
 
-      raise CraftAiDecisionError(
-        """Unable to take decision, the given context is not valid: {}.""".
-        format(", ".join(missing_properties_messages + bad_properties_messages))
-      )
+      return missing_properties_messages + bad_properties_messages
+    return []
 
   @staticmethod
   def _find_matching_child(node, context):
@@ -245,7 +255,7 @@ class Interpreter(object):
   @staticmethod
   def _parse_tree(tree_object):
     # Checking definition of tree_object
-    if not (tree_object and isinstance(tree_object, object)):
+    if not isinstance(tree_object, dict):
       raise CraftAiDecisionError("Invalid decision tree format, the given json is not an object.")
 
     # Checking version existence
@@ -253,7 +263,7 @@ class Interpreter(object):
     if not tree_version:
       raise CraftAiDecisionError(
         """Invalid decision tree format, unable to find the version"""
-        """ information."""
+        """ informations."""
       )
 
     # Checking version and tree validity according to version

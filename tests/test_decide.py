@@ -46,12 +46,16 @@ def check_expectation(tree, expectation):
   time = Time(exp_time["t"], exp_time["tz"]) if exp_time else {}
 
   if expectation.get("error"):
-    assert_raises(
-      craft_err.CraftAiDecisionError,
-      CLIENT.decide,
-      tree,
-      exp_context,
-      timestamp)
+    with assert_raises(craft_err.CraftAiDecisionError) as context_manager:
+      CLIENT.decide(tree, exp_context, timestamp)
+
+    exception = context_manager.exception
+    expected_message = ""
+    if isinstance(expectation["error"]["message"], str):
+      expected_message = expectation["error"]["message"]
+    else:
+      expected_message = expectation["error"]["message"].encode("utf8")
+    assert_equal(exception.message, expected_message)
   else:
     expected_decision = expectation["output"]
     decision = CLIENT.decide(tree, exp_context, time)
@@ -83,21 +87,11 @@ def test_rebuild_context():
 
 #pylint: disable=W0212
 
-  # Case 1:
-  # - don't provide a Time object while properties in configuration need to be generated from it
-  # - don't provide those properties directly in the context
-  state = {"car": "Renault", "day_of_week": 2}
-  assert_raises(
-    craft_err.CraftAiDecisionError,
-    Interpreter._rebuild_context,
-    configuration,
-    state)
-
   # Case 2:
   # - provide none of the properties that should be generated
   state = {"car": "Renault", "day_of_week": 2}
   time = Time(1489998174, "+01:00")
-  rebuilt_context = Interpreter._rebuild_context(configuration, state, time)
+  rebuilt_context = Interpreter._rebuild_context(configuration, state, time)["context"]
   expected_context = {
     "car": "Renault",
     "day_of_week": 2,

@@ -57,14 +57,14 @@ class CraftAiNotFoundError(CraftAiError):
 class CraftAiDecisionError(CraftAiError):
   """Raised when some issue is encountered when trying to find a decision"""
   def __init__(self, message):
-    self.message = "".join(("Error while taking a decision: ", message))
+    self.message = "".join(("Unable to take decision, ", message))
     super(CraftAiDecisionError, self).__init__(message)
 
 
 class CraftAiNullDecisionError(CraftAiDecisionError):
   """Raised when some issue is encountered when trying to find a decision"""
   def __init__(self, message):
-    self.message = "".join(("Unable to take decision: ", message))
+    self.message = "".join(("Unable to take decision, ", message))
     super(CraftAiNullDecisionError, self).__init__(message)
 
 
