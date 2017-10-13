@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.6.0...HEAD) ##
 ### Added ###
-- Add new function `client.get_state_history`, that allow to retrieve states history based on context operations. Take a look a the [documentation](https://beta.craft.ai/doc/python#retrieve-state-history) for further informations. This function is also available in the _panda_ version.
+- Add new function `client.get_state_history` retrieving a agent's state history. Take a look a the [documentation](https://beta.craft.ai/doc/python#retrieve-state-history) for further informations. This function is also available in the _pandas_ version.
 
 ### Fixed ###
 - Fix the interpreter error messages to fit the [test suite](https://github.com/craft-ai/craft-ai-interpreter-test-suite) expectations.
