@@ -195,10 +195,12 @@ class Interpreter(object):
     ]
 
     if missing_properties or bad_properties:
+      missing_properties = sorted(missing_properties)
       missing_properties_messages = [
         "expected property '{}' is not defined"
         .format(p) for p in missing_properties
       ]
+      bad_properties = sorted(bad_properties)
       bad_properties_messages = [
         "'{}' is not a valid value for property '{}' of type '{}'"
         .format(context[p], p, configuration["context"][p]["type"]) for p in bad_properties
