@@ -147,6 +147,15 @@ def test_get_operations_list_df():
   assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00"))
   assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-01 04:59:00"))
 
+@with_setup(setup_simple_agent_with_data, teardown)
+def test_get_state_history_df():
+  df = CLIENT.get_state_history(AGENT_ID)
+
+  assert_equal(len(df), 181)
+  assert_equal(len(df.dtypes), 5)
+  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00"))
+  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-01 05:00:00"))
+
 def setup_complex_agent_with_data():
   setup_complex_agent()
   CLIENT.add_operations(AGENT_ID, COMPLEX_AGENT_DATA)

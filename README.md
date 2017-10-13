@@ -12,7 +12,7 @@ If you're reading this you are probably already registered with **craft ai**, if
 
 ### 1 - Create a project ###
 
-Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/projects), and press **Create a project**. 
+Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/projects), and press **Create a project**.
 
 Once it's done, you can click on your newly created project to retrieve its tokens. There are two types of tokens: **read** and **write**. You'll need the **write** token to create, update and delete your agent.
 
@@ -690,6 +690,18 @@ client.get_context_state(
 )
 ```
 
+#### Retrieve state history ####
+
+```python
+client.get_state_history(
+    "impervious_kraken", # The agent id
+    1478894153, # Optional, the **start** timestamp from which the
+                # operations are retrieved (inclusive bound)
+    1478895266, # Optional, the **end** timestamp up to which the
+                # operations are retrieved (inclusive bound)
+)
+```
+
 ### Decision tree ###
 
 Decision trees are computed at specific timestamps, directly by **craft ai** which learns from the context operations [added](#add-operations) throughout time.
@@ -712,7 +724,7 @@ client.get_decision_tree(
 )
 ```
 
-#### Take Decision ####
+#### Take decision ####
 
 To get a chance to store and reuse the decision tree, use `get_decision_tree` and use `decide`, a simple function evaluating a decision tree offline.
 
@@ -866,12 +878,33 @@ client.add_operations("impervious_kraken", df)
 
 Given something that is not a `DataFrame` this method behave like the _vanilla_ `craftai.Client.add_operations`.
 
+#### `craftai.pandas.Client.get_state_history` #####
+
+Retrieves the desired state history as a `DataFrame` where:
+
+- each state is a row,
+- each context property is a column,
+- the index is [_time based_](https://pandas.pydata.org/pandas-docs/stable/timeseries.html) matching the state timestamps
+
+```python
+df = client.get_state_history("impervious_kraken")
+
+# `df` is a pd.DataFrame looking like
+#
+#              peopleCount  lightbulbState   timezone
+# 2013-01-01   0            OFF              +02:00
+# 2013-01-02   1            ON               +02:00
+# 2013-01-03   2            ON               +02:00
+# 2013-01-04   2            OFF              +02:00
+# 2013-01-05   0            OFF              +02:00
+```
+
 #### `craftai.pandas.Client.decide_from_contexts_df` #####
 
 Take multiple decisions on a given `DataFrame` following the same format as above.
 
 ```python
-decisions_df = client.decide(tree, pd.DataFrame(
+decisions_df = client.decide_from_contexts_df(tree, pd.DataFrame(
   [
     [0, "+02:00"],
     [1, np.nan],
