@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.7.1...HEAD) ##
+### Added ###
+- Support new format for timezone offsets: +/-hhmm, +/-hh and some abbreviations(CEST, PST, ...). Check the [documentation](https://beta.craft.ai/doc/http#context-properties-types) for the complete list.
 
 ## [1.7.1](https://github.com/craft-ai/craft-ai-client-python/compare/v1.7.0...v1.7.1) - 2017-10-13 ##
 ### Added ###
