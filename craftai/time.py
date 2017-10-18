@@ -13,6 +13,7 @@ from pytz import utc as pyutc
 from tzlocal import get_localzone
 
 from craftai.errors import CraftAiTimeError
+from craftai.timezones import is_timezone, timezone_offset_in_sec
 
 _EPOCH = datetime(1970, 1, 1, tzinfo=pyutc)
 _ISO_FMT = "%Y-%m-%dT%H:%M:%S%z"
@@ -52,12 +53,9 @@ class Time(object):
       if isinstance(timezone, tzinfo):
         # If it's already a timezone object, no more work is needed
         time = time.astimezone(timezone)
-      elif isinstance(timezone, six.string_types):
+      elif isinstance(timezone, six.string_types) and is_timezone(timezone):
         # If it's a string, we convert it to a usable timezone object
-        timezone = timezone.replace(":", "")
-        offset = (int(timezone[-4:-2]) * 60 + int(timezone[-2:])) * 60
-        if timezone[0] == "-":
-          offset = -offset
+        offset = timezone_offset_in_sec(timezone)
         time = time.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
       else:
         raise CraftAiTimeError(
