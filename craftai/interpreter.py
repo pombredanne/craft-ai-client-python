@@ -4,23 +4,14 @@ import semver
 import six
 
 from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
+from craftai.operators import _OPERATORS
 from craftai.time import Time
-
-_OPERATORS = {
-  "is": lambda context, value: context == value,
-  ">=": lambda context, value: context >= value,
-  "<": lambda context, value: context < value,
-  "[in[": lambda context, value: context >= value[0] and
-          context < value[1] if value[0] < value[1] else context >= value[0] or context < value[1]
-}
-
-_TIMEZONE_REGEX = re.compile(r"[+-]\d\d:\d\d")
+from craftai.timezones import is_timezone
 
 _VALUE_VALIDATORS = {
   "continuous": lambda value: isinstance(value, numbers.Real),
   "enum": lambda value: isinstance(value, six.string_types),
-  "timezone": lambda value: isinstance(value, six.string_types) and
-              _TIMEZONE_REGEX.match(value) is not None,
+  "timezone": lambda value: isinstance(value, six.string_types) and is_timezone(value),
   "time_of_day": lambda value: isinstance(value, numbers.Real) and value >= 0 and value < 24,
   "day_of_week": lambda value: isinstance(value, six.integer_types) and value >= 0 and value <= 6,
   "day_of_month": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 31,
