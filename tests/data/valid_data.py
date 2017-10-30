@@ -21,6 +21,51 @@ VALID_CONFIGURATION = {
   "time_quantum": VALID_TQ
 }
 
+VALID_LARGE_CONFIGURATION = {
+  "context": {
+    "e1": {
+      "type": "enum"
+    },
+    "e2": {
+      "type": "enum"
+    },
+    "e3": {
+      "type": "enum"
+    },
+    "e4": {
+      "type": "enum"
+    },
+    "c1": {
+      "type": "continuous"
+    },
+    "c2": {
+      "type": "continuous"
+    },
+    "c3": {
+      "type": "continuous"
+    },
+    "c4": {
+      "type": "continuous"
+    },
+    "time": {
+      "type": "time_of_day",
+      "is_generated": True
+    },
+    "day_of_week": {
+      "type": "time_of_day",
+      "is_generated": True
+    },
+    "tz": {
+      "type": "timezone"
+    }
+  },
+  "output": [
+    "c4"
+  ],
+  "time_quantum": 10,
+  "learning_period": 3600
+}
+
 VALID_TIMESTAMP = 1458741230
 VALID_OPERATIONS_SET = [
   {

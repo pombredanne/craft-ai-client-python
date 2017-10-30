@@ -1,3 +1,5 @@
+import random
+
 import craftai
 
 from nose.tools import assert_is_instance, assert_not_equal, assert_raises, with_setup
@@ -9,10 +11,47 @@ from .data import invalid_data
 CLIENT = craftai.Client(settings.CRAFT_CFG)
 AGENT_ID = "test_get_decision_tree_" + settings.RUN_ID
 
+VALID_L_CFG = valid_data.VALID_LARGE_CONFIGURATION
+VALID_L_BATCH_DURATION = VALID_L_CFG["learning_period"] * 4
+VALID_L_ENUM_VALUES = ["CYAN", "MAGENTA", "YELLOW", "BLACK"]
+
+def random_enum_value():
+  return random.choice(VALID_L_ENUM_VALUES)
+
+def random_continuous_value():
+  return random.uniform(-12, 12)
+
+VALID_L_OPERATIONS = [
+  [
+    {
+      "timestamp": batch_offset * VALID_L_BATCH_DURATION + operation_offset,
+      "context": {
+        "e1": random_enum_value(),
+        "e2": random_enum_value(),
+        "e3": random_enum_value(),
+        "e4": random_enum_value(),
+        "c1": random_continuous_value(),
+        "c2": random_continuous_value(),
+        "c3": random_continuous_value(),
+        "c4": random_continuous_value(),
+        "tz": "CET"
+      }
+    }
+    for operation_offset in range(0, VALID_L_BATCH_DURATION, 1000)
+  ]
+  for batch_offset in range(0, 60)
+]
+
 def setup_agent_w_operations():
   CLIENT.delete_agent(AGENT_ID)
   CLIENT.create_agent(valid_data.VALID_CONFIGURATION, AGENT_ID)
   CLIENT.add_operations(AGENT_ID, valid_data.VALID_OPERATIONS_SET)
+
+def setup_agent_w_operations_l():
+  CLIENT.delete_agent(AGENT_ID)
+  CLIENT.create_agent(VALID_L_CFG, AGENT_ID)
+  for batch in VALID_L_OPERATIONS:
+    CLIENT.add_operations(AGENT_ID, batch)
 
 def teardown():
   CLIENT.delete_agent(AGENT_ID)
@@ -64,3 +103,12 @@ def test_get_decision_tree_with_invalid_timestamp():
       CLIENT.get_decision_tree,
       AGENT_ID,
       invalid_data.INVALID_TIMESTAMPS[inv_ts])
+
+@with_setup(setup_agent_w_operations_l, teardown)
+def test_get_decision_tree_with_timeout():
+  last_operation = VALID_L_OPERATIONS[-1][-1]
+  assert_raises(
+    craftai.errors.CraftAiLongRequestTimeOutError,
+    CLIENT.get_decision_tree,
+    AGENT_ID,
+    last_operation["timestamp"])

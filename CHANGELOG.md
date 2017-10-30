@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.8.0...HEAD) ##
+### Fixed ###
+
+- `client.get_decision_tree` now properly returns timeout sent by the API as `errors.CraftAiLongRequestTimeOutError`.
 
 ## [1.8.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.7.1...v1.8.0) - 2017-10-24 ##
 ### Added ###

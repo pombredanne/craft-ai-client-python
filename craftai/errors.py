@@ -79,3 +79,10 @@ class CraftAiTokenError(CraftAiError):
   def __init__(self, message):
     self.message = "".join(("Invalid Token: ", message))
     super(CraftAiTokenError, self).__init__(message)
+
+class CraftAiLongRequestTimeOutError(CraftAiError):
+  """Raised when a request takes a long time"""
+  def __init__(self, message=None):
+    self.message = message if message is None else (
+      "Request timed out because the computation is not finished, please try again")
+    super(CraftAiLongRequestTimeOutError, self).__init__(message)

@@ -6,7 +6,7 @@ import six
 from craftai import helpers, __version__ as pkg_version
 from craftai.constants import AGENT_ID_PATTERN
 from craftai.errors import CraftAiCredentialsError, CraftAiBadRequestError, CraftAiNotFoundError
-from craftai.errors import CraftAiUnknownError, CraftAiInternalError
+from craftai.errors import CraftAiUnknownError, CraftAiInternalError, CraftAiLongRequestTimeOutError
 from craftai.interpreter import Interpreter
 from craftai.jwt_decode import jwt_decode
 
@@ -316,23 +316,36 @@ class CraftAIClient(object):
     return Interpreter.decide(tree, args)
 
   @staticmethod
-  def _decode_response(response):
-    # https://github.com/kennethreitz/requests/blob/master/requests/status_codes.py
-    if response.status_code == requests.codes.not_found:
-      raise CraftAiNotFoundError(response.text)
-    if response.status_code == requests.codes.bad_request:
-      raise CraftAiBadRequestError(response.text)
-    if response.status_code == requests.codes.unauthorized:
-      raise CraftAiCredentialsError(response.text)
-    if response.status_code == requests.codes.request_timeout:
-      raise CraftAiBadRequestError("Request has timed out")
-    if response.status_code == requests.codes.gateway_timeout:
-      raise CraftAiInternalError("Response has timed out")
-
+  def _parse_body(response):
     try:
       return response.json()
     except:
-      raise CraftAiUnknownError(response.text)
+      raise CraftAiInternalError(
+        "Internal Error, the craft ai server responded in an invalid format."
+      )
+
+  @staticmethod
+  def _decode_response(response):
+    status_code = response.status_code
+
+    if status_code == 200 or status_code == 201 or status_code == 204:
+      return CraftAIClient._parse_body(response)
+    if status_code == 202:
+      raise CraftAiLongRequestTimeOutError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 401 or status_code == 403:
+      raise CraftAiCredentialsError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 400:
+      raise CraftAiBadRequestError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 404:
+      raise CraftAiNotFoundError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 413:
+      raise CraftAiBadRequestError("Given payload is too large")
+    if status_code == 500:
+      raise CraftAiInternalError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 504:
+      raise CraftAiBadRequestError("Request has timed out")
+
+    raise CraftAiUnknownError(CraftAIClient._parse_body(response)["message"])
 
   @staticmethod
   def _check_agent_id(agent_id):
