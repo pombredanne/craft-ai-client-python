@@ -1,5 +1,8 @@
 import json
+import time
+
 from platform import python_implementation, python_version
+
 import requests
 import six
 
@@ -13,6 +16,9 @@ from craftai.jwt_decode import jwt_decode
 USER_AGENT = "craft-ai-client-python/{} [{} {}]".format(pkg_version,
                                                         python_implementation(),
                                                         python_version())
+
+def current_time_ms():
+  return int(round(time.time() * 1000))
 
 class CraftAIClient(object):
   """Client class for craft ai's API"""
@@ -55,6 +61,9 @@ class CraftAIClient(object):
                                     """ or invalid owner provided.""")
     if not isinstance(cfg.get("operationsChunksSize"), six.integer_types):
       cfg["operationsChunksSize"] = 200
+    if (cfg.get("decisionTreeRetrievalTimeout") is not False and
+        not isinstance(cfg.get("decisionTreeRetrievalTimeout"), six.integer_types)):
+      cfg["decisionTreeRetrievalTimeout"] = 1000 * 60 * 5 # 5 minutes
     if not isinstance(cfg.get("url"), six.string_types):
       cfg["url"] = "https://beta.craft.ai"
     if cfg.get("url").endswith("/"):
@@ -295,10 +304,7 @@ class CraftAIClient(object):
   # Decision tree methods #
   #########################
 
-  def get_decision_tree(self, agent_id, timestamp):
-    # Raises an error when agent_id is invalid
-    self._check_agent_id(agent_id)
-
+  def _get_decision_tree(self, agent_id, timestamp):
     headers = self._headers.copy()
 
     req_url = "{}/agents/{}/decision/tree?t={}".format(self._base_url,
@@ -310,6 +316,26 @@ class CraftAIClient(object):
     decision_tree = self._decode_response(resp)
 
     return decision_tree
+
+  def get_decision_tree(self, agent_id, timestamp):
+    # Raises an error when agent_id is invalid
+    self._check_agent_id(agent_id)
+
+    if self._config["decisionTreeRetrievalTimeout"] is False:
+      # Don't retry
+      return self._get_decision_tree(agent_id, timestamp)
+    else:
+      start = current_time_ms()
+      while True:
+        now = current_time_ms()
+        if now - start > self._config["decisionTreeRetrievalTimeout"]:
+          # Client side timeout
+          raise CraftAiLongRequestTimeOutError()
+        try:
+          return self._get_decision_tree(agent_id, timestamp)
+        except CraftAiLongRequestTimeOutError:
+          # Do nothing and continue.
+          continue
 
   @staticmethod
   def decide(tree, *args):
