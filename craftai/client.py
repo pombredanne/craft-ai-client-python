@@ -1,18 +1,28 @@
+# To avoid conflicts between python's own 'time' and this 'time.py'
+# cf. https://stackoverflow.com/a/28854227
+from __future__ import absolute_import
+
 import json
+import time
+
 from platform import python_implementation, python_version
+
 import requests
 import six
 
 from craftai import helpers, __version__ as pkg_version
 from craftai.constants import AGENT_ID_PATTERN
 from craftai.errors import CraftAiCredentialsError, CraftAiBadRequestError, CraftAiNotFoundError
-from craftai.errors import CraftAiUnknownError, CraftAiInternalError
+from craftai.errors import CraftAiUnknownError, CraftAiInternalError, CraftAiLongRequestTimeOutError
 from craftai.interpreter import Interpreter
 from craftai.jwt_decode import jwt_decode
 
 USER_AGENT = "craft-ai-client-python/{} [{} {}]".format(pkg_version,
                                                         python_implementation(),
                                                         python_version())
+
+def current_time_ms():
+  return int(round(time.time() * 1000))
 
 class CraftAIClient(object):
   """Client class for craft ai's API"""
@@ -55,6 +65,9 @@ class CraftAIClient(object):
                                     """ or invalid owner provided.""")
     if not isinstance(cfg.get("operationsChunksSize"), six.integer_types):
       cfg["operationsChunksSize"] = 200
+    if (cfg.get("decisionTreeRetrievalTimeout") is not False and
+        not isinstance(cfg.get("decisionTreeRetrievalTimeout"), six.integer_types)):
+      cfg["decisionTreeRetrievalTimeout"] = 1000 * 60 * 5 # 5 minutes
     if not isinstance(cfg.get("url"), six.string_types):
       cfg["url"] = "https://beta.craft.ai"
     if cfg.get("url").endswith("/"):
@@ -295,10 +308,7 @@ class CraftAIClient(object):
   # Decision tree methods #
   #########################
 
-  def get_decision_tree(self, agent_id, timestamp):
-    # Raises an error when agent_id is invalid
-    self._check_agent_id(agent_id)
-
+  def _get_decision_tree(self, agent_id, timestamp):
     headers = self._headers.copy()
 
     req_url = "{}/agents/{}/decision/tree?t={}".format(self._base_url,
@@ -311,28 +321,61 @@ class CraftAIClient(object):
 
     return decision_tree
 
+  def get_decision_tree(self, agent_id, timestamp):
+    # Raises an error when agent_id is invalid
+    self._check_agent_id(agent_id)
+
+    if self._config["decisionTreeRetrievalTimeout"] is False:
+      # Don't retry
+      return self._get_decision_tree(agent_id, timestamp)
+    else:
+      start = current_time_ms()
+      while True:
+        now = current_time_ms()
+        if now - start > self._config["decisionTreeRetrievalTimeout"]:
+          # Client side timeout
+          raise CraftAiLongRequestTimeOutError()
+        try:
+          return self._get_decision_tree(agent_id, timestamp)
+        except CraftAiLongRequestTimeOutError:
+          # Do nothing and continue.
+          continue
+
   @staticmethod
   def decide(tree, *args):
     return Interpreter.decide(tree, args)
 
   @staticmethod
-  def _decode_response(response):
-    # https://github.com/kennethreitz/requests/blob/master/requests/status_codes.py
-    if response.status_code == requests.codes.not_found:
-      raise CraftAiNotFoundError(response.text)
-    if response.status_code == requests.codes.bad_request:
-      raise CraftAiBadRequestError(response.text)
-    if response.status_code == requests.codes.unauthorized:
-      raise CraftAiCredentialsError(response.text)
-    if response.status_code == requests.codes.request_timeout:
-      raise CraftAiBadRequestError("Request has timed out")
-    if response.status_code == requests.codes.gateway_timeout:
-      raise CraftAiInternalError("Response has timed out")
-
+  def _parse_body(response):
     try:
       return response.json()
     except:
-      raise CraftAiUnknownError(response.text)
+      raise CraftAiInternalError(
+        "Internal Error, the craft ai server responded in an invalid format."
+      )
+
+  @staticmethod
+  def _decode_response(response):
+    status_code = response.status_code
+
+    if status_code == 200 or status_code == 201 or status_code == 204:
+      return CraftAIClient._parse_body(response)
+    if status_code == 202:
+      raise CraftAiLongRequestTimeOutError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 401 or status_code == 403:
+      raise CraftAiCredentialsError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 400:
+      raise CraftAiBadRequestError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 404:
+      raise CraftAiNotFoundError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 413:
+      raise CraftAiBadRequestError("Given payload is too large")
+    if status_code == 500:
+      raise CraftAiInternalError(CraftAIClient._parse_body(response)["message"])
+    if status_code == 504:
+      raise CraftAiBadRequestError("Request has timed out")
+
+    raise CraftAiUnknownError(CraftAIClient._parse_body(response)["message"])
 
   @staticmethod
   def _check_agent_id(agent_id):
