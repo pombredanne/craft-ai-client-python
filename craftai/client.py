@@ -1,3 +1,7 @@
+# To avoid conflicts between python's own 'time' and this 'time.py'
+# cf. https://stackoverflow.com/a/28854227
+from __future__ import absolute_import
+
 import json
 import time
 

@@ -1,9 +1,8 @@
-#
-# Ugly manual deactivation of these checks because python 2 wrongly believes the
-# system's 'time' package is the same than this time.py
-#
-#pylint: disable=import-self,ungrouped-imports,wrong-import-order,no-member
-import time as _time
+# To avoid conflicts between python's own 'time' and this 'time.py'
+# cf. https://stackoverflow.com/a/28854227
+from __future__ import absolute_import
+
+import time
 
 from datetime import datetime, tzinfo, timedelta
 
@@ -23,12 +22,12 @@ class Time(object):
   def __init__(self, t=None, timezone=""):
     if not t:
       # If no initial timestamp is given, the current local time is used
-      time = datetime.now(get_localzone())
+      _time = datetime.now(get_localzone())
     elif isinstance(t, int):
       # Else if t is an int we try to use it as a given timestamp with
       # local UTC offset by default
       try:
-        time = datetime.fromtimestamp(t, get_localzone())
+        _time = datetime.fromtimestamp(t, get_localzone())
       except (OverflowError, OSError) as e:
         raise CraftAiTimeError(
           """Unable to instantiate Time from given timestamp. {}""".
@@ -37,7 +36,7 @@ class Time(object):
       # Else if t is a string we try to interprete it as an ISO time
       # string
       try:
-        time = datetime.strptime(t, _ISO_FMT)
+        _time = datetime.strptime(t, _ISO_FMT)
       except ValueError as e:
         raise CraftAiTimeError(
           """Unable to instantiate Time from given string. {}""".
@@ -52,11 +51,11 @@ class Time(object):
       # If a timezone is specified we can try to use it
       if isinstance(timezone, tzinfo):
         # If it's already a timezone object, no more work is needed
-        time = time.astimezone(timezone)
+        _time = _time.astimezone(timezone)
       elif isinstance(timezone, six.string_types) and is_timezone(timezone):
         # If it's a string, we convert it to a usable timezone object
         offset = timezone_offset_in_sec(timezone)
-        time = time.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
+        _time = _time.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
       else:
         raise CraftAiTimeError(
           """Unable to instantiate Time with the given timezone."""
@@ -64,18 +63,18 @@ class Time(object):
         )
 
     try:
-      self.utc_iso = time.isoformat()
+      self.utc_iso = _time.isoformat()
     except ValueError as e:
       raise CraftAiTimeError(
         """Unable to create ISO 8061 UTCstring. {}""".
         format(e.__str__()))
 
-    self.day_of_week = time.weekday()
-    self.time_of_day = time.hour + time.minute / 60 + time.second / 3600
-    self.day_of_month = time.day
-    self.month_of_year = time.month
-    self.timezone = time.strftime("%z")[:3] + ":" + time.strftime("%z")[3:]
-    self.timestamp = Time.timestamp_from_datetime(time)
+    self.day_of_week = _time.weekday()
+    self.time_of_day = _time.hour + _time.minute / 60 + _time.second / 3600
+    self.day_of_month = _time.day
+    self.month_of_year = _time.month
+    self.timezone = _time.strftime("%z")[:3] + ":" + _time.strftime("%z")[3:]
+    self.timestamp = Time.timestamp_from_datetime(_time)
 
   def to_dict(self):
     """Returns the Time instance as a usable dictionary for craftai"""
@@ -93,9 +92,9 @@ class Time(object):
   def timestamp_from_datetime(date_time):
     """Returns POSIX timestamp as float"""
     if date_time.tzinfo is None:
-      return _time.mktime((date_time.year, date_time.month, date_time.day, date_time.hour,
-                           date_time.minute, date_time.second,
-                           -1, -1, -1)) + date_time.microsecond / 1e6
+      return time.mktime((date_time.year, date_time.month, date_time.day, date_time.hour,
+                          date_time.minute, date_time.second,
+                          -1, -1, -1)) + date_time.microsecond / 1e6
 
     return (date_time - _EPOCH).total_seconds()
 
