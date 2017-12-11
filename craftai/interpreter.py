@@ -112,6 +112,23 @@ class Interpreter(object):
     }
 
   @staticmethod
+  def _validate_property_value(configuration, context, property_name):
+    if not property_name in context:
+      return False
+
+    if context[property_name] is None:
+      return True
+
+    property_type = configuration["context"][property_name]["type"]
+    if property_type in _VALUE_VALIDATORS:
+      property_value = context[property_name]
+      #print(property_name, property_type, property_value)
+      return _VALUE_VALIDATORS[property_type](property_value)
+    else:
+      #print("osef")
+      return True
+
+  @staticmethod
   def _decide_recursion(node, context):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
@@ -180,9 +197,7 @@ class Interpreter(object):
     # Validate the values
     bad_properties = [
       p for p in expected_properties
-      if p in context and
-      not context[p] is None and
-      not _VALUE_VALIDATORS[configuration["context"][p]["type"]](context[p])
+      if not Interpreter._validate_property_value(configuration, context, p)
     ]
 
     if missing_properties or bad_properties:
