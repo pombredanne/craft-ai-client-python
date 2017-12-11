@@ -124,9 +124,7 @@ class Interpreter(object):
       property_value = context[property_name]
       #print(property_name, property_type, property_value)
       return _VALUE_VALIDATORS[property_type](property_value)
-    else:
-      #print("osef")
-      return True
+    return True
 
   @staticmethod
   def _decide_recursion(node, context):
