@@ -2,10 +2,9 @@ import pandas as pd
 import numpy as np
 
 from numpy.random import randn
+from nose.tools import assert_equal, assert_raises, with_setup
 
 import craftai.pandas
-
-from nose.tools import assert_equal, assert_raises, with_setup
 
 from . import settings
 

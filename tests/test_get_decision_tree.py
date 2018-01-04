@@ -1,8 +1,7 @@
 import random
 
-import craftai
-
 from nose.tools import assert_is_instance, assert_not_equal, assert_raises, with_setup
+import craftai
 
 from . import settings
 from .data import valid_data
