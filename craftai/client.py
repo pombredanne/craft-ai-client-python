@@ -205,7 +205,9 @@ class CraftAIClient(object):
     session = requests.Session()
     offset = 0
 
-    while True:
+    is_looping = True
+
+    while is_looping:
       next_offset = offset + self.config["operationsChunksSize"]
 
       try:
@@ -220,12 +222,14 @@ class CraftAIClient(object):
       self._decode_response(resp)
 
       if next_offset >= len(operations):
-        return {
-          "message": "Successfully added %i operation(s) to the agent \"%s/%s/%s\" context."
-                     % (len(operations), self.config["owner"], self.config["project"], agent_id)
-        }
+        is_looping = False
 
       offset = next_offset
+
+    return {
+      "message": "Successfully added %i operation(s) to the agent \"%s/%s/%s\" context."
+                 % (len(operations), self.config["owner"], self.config["project"], agent_id)
+    }
 
   def _get_operations_list_pages(self, url, ops_list):
     if url is None:
