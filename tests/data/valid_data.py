@@ -62,8 +62,8 @@ VALID_LARGE_CONFIGURATION = {
   "output": [
     "c4"
   ],
-  "time_quantum": 10,
-  "learning_period": 3600
+  "time_quantum": 100,
+  "learning_period": 3600 * 24 * 7
 }
 
 VALID_TIMESTAMP = 1458741230
