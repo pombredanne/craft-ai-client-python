@@ -6,9 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.10.0...HEAD) ##
-### Fixed ###
+### Changed ###
 
-- Remove context extrapolation from tests.
+- It is no longer possible to compute a tree at a future timestamp, tests have been adapted to reflect that.
 
 ## [1.10.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.9.0...v1.10.0) - 2018-02-14 ##
 ### Fixed ###
