@@ -62,6 +62,6 @@ def jwt_decode(jwt):
   try:
     signature = base64url_decode(crypto_segment)
   except (TypeError, binascii.Error):
-    raise CraftAiTokenError("Invalid crypto padding")
-
+    raise CraftAiTokenError("Unable to decrypt token")
+    
   return (payload, signing_input, header, signature)
