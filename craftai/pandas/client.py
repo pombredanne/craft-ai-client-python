@@ -5,6 +5,7 @@ import pandas as pd
 from .. import Client as VanillaClient
 from ..errors import CraftAiBadRequestError
 from .interpreter import Interpreter
+from .utils import is_valid_property_value
 
 def chunker(to_be_chunked_df, chunk_size):
   return (to_be_chunked_df[pos:pos + chunk_size]
@@ -24,7 +25,7 @@ class Client(VanillaClient):
           {
             "timestamp": row.name.value // 10 ** 9, # Timestamp.value returns nanoseconds
             "context": {
-              col: row[col] for col in operations.columns if pd.notnull(row[col])
+              col: row[col] for col in operations.columns if is_valid_property_value(row[col])
             }
           } for _, row in chunk.iterrows()
         ]

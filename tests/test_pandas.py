@@ -81,6 +81,22 @@ COMPLEX_AGENT_DATA = pd.DataFrame(
   columns=["a", "b", "tz"],
   index=pd.date_range("20130101", periods=10, freq="D")
 )
+COMPLEX_AGENT_DATA_2 = pd.DataFrame(
+  [
+    [1, "Pierre", "+02:00", [8, 9]],
+    [2, "Paul"],
+    [3],
+    [4],
+    [5, "Jacques"],
+    [6],
+    [7],
+    [8, np.nan, "+01:00", [1, 2, 3]],
+    [9],
+    [10]
+  ],
+  columns=["a", "b", "tz", "arrays"],
+  index=pd.date_range("20130101", periods=10, freq="D")
+)
 CLIENT = craftai.pandas.Client(settings.CRAFT_CFG)
 
 def setup_simple_agent():
@@ -208,6 +224,33 @@ def setup_complex_agent_2_with_data():
 def test_decide_from_contexts_df_null_decisions():
   tree = CLIENT.get_decision_tree(AGENT_ID,
                                   COMPLEX_AGENT_DATA.last_valid_index().value // 10 ** 9)
+
+  test_df = pd.DataFrame(
+    [
+      ["Jean-Pierre", "+02:00"],
+      ["Paul"]
+    ],
+    columns=["b", "tz"],
+    index=pd.date_range("20130201", periods=2, freq="D"))
+
+  df = CLIENT.decide_from_contexts_df(tree, test_df)
+  assert_equal(len(df), 2)
+  assert pd.isnull(df["a_predicted_value"][0])
+  assert pd.notnull(df["error"][0])
+
+  assert pd.notnull(df["a_predicted_value"][1])
+  assert pd.isnull(df["error"][1])
+
+
+def setup_complex_agent_3_with_data():
+  CLIENT.delete_agent(AGENT_ID)
+  CLIENT.create_agent(COMPLEX_AGENT_CONFIGURATION_2, AGENT_ID)
+  CLIENT.add_operations(AGENT_ID, COMPLEX_AGENT_DATA_2)
+
+@with_setup(setup_complex_agent_3_with_data, teardown)
+def test_decide_from_contexts_df_with_array():
+  tree = CLIENT.get_decision_tree(AGENT_ID,
+                                  COMPLEX_AGENT_DATA_2.last_valid_index().value // 10 ** 9)
 
   test_df = pd.DataFrame(
     [
