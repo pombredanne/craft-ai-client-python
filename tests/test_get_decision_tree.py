@@ -103,6 +103,10 @@ def test_get_decision_tree_with_invalid_timestamp():
       AGENT_ID,
       invalid_data.INVALID_TIMESTAMPS[inv_ts])
 
+###
+### The following tests are quite long, they are disabled atm.
+###
+
 # @with_setup(setup_agent_w_operations_l, teardown)
 # def test_get_decision_tree_from_operations():
 #   last_operation = VALID_L_OPERATIONS[-1][-1]
@@ -113,26 +117,26 @@ def test_get_decision_tree_with_invalid_timestamp():
 #   assert_not_equal(decision_tree.get("configuration"), None)
 #   assert_not_equal(decision_tree.get("trees"), None)
 
-@with_setup(setup_agent_w_operations_l, teardown)
-def test_get_decision_tree_w_serverside_timeout():
-  other_client_cfg = settings.CRAFT_CFG.copy()
-  other_client_cfg["decisionTreeRetrievalTimeout"] = False
-  other_client = craftai.Client(other_client_cfg)
-  last_operation = VALID_L_OPERATIONS[-1][-1]
-  assert_raises(
-    craftai.errors.CraftAiLongRequestTimeOutError,
-    other_client.get_decision_tree,
-    AGENT_ID,
-    last_operation["timestamp"])
+# @with_setup(setup_agent_w_operations_l, teardown)
+# def test_get_decision_tree_w_serverside_timeout():
+#   other_client_cfg = settings.CRAFT_CFG.copy()
+#   other_client_cfg["decisionTreeRetrievalTimeout"] = False
+#   other_client = craftai.Client(other_client_cfg)
+#   last_operation = VALID_L_OPERATIONS[-1][-1]
+#   assert_raises(
+#     craftai.errors.CraftAiLongRequestTimeOutError,
+#     other_client.get_decision_tree,
+#     AGENT_ID,
+#     last_operation["timestamp"])
 
-@with_setup(setup_agent_w_operations_l, teardown)
-def test_get_decision_tree_w_smallish_timeout():
-  other_client_cfg = settings.CRAFT_CFG.copy()
-  other_client_cfg["decisionTreeRetrievalTimeout"] = 500
-  other_client = craftai.Client(other_client_cfg)
-  last_operation = VALID_L_OPERATIONS[-1][-1]
-  assert_raises(
-    craftai.errors.CraftAiLongRequestTimeOutError,
-    other_client.get_decision_tree,
-    AGENT_ID,
-    last_operation["timestamp"])
+# @with_setup(setup_agent_w_operations_l, teardown)
+# def test_get_decision_tree_w_smallish_timeout():
+#   other_client_cfg = settings.CRAFT_CFG.copy()
+#   other_client_cfg["decisionTreeRetrievalTimeout"] = 500
+#   other_client = craftai.Client(other_client_cfg)
+#   last_operation = VALID_L_OPERATIONS[-1][-1]
+#   assert_raises(
+#     craftai.errors.CraftAiLongRequestTimeOutError,
+#     other_client.get_decision_tree,
+#     AGENT_ID,
+#     last_operation["timestamp"])
