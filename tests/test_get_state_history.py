@@ -177,14 +177,6 @@ class TestGetStateHistorySuccess(unittest.TestCase):
           "lightbulbColor": "green"
         },
         "timestamp": 1464601500
-      },
-      {
-        "sample": {
-          "presence": "robert",
-          "lightIntensity": 0.6,
-          "lightbulbColor": "green"
-        },
-        "timestamp": 1464601600
       }
     ])
 
@@ -248,14 +240,6 @@ class TestGetStateHistorySuccess(unittest.TestCase):
           "lightbulbColor": "green"
         },
         "timestamp": 1464601500
-      },
-      {
-        "sample": {
-          "presence": "robert",
-          "lightIntensity": 0.6,
-          "lightbulbColor": "green"
-        },
-        "timestamp": 1464601600
       }
     ])
 
