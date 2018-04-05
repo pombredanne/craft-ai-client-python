@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed ###
 
 - Fix an error occurring in the pandas client when the provided DataFrame included non-scalar values.
+- The decoding of the craft ai JWT token is now resilient to spaces around the token string.
 
 ## [1.10.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.9.0...v1.10.0) - 2018-02-14 ##
 ### Fixed ###

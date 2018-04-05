@@ -21,6 +21,18 @@ class TestJwtDecode(unittest.TestCase):
       "admin": True
     })
 
+  def test_decode_works_with_spaces(self):
+    (payload, _, header, _) = jwt_decode("  " + JWT_IO_EXAMPLE + " ")
+    self.assertEqual(header, {
+      "alg": "HS256",
+      "typ": "JWT"
+    })
+    self.assertEqual(payload, {
+      "sub": "1234567890",
+      "name": "John Doe",
+      "admin": True
+    })
+
   def test_decode_fails_properly(self):
     self.assertRaises(
       CraftAiTokenError,

@@ -30,7 +30,7 @@ def jwt_decode(jwt):
     raise CraftAiTokenError("Invalid token type, the token must be a {0}".format(binary_type))
 
   try:
-    signing_input, crypto_segment = jwt.rsplit(b".", 1)
+    signing_input, crypto_segment = jwt.strip().rsplit(b".", 1)
     header_segment, payload_segment = signing_input.split(b".", 1)
   except ValueError:
     raise CraftAiTokenError("Not enough segments")
