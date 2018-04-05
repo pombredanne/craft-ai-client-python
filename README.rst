@@ -3,9 +3,11 @@
 
 |PyPI| |Build Status| |License| |python|
 
-`**craft ai** *AI-as-a-service* <http://craft.ai>`__ enables your
-services to learn every day: provide a personalized experience to each
-user and automate complex tasks.
+`**craft ai** cognitive automation API <http://craft.ai>`__ leverages
+explainable Artificial Intelligence to 10x your knowledge workers
+productivity. craft ai is the first high level AI API enabling Automated
+Machine Learning at the individual level that generates explainable
+predictive models on the fly.
 
 Get Started!
 ------------
@@ -50,6 +52,8 @@ Then import it in your code
 
     import craftai
 
+..
+
     This client also provides helpers to use it in conjuction with
     `pandas <#pandas-support>`__
 
@@ -91,21 +95,21 @@ properties:
 
     agent_id = "my_first_agent"
     configuration = {
-        "context": {
-            "peopleCount": {
-                "type": "continuous"
-            },
-            "timeOfDay": {
-                "type": "time_of_day"
-            },
-            "timezone": {
-                "type": "timezone"
-            },
-            "lightbulbState": {
-                "type": "enum"
-            }
+      "context": {
+        "peopleCount": {
+          "type": "continuous"
         },
-        "output": ["lightbulbState"]
+        "timeOfDay": {
+          "type": "time_of_day"
+        },
+        "timezone": {
+          "type": "timezone"
+        },
+        "lightbulbState": {
+          "type": "enum"
+        }
+      },
+      "output": ["lightbulbState"]
     }
 
     agent = client.create_agent(configuration, agent_id)
@@ -162,57 +166,58 @@ In the following we add 8 operations:
     print("Agent", agent["id"], "has successfully been created")
 
     context_list = [
-        {
-            "timestamp": 1469410200,
-            "context": {
-                "timezone": "+02:00",
-                "peopleCount": 0,
-                "lightbulbState": "OFF"
-            }
-        },
-        {
-            "timestamp": 1469415720,
-            "context": {
-                "peopleCount": 1,
-                "lightbulbState": "ON"
-            }
-        },
-        {
-            "timestamp": 1469416500,
-            "context": {
-                "peopleCount": 2
-            }
-        },
-        {
-            "timestamp": 1469417460,
-            "context": {
-                "lightbulbState": "OFF"
-            }
-        },
-        {
-            "timestamp": 1469419920,
-            "context": {
-                "peopleCount": 0
-            }
-        },
-        {
-            "timestamp": 1469460180,
-            "context": {
-                "peopleCount": 2
-            }
-        },
-        {
-            "timestamp": 1469471700,
-            "context": {
-                "lightbulbState": "ON"
-            }
-        },
-        {
-            "timestamp": 1469473560,
-            "context": {
-                "peopleCount": 0
-            }
+      {
+        "timestamp": 1469410200,
+        "context": {
+          "timezone": "+02:00",
+          "peopleCount": 0,
+          "lightbulbState": "OFF"
         }
+      },
+      {
+        "timestamp": 1469415720,
+        "context": {
+          "peopleCount": 1,
+          "lightbulbState": "ON"
+        }
+      },
+      {
+        "timestamp": 1469416500,
+        "context": {
+          "peopleCount": 2
+        }
+      },
+      {
+        "timestamp": 1469417460,
+        "context": {
+          "lightbulbState": "OFF"
+        }
+      },
+      {
+        "timestamp": 1469419920,
+        "context": {
+          "peopleCount": 0
+        }
+      },
+      {
+        "timestamp": 1469460180,
+        "context": {
+          "peopleCount": 2
+        }
+      },
+      {
+        "timestamp": 1469471700,
+        "context": {
+          "lightbulbState": "ON"
+        }
+      },
+      {
+        "timestamp": 1469473560,
+        "context": {
+          "peopleCount": 0,
+          "lightbulbState": "OFF"
+        }
+      }
     ]
     client.add_operations(agent_id, context_list)
     print("Successfully added initial operations to agent", agent_id, "!")
@@ -251,96 +256,127 @@ moment. Let's first try to compute the decision tree at midnight on July
     client.add_operations(agent_id, context_list)
     print("Successfully added initial operations to agent", agent_id, "!")
 
-    decision_tree = client.get_decision_tree(agent_id, 1469476800)
+    dt_timestamp = 1469476800
+    decision_tree = client.get_decision_tree(agent_id, dt_timestamp)
     print("The full decision tree at timestamp", dt_timestamp, "is the following:")
     print(decision_tree)
-    """ Outputed tree is the following
+    """ Outputted tree is the following
       {
-        "_version": "1.0.0",
-        "configuration": {
-          "context": {
-            "peopleCount": {
-              "type": "continuous"
-            },
-            "timeOfDay": {
-              "type": "time_of_day",
-              "is_generated": true
-            },
-            "timezone": {
-              "type": "timezone"
-            },
-            "lightbulbState": {
-              "type": "enum"
-            }
-          },
-          "output": [
-            "lightbulbState"
-          ],
-          "time_quantum": 600,
-          "learning_period": 108000
-        },
-        "trees": {
-          "lightbulbState": {
-            "children": [
+        "_version":"1.1.0",
+        "trees":{
+          "lightbulbState":{
+            "children":[
               {
-                "children": [
+                "children":[
                   {
-                    "children": [
-                      {
-                        "confidence": 0.9545537233352661,
-                        "decision_rule": {
-                          "operator": "continuous.lessthan",
-                          "operand": 1,
-                          "property": "peopleCount"
-                        },
-                        "predicted_value": "OFF"
-                      },
-                      {
-                        "confidence": 0.8630361557006836,
-                        "decision_rule": {
-                          "operator": ">=",
-                          "operand": 1,
-                          "property": "peopleCount"
-                        },
-                        "predicted_value": "ON"
-                      }
-                    ],
-                    "decision_rule": {
-                      "operator": "<",
-                      "operand": 5.666666507720947,
-                      "property": "timeOfDay"
-                    }
+                    "confidence":0.6774609088897705,
+                    "decision_rule":{
+                      "operand":0.5,
+                      "operator":"<",
+                      "property":"peopleCount"
+                    },
+                    "predicted_value":"OFF"
                   },
                   {
-                    "confidence": 0.9947378635406494,
-                    "decision_rule": {
-                      "operator": ">=",
-                      "operand": 5.666666507720947,
-                      "property": "timeOfDay"
+                    "confidence":0.8630361557006836,
+                    "decision_rule":{
+                      "operand":0.5,
+                      "operator":">=",
+                      "property":"peopleCount"
                     },
-                    "predicted_value": "OFF"
+                    "predicted_value":"ON"
                   }
                 ],
-                "decision_rule": {
-                  "operator": "<",
-                  "operand": 20.66666603088379,
-                  "property": "timeOfDay"
+                "decision_rule":{
+                  "operand":[
+                    5,
+                    5.6666665
+                  ],
+                  "operator":"[in[",
+                  "property":"timeOfDay"
                 }
               },
               {
-                "confidence": 0.8630361557006836,
-                "decision_rule": {
-                  "operator": ">=",
-                  "operand": 20.66666603088379,
-                  "property": "timeOfDay"
-                },
-                "predicted_value": "ON"
+                "children":[
+                  {
+                    "confidence":0.9947378635406494,
+                    "decision_rule":{
+                      "operand":[
+                        5.6666665,
+                        20.666666
+                      ],
+                      "operator":"[in[",
+                      "property":"timeOfDay"
+                    },
+                    "predicted_value":"OFF"
+                  },
+                  {
+                    "children":[
+                      {
+                        "confidence":0.969236433506012,
+                        "decision_rule":{
+                          "operand":1,
+                          "operator":"<",
+                          "property":"peopleCount"
+                        },
+                        "predicted_value":"OFF"
+                      },
+                      {
+                        "confidence":0.8630361557006836,
+                        "decision_rule":{
+                          "operand":1,
+                          "operator":">=",
+                          "property":"peopleCount"
+                        },
+                        "predicted_value":"ON"
+                      }
+                    ],
+                    "decision_rule":{
+                      "operand":[
+                        20.666666,
+                        5
+                      ],
+                      "operator":"[in[",
+                      "property":"timeOfDay"
+                    }
+                  }
+                ],
+                "decision_rule":{
+                  "operand":[
+                    5.6666665,
+                    5
+                  ],
+                  "operator":"[in[",
+                  "property":"timeOfDay"
+                }
               }
-            ],
+            ]
           }
+        },
+        "configuration":{
+          "time_quantum":600,
+          "learning_period":9000000,
+          "context":{
+            "peopleCount":{
+              "type":"continuous"
+            },
+            "timeOfDay":{
+              "type":"time_of_day",
+              "is_generated":True
+            },
+            "timezone":{
+              "type":"timezone"
+            },
+            "lightbulbState":{
+              "type":"enum"
+            }
+          },
+          "output":[
+            "lightbulbState"
+          ]
         }
-      ]
-      """
+      }
+    """
 
 Try to retrieve the tree at different timestamps to see how it gradually
 learns from the new operations. To visualize the trees, use the
@@ -372,14 +408,15 @@ the room ?".
     client.add_operations(agent_id, context_list)
     print("Successfully added initial operations to agent", agent_id, "!")
 
-    decision_tree = client.get_decision_tree(agent_id, 1469476800)
+    dt_timestamp = 1469476800
+    decision_tree = client.get_decision_tree(agent_id, dt_timestamp)
     print("The decision tree at timestamp", dt_timestamp, "is the following:")
     print(decision_tree)
 
     context = {
-        "timezone": "+02:00",
-        "timeOfDay": 7.25,
-        "peopleCount": 2
+      "timezone": "+02:00",
+      "timeOfDay": 7.25,
+      "peopleCount": 2
     }
     resp = client.decide(decision_tree, context)
     print("The anticipated lightbulb state is:", resp["output"]["lightbulbState"]["predicted_value"])
@@ -430,10 +467,16 @@ Each agent has a configuration defining:
    context that is older than this duration. You should generally choose
    the smallest value that fits this description.
 
-    ⚠️ if no time\_quantum is specified, the default value is 600.
+    ⚠️ if no time_quantum is specified, the default value is 600.
 
-    ⚠️ if no learning\_period is specified, the default value is 15000
+..
+
+    ⚠️ if no learning_period is specified, the default value is 15000
     time quantums.
+
+..
+
+    ⚠️ the maximum learning_period value is 750000 \* time_quantum.
 
 Context properties types
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -456,112 +499,92 @@ Time types: ``timezone``, ``time_of_day``, ``day_of_week``, ``day_of_month`` and
 
 -  a ``time_of_day`` property is a real number belonging to **[0.0;
    24.0[**, each value represents the number of hours in the day since
-   midnight (e.g. 13.5 means
-   13:30),
+   midnight (e.g. 13.5 means 13:30),
 -  a ``day_of_week`` property is an integer belonging to **[0, 6]**,
-   each
-   value represents a day of the week starting from Monday (0 is Monday,
-   6 is
-   Sunday).
+   each value represents a day of the week starting from Monday (0 is
+   Monday, 6 is Sunday).
 -  a ``day_of_month`` property is an integer belonging to **[1, 31]**,
    each value represents a day of the month.
 -  a ``month_of_year`` property is an integer belonging to **[1, 12]**,
    each value represents a month of the year.
 -  a ``timezone`` property is a string value representing the timezone
-   as an
-   offset from UTC, supported format are:
--  **±[hh]:[mm]**,
--  **±[hh][mm]**,
--  **±[hh]**,
+   as an offset from UTC, supported format are:
 
-| where ``hh`` represent the hour and ``mm`` the minutes from UTC (eg.
-  ``+01:30``)), between ``-12:00`` and
-| ``+14:00``.
+   -  **±[hh]:[mm]**,
+   -  **±[hh][mm]**,
+   -  **±[hh]**,
 
-Some abbreviations are also supported:
+   where ``hh`` represent the hour and ``mm`` the minutes from UTC (eg.
+   ``+01:30``)), between ``-12:00`` and ``+14:00``.
 
--  **UTC** or **Z** Universal Time Coordinated,
--  **GMT** Greenwich Mean Time, as UTC,
--  **BST** British Summer Time, as UTC+1 hour,
--  **IST** Irish Summer Time, as UTC+1,
--  **WET** Western Europe Time, as UTC,
--  **WEST** Western Europe Summer Time, as UTC+1,
--  **CET** Central Europe Time, as UTC+1,
--  **CEST** Central Europe Summer Time, as UTC+2,
--  **EET** Eastern Europe Time, as UTC+2,
--  **EEST** Eastern Europe Summer Time, as UTC+3,
--  **MSK** Moscow Time, as UTC+3,
--  **MSD** Moscow Summer Time, as UTC+4,
--  **AST** Atlantic Standard Time, as UTC-4,
--  **ADT** Atlantic Daylight Time, as UTC-3,
--  **EST** Eastern Standard Time, as UTC-5,
--  **EDT** Eastern Daylight Saving Time, as UTC-4,
--  **CST** Central Standard Time, as UTC-6,
--  **CDT** Central Daylight Saving Time, as UTC-5,
--  **MST** Mountain Standard Time, as UTC-7,
--  **MDT** Mountain Daylight Saving Time, as UTC-6,
--  **PST** Pacific Standard Time, as UTC-8,
--  **PDT** Pacific Daylight Saving Time, as UTC-7,
--  **HST** Hawaiian Standard Time, as UTC-10,
--  **AKST** Alaska Standard Time, as UTC-9,
--  **AKDT** Alaska Standard Daylight Saving Time, as UTC-8,
--  **AEST** Australian Eastern Standard Time, as UTC+10,
--  **AEDT** Australian Eastern Daylight Time, as UTC+11,
--  **ACST** Australian Central Standard Time, as UTC+9.5,
--  **ACDT** Australian Central Daylight Time, as UTC+10.5,
--  **AWST** Australian Western Standard Time, as UTC+8.
+   Some abbreviations are also supported:
 
-    | ℹ️ By default, the values of the ``time_of_day`` and
-      ``day_of_week``
-    | properties are generated from the ```timestamp`` <#timestamp>`__
-      of an agent's
-    | state and the agent's current ``timezone``. Therefore, whenever
-      you use generated
-    | ``time_of_day`` and/or ``day_of_week`` in your configuration, you
-      **must** provide a
-    | ``timezone`` value in the context. There can only be one
-      ``timezone`` property.
+   -  **UTC** or **Z** Universal Time Coordinated,
+   -  **GMT** Greenwich Mean Time, as UTC,
+   -  **BST** British Summer Time, as UTC+1 hour,
+   -  **IST** Irish Summer Time, as UTC+1,
+   -  **WET** Western Europe Time, as UTC,
+   -  **WEST** Western Europe Summer Time, as UTC+1,
+   -  **CET** Central Europe Time, as UTC+1,
+   -  **CEST** Central Europe Summer Time, as UTC+2,
+   -  **EET** Eastern Europe Time, as UTC+2,
+   -  **EEST** Eastern Europe Summer Time, as UTC+3,
+   -  **MSK** Moscow Time, as UTC+3,
+   -  **MSD** Moscow Summer Time, as UTC+4,
+   -  **AST** Atlantic Standard Time, as UTC-4,
+   -  **ADT** Atlantic Daylight Time, as UTC-3,
+   -  **EST** Eastern Standard Time, as UTC-5,
+   -  **EDT** Eastern Daylight Saving Time, as UTC-4,
+   -  **CST** Central Standard Time, as UTC-6,
+   -  **CDT** Central Daylight Saving Time, as UTC-5,
+   -  **MST** Mountain Standard Time, as UTC-7,
+   -  **MDT** Mountain Daylight Saving Time, as UTC-6,
+   -  **PST** Pacific Standard Time, as UTC-8,
+   -  **PDT** Pacific Daylight Saving Time, as UTC-7,
+   -  **HST** Hawaiian Standard Time, as UTC-10,
+   -  **AKST** Alaska Standard Time, as UTC-9,
+   -  **AKDT** Alaska Standard Daylight Saving Time, as UTC-8,
+   -  **AEST** Australian Eastern Standard Time, as UTC+10,
+   -  **AEDT** Australian Eastern Daylight Time, as UTC+11,
+   -  **ACST** Australian Central Standard Time, as UTC+9.5,
+   -  **ACDT** Australian Central Daylight Time, as UTC+10.5,
+   -  **AWST** Australian Western Standard Time, as UTC+8.
 
-    | If you wish to provide their values manually, add
-      ``is_generated: false`` to the
-    | time types properties in your configuration. In this case, since
-      you provide the values, the
-    | ``timezone`` property is not required, and you must update the
-      context whenever
-    | one of these time values changes in a way that is significant for
-      your system.
+    ℹ️ By default, the values of the ``time_of_day`` and ``day_of_week``
+    properties are generated from the ```timestamp`` <#timestamp>`__ of
+    an agent's state and the agent's current ``timezone``. Therefore,
+    whenever you use generated ``time_of_day`` and/or ``day_of_week`` in
+    your configuration, you **must** provide a ``timezone`` value in the
+    context. There can only be one ``timezone`` property.
+
+    If you wish to provide their values manually, add
+    ``is_generated: false`` to the time types properties in your
+    configuration. In this case, since you provide the values, the
+    ``timezone`` property is not required, and you must update the
+    context whenever one of these time values changes in a way that is
+    significant for your system.
 
 Examples
 ''''''''
 
-| Let's take a look at the following configuration. It is designed to
-  model the **color**
-| of a lightbulb (the ``lightbulbColor`` property, defined as an output)
-  depending
-| on the **outside light intensity** (the ``lightIntensity`` property),
-  the **time
-  of the day** (the ``time`` property) and the **day of the week** (the
-  ``day``
-| property).
+Let's take a look at the following configuration. It is designed to
+model the **color** of a lightbulb (the ``lightbulbColor`` property,
+defined as an output) depending on the **outside light intensity** (the
+``lightIntensity`` property), the **time of the day** (the ``time``
+property) and the **day of the week** (the ``day`` property).
 
-| ``day`` and ``time`` values will be generated automatically, hence the
-  need for
-| ``timezone``, the current Time Zone, to compute their value from given
-| ```timestamps`` <#timestamp>`__.
+``day`` and ``time`` values will be generated automatically, hence the
+need for ``timezone``, the current Time Zone, to compute their value
+from given ```timestamps`` <#timestamp>`__.
 
-| The ``time_quantum`` is set to 100 seconds, which means that if the
-  lightbulb
-| color is changed from red to blue then from blue to purple in less
-  that 1
-| minutes and 40 seconds, only the change from red to purple will be
-  taken into
-| account.
+The ``time_quantum`` is set to 100 seconds, which means that if the
+lightbulb color is changed from red to blue then from blue to purple in
+less that 1 minutes and 40 seconds, only the change from red to purple
+will be taken into account.
 
-| The ``learning_period`` is set to 108 000 seconds (one month) , which
-  means that
-| the state of the lightbulb from more than a month ago can be ignored
-  when learning
-| the decision model.
+The ``learning_period`` is set to 108 000 seconds (one month) , which
+means that the state of the lightbulb from more than a month ago can be
+ignored when learning the decision model.
 
 .. code:: json
 
@@ -588,11 +611,9 @@ Examples
       "learning_period": 108000
     }
 
-| In this second example, the ``time`` property is not generated, no
-  property of
-| type ``timezone`` is therefore needed. However values of ``time`` must
-  be manually
-| provided continuously.
+In this second example, the ``time`` property is not generated, no
+property of type ``timezone`` is therefore needed. However values of
+``time`` must be manually provided continuously.
 
 .. code:: json
 
@@ -717,29 +738,34 @@ Create
 
 Create a new agent, and create its `configuration <#configuration>`__.
 
+    The agent's identifier is a case sensitive string between 1 and 36
+    characters long. It only accepts letters, digits, hyphen-minuses and
+    underscores (i.e. the regular expression ``/[a-zA-Z0-9_-]{1,36}/``).
+
 .. code:: python
 
     client.create_agent(
-        { # The configuration
-            "context": {
-              "peopleCount": {
-                "type": "continuous"
-              },
-              "timeOfDay": {
-                "type": "time_of_day"
-              },
-              "timezone": {
-                "type": "timezone"
-              },
-              "lightbulbState": {
-                "type": "enum"
-              }
-            },
-            "output": [ "lightbulbState" ],
-            "time_quantum": 100,
-            "learning_period": 108000
+      { # The configuration
+        "context": {
+          "peopleCount": {
+            "type": "continuous"
+          },
+          "timeOfDay": {
+            "type": "time_of_day"
+          },
+          "timezone": {
+            "type": "timezone"
+          },
+          "lightbulbState": {
+            "type": "enum"
+          }
         },
-        "impervious_kraken", # id for the agent, if undefined a random id is generated
+        "output": [ "lightbulbState" ],
+        "time_quantum": 100,
+        "learning_period": 108000
+      },
+      "impervious_kraken" # id for the agent, if undefined a random id is generated
+    )
 
 Delete
 ^^^^^^
@@ -747,7 +773,7 @@ Delete
 .. code:: python
 
     client.delete_agent(
-        "impervious_kraken" # The agent id
+      "impervious_kraken" # The agent id
     )
 
 Retrieve
@@ -756,7 +782,7 @@ Retrieve
 .. code:: python
 
     client.get_agent(
-        "impervious_kraken" # The agent id
+      "impervious_kraken" # The agent id
     )
 
 List
@@ -771,26 +797,26 @@ List
 Create and retrieve shared url
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-| Create and get a shareable url to view an agent tree.
-| Only one url can be created at a time.
+Create and get a shareable url to view an agent tree. Only one url can
+be created at a time.
 
 .. code:: python
 
     client.get_shared_agent_inspector_url(
-        "impervious_kraken", # The agent id.
-        1464600256 # optional, the timestamp for which you want to inspect the tree.
+      "impervious_kraken", # The agent id.
+      1464600256 # optional, the timestamp for which you want to inspect the tree.
     )
 
 Delete shared url
 ^^^^^^^^^^^^^^^^^
 
-| Delete a shareable url.
-| The previous url cannot access the agent tree anymore.
+Delete a shareable url. The previous url cannot access the agent tree
+anymore.
 
 .. code:: python
 
     client.delete_shared_agent_inspector_url(
-        'impervious_kraken' # The agent id.
+      'impervious_kraken' # The agent id.
     )
 
 Context
@@ -802,60 +828,61 @@ Add operations
 .. code:: python
 
     client.add_operations(
-        "impervious_kraken", # The agent id
-        [ # The list of context operations
-            {
-                "timestamp": 1469410200,
-                "context": {
-                    "timezone": "+02:00",
-                    "peopleCount": 0,
-                    "lightbulbState": "OFF"
-                }
-            },
-            {
-                "timestamp": 1469415720,
-                "context": {
-                    "peopleCount": 1,
-                    "lightbulbState": "ON"
-                }
-            },
-            {
-                "timestamp": 1469416500,
-                "context": {
-                    "peopleCount": 2
-                }
-            },
-            {
-                "timestamp": 1469417460,
-                "context": {
-                    "lightbulbState": "OFF"
-                }
-            },
-            {
-                "timestamp": 1469419920,
-                "context": {
-                    "peopleCount": 0
-                }
-            },
-            {
-                "timestamp": 1469460180,
-                "context": {
-                    "peopleCount": 2
-                }
-            },
-            {
-                "timestamp": 1469471700,
-                "context": {
-                    "lightbulbState": "ON"
-                }
-            },
-            {
-                "timestamp": 1469473560,
-                "context": {
-                    "peopleCount": 0
-                }
-            }
-        ]
+      "impervious_kraken", # The agent id
+      [ # The list of context operations
+        {
+          "timestamp": 1469410200,
+          "context": {
+            "timezone": "+02:00",
+            "peopleCount": 0,
+            "lightbulbState": "OFF"
+          }
+        },
+        {
+          "timestamp": 1469415720,
+          "context": {
+            "peopleCount": 1,
+            "lightbulbState": "ON"
+          }
+        },
+        {
+          "timestamp": 1469416500,
+          "context": {
+            "peopleCount": 2
+          }
+        },
+        {
+          "timestamp": 1469417460,
+          "context": {
+            "lightbulbState": "OFF"
+          }
+        },
+        {
+          "timestamp": 1469419920,
+          "context": {
+            "peopleCount": 0
+          }
+        },
+        {
+          "timestamp": 1469460180,
+          "context": {
+            "peopleCount": 2
+          }
+        },
+        {
+          "timestamp": 1469471700,
+          "context": {
+            "lightbulbState": "ON"
+          }
+        },
+        {
+          "timestamp": 1469473560,
+          "context": {
+            "peopleCount": 0,
+            "lightbulbState": "OFF"
+          }
+        }
+      ]
     )
 
 List operations
@@ -864,12 +891,14 @@ List operations
 .. code:: python
 
     client.get_operations_list(
-        "impervious_kraken", # The agent id
-        1478894153, # Optional, the **start** timestamp from which the
-                    # operations are retrieved (inclusive bound)
-        1478895266, # Optional, the **end** timestamp up to which the
-                    # operations are retrieved (inclusive bound)
+      "impervious_kraken", # The agent id
+      1478894153, # Optional, the **start** timestamp from which the
+                  # operations are retrieved (inclusive bound)
+      1478895266, # Optional, the **end** timestamp up to which the
+                  # operations are retrieved (inclusive bound)
     )
+
+..
 
     This call can generate multiple requests to the craft ai API as
     results are paginated.
@@ -880,8 +909,8 @@ Retrieve state
 .. code:: python
 
     client.get_context_state(
-        "impervious_kraken", # The agent id
-        1469473600 # The timestamp at which the context state is retrieved
+      "impervious_kraken", # The agent id
+      1469473600 # The timestamp at which the context state is retrieved
     )
 
 Retrieve state history
@@ -890,11 +919,11 @@ Retrieve state history
 .. code:: python
 
     client.get_state_history(
-        "impervious_kraken", # The agent id
-        1478894153, # Optional, the **start** timestamp from which the
-                    # operations are retrieved (inclusive bound)
-        1478895266, # Optional, the **end** timestamp up to which the
-                    # operations are retrieved (inclusive bound)
+      "impervious_kraken", # The agent id
+      1478894153, # Optional, the **start** timestamp from which the
+                  # operations are retrieved (inclusive bound)
+      1478895266, # Optional, the **end** timestamp up to which the
+                  # operations are retrieved (inclusive bound)
     )
 
 Decision tree
@@ -912,18 +941,19 @@ object containing:
    `creation <#create-agent>`__
 -  the tree itself as a JSON object:
 
--  Internal nodes are represented by a ``"decision_rule"`` object and a
-   ``"children"`` array. The first one, contains the ``"property``, and
-   the ``"property"``'s value, to decide which child matches a context.
--  Leaves have a ``"predicted_value"``, ``"confidence"`` and
-   ``"decision_rule"`` object for this value, instead of a
-   ``"children"`` array. ``"predicted_value``" is an estimation of the
-   output in the contexts matching the node. ``"confidence"`` is a
-   number between 0 and 1 that indicates how confident **craft ai** is
-   that the output is a reliable prediction. When the output is a
-   numerical type, leaves also have a ``"standard_deviation"`` that
-   indicates a margin of error around the ``"predicted_value"``.
--  The root only contains a ``"children"`` array.
+   -  Internal nodes are represented by a ``"decision_rule"`` object and
+      a ``"children"`` array. The first one, contains the ``"property``,
+      and the ``"property"``'s value, to decide which child matches a
+      context.
+   -  Leaves have a ``"predicted_value"``, ``"confidence"`` and
+      ``"decision_rule"`` object for this value, instead of a
+      ``"children"`` array. ``"predicted_value``" is an estimation of
+      the output in the contexts matching the node. ``"confidence"`` is
+      a number between 0 and 1 that indicates how confident **craft ai**
+      is that the output is a reliable prediction. When the output is a
+      numerical type, leaves also have a ``"standard_deviation"`` that
+      indicates a margin of error around the ``"predicted_value"``.
+   -  The root only contains a ``"children"`` array.
 
 Compute
 ^^^^^^^
@@ -931,8 +961,8 @@ Compute
 .. code:: python
 
     client.get_decision_tree(
-        "impervious_kraken", # The agent id
-        1469473600 # The timestamp at which the decision tree is retrieved
+      "impervious_kraken", # The agent id
+      1469473600 # The timestamp at which the decision tree is retrieved
     )
 
 Take decision
@@ -948,12 +978,12 @@ decision tree offline.
 
     # Compute the decision on a fully described context
     decision = client.decide(
-        tree,
-        { # The context on which the decision is taken
-            "timezone": "+02:00",
-            "timeOfDay": 7.5,
-            "peopleCount": 3
-        }
+      tree,
+      { # The context on which the decision is taken
+        "timezone": "+02:00",
+        "timeOfDay": 7.5,
+        "peopleCount": 3
+      }
     )
 
     # Or Compute the decision on a context created from the given one and filling the
