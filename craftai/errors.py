@@ -77,7 +77,7 @@ class CraftAiTimeError(CraftAiError):
 class CraftAiTokenError(CraftAiError):
   """Raised when the given token is invalid"""
   def __init__(self, message):
-    self.message = "".join(("Invalid Token: ", message))
+    self.message = "".join(("Unable to decrypt the JWT token: ", message))
     super(CraftAiTokenError, self).__init__(message)
 
 class CraftAiLongRequestTimeOutError(CraftAiError):
