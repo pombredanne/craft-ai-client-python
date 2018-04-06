@@ -27,10 +27,10 @@ def jwt_decode(jwt):
     jwt = jwt.encode("utf-8")
 
   if not issubclass(type(jwt), binary_type):
-    raise CraftAiTokenError("Invalid token type. Token must be a {0}".format(binary_type))
+    raise CraftAiTokenError("Invalid token type, the token must be a {0}".format(binary_type))
 
   try:
-    signing_input, crypto_segment = jwt.rsplit(b".", 1)
+    signing_input, crypto_segment = jwt.strip().rsplit(b".", 1)
     header_segment, payload_segment = signing_input.split(b".", 1)
   except ValueError:
     raise CraftAiTokenError("Not enough segments")
@@ -43,15 +43,15 @@ def jwt_decode(jwt):
   try:
     header = json.loads(header_data.decode("utf-8"))
   except ValueError as e:
-    raise CraftAiTokenError("Invalid header string: %s" % e)
+    raise CraftAiTokenError("Invalid header string '%s'" % e)
 
   if not isinstance(header, Mapping):
-    raise CraftAiTokenError("Invalid header string: must be a json object")
+    raise CraftAiTokenError("Invalid header string, it must be a json object")
 
   try:
     payload_data = base64url_decode(payload_segment)
   except (TypeError, binascii.Error):
-    raise CraftAiTokenError("Invalid payload padding")
+    raise CraftAiTokenError("Unable to decode the payload segment of the token")
 
   try:
     payload = json.loads(payload_data.decode("utf-8"))
@@ -62,6 +62,6 @@ def jwt_decode(jwt):
   try:
     signature = base64url_decode(crypto_segment)
   except (TypeError, binascii.Error):
-    raise CraftAiTokenError("Invalid crypto padding")
+    raise CraftAiTokenError("Unable to decode the crypto segment of the token")
 
   return (payload, signing_input, header, signature)
