@@ -11,6 +11,7 @@ before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -y pandoc
 install: make init
+cache: pip
 script: make test
 env:
   global:
