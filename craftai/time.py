@@ -19,11 +19,8 @@ _ISO_FMT = "%Y-%m-%dT%H:%M:%S%z"
 
 class Time(object):
   """Handles time in a useful way for craft ai's client"""
-  def __init__(self, t=None, timezone=""):
-    if not t:
-      # If no initial timestamp is given, the current local time is used
-      _time = datetime.now(get_localzone())
-    elif isinstance(t, int):
+  def __init__(self, t, timezone):
+    if isinstance(t, int):
       # Else if t is an int we try to use it as a given timestamp with
       # local UTC offset by default
       try:
@@ -47,20 +44,19 @@ class Time(object):
         """ It must be integer or string."""
       )
 
-    if timezone:
-      # If a timezone is specified we can try to use it
-      if isinstance(timezone, tzinfo):
-        # If it's already a timezone object, no more work is needed
-        _time = _time.astimezone(timezone)
-      elif isinstance(timezone, six.string_types) and is_timezone(timezone):
-        # If it's a string, we convert it to a usable timezone object
-        offset = timezone_offset_in_sec(timezone)
-        _time = _time.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
-      else:
-        raise CraftAiTimeError(
-          """Unable to instantiate Time with the given timezone."""
-          """ {} is neither a string nor a timezone.""".format(timezone)
-        )
+    # If a timezone is specified we can try to use it
+    if isinstance(timezone, tzinfo):
+      # If it's already a timezone object, no more work is needed
+      _time = _time.astimezone(timezone)
+    elif isinstance(timezone, six.string_types) and is_timezone(timezone):
+      # If it's a string, we convert it to a usable timezone object
+      offset = timezone_offset_in_sec(timezone)
+      _time = _time.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
+    else:
+      raise CraftAiTimeError(
+        """Unable to instantiate Time with the given timezone."""
+        """ {} is neither a string nor a timezone.""".format(timezone)
+      )
 
     try:
       self.utc_iso = _time.isoformat()
