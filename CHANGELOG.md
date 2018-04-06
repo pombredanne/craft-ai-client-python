@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - It is no longer possible to compute a tree at a future timestamp, tests have been adapted to reflect that.
 
+### Fixed ###
+
+- Fix an error occurring in the pandas client when the provided DataFrame included non-scalar values.
+
 ## [1.10.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.9.0...v1.10.0) - 2018-02-14 ##
 ### Fixed ###
 

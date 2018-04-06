@@ -2,6 +2,7 @@ import pandas as pd
 
 from .. import Interpreter as VanillaInterpreter, Time
 from ..errors import CraftAiBadRequestError, CraftAiNullDecisionError
+from .utils import is_valid_property_value
 
 def decide_from_row(tree, columns, row):
   time = Time(
@@ -9,7 +10,7 @@ def decide_from_row(tree, columns, row):
     timezone=row.name.tz
   )
   context = {
-    col: row[col] for col in columns if pd.notnull(row[col])
+    col: row[col] for col in columns if is_valid_property_value(row[col])
   }
   try:
     decision = VanillaInterpreter.decide(tree, [context, time])
@@ -29,7 +30,6 @@ class Interpreter(VanillaInterpreter):
   def decide_from_contexts_df(tree, contexts_df):
     if not isinstance(contexts_df.index, pd.DatetimeIndex):
       raise CraftAiBadRequestError("Invalid dataframe given, it is not time indexed")
-
     return contexts_df.apply(lambda row: decide_from_row(tree,
                                                          contexts_df.columns,
                                                          row)
