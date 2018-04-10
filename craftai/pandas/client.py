@@ -17,17 +17,17 @@ class Client(VanillaClient):
   def __init__(self, cfg):
     # Add new specific attribute, the column name of the timezone
     self.tz_col = None
-    super().__init__(cfg)
+    super(Client, self).__init__(cfg)
 
   def create_agent(self, configuration, agent_id=""):
     # Reset the column name
     self.tz_col = None
     # Check if a timezone is needed. If so, save the column name
-    tz_col = [key for key, value in configuration['context'].items()
+    tz_col = [key for key, value in configuration["context"].items()
               if value["type"] == "timezone"]
     if tz_col:
       self.tz_col = tz_col[0]
-    return super().create_agent(configuration, agent_id)
+    return super(Client, self).create_agent(configuration, agent_id)
 
   def add_operations(self, agent_id, operations):
     if isinstance(operations, pd.DataFrame):
@@ -67,7 +67,7 @@ class Client(VanillaClient):
     return pd.DataFrame(
       [operation["context"] for operation in operations_list],
       index=pd.to_datetime([operation["timestamp"] for operation in operations_list],
-                           unit="s").tz_localize('UTC')
+                           unit="s").tz_localize("UTC")
     )
 
   def get_state_history(self, agent_id, start=None, end=None):
@@ -76,7 +76,7 @@ class Client(VanillaClient):
     return pd.DataFrame(
       [state["sample"] for state in state_history],
       index=pd.to_datetime([state["timestamp"] for state in state_history],
-                           unit="s").tz_localize('UTC')
+                           unit="s").tz_localize("UTC")
     )
 
   @staticmethod

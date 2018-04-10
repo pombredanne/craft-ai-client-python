@@ -37,7 +37,7 @@ class Interpreter(VanillaInterpreter):
   @staticmethod
   def decide_from_contexts_df(tree, contexts_df):
     _, configuration, _ = VanillaInterpreter._parse_tree(tree)
-    tz_col = [key for key, value in configuration['context'].items()
+    tz_col = [key for key, value in configuration["context"].items()
               if value["type"] == "timezone"]
     if tz_col:
       tz_col = tz_col[0]

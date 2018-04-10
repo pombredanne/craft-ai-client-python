@@ -33,7 +33,7 @@ SIMPLE_AGENT_CONFIGURATION = {
 SIMPLE_AGENT_DATA = pd.DataFrame(
   randn(300, 5),
   columns=["a", "b", "c", "d", "e"],
-  index=pd.date_range("20130101", periods=300, freq="T").tz_localize('Europe/Paris')
+  index=pd.date_range("20130101", periods=300, freq="T").tz_localize("Europe/Paris")
 )
 COMPLEX_AGENT_CONFIGURATION = {
   "context": {
@@ -79,7 +79,7 @@ COMPLEX_AGENT_DATA = pd.DataFrame(
     [10]
   ],
   columns=["a", "b", "timezone"],
-  index=pd.date_range("20130101", periods=10, freq="D").tz_localize('Europe/Paris')
+  index=pd.date_range("20130101", periods=10, freq="D").tz_localize("Europe/Paris")
 )
 COMPLEX_AGENT_DATA_2 = pd.DataFrame(
   [
@@ -95,7 +95,7 @@ COMPLEX_AGENT_DATA_2 = pd.DataFrame(
     [10]
   ],
   columns=["a", "b", "timezone", "arrays"],
-  index=pd.date_range("20130101", periods=10, freq="D").tz_localize('Europe/Paris')
+  index=pd.date_range("20130101", periods=10, freq="D").tz_localize("Europe/Paris")
 )
 DATETIME_AGENT_CONFIGURATION = {
   "context": {
@@ -126,7 +126,7 @@ DATETIME_AGENT_DATA = pd.DataFrame(
     [10, "+10:00"]
   ],
   columns=["a", "tz"],
-  index=pd.date_range("20130101 12:00:00", periods=10, freq="H").tz_localize('UTC')
+  index=pd.date_range("20130101 12:00:00", periods=10, freq="H").tz_localize("UTC")
 )
 DATETIME_AGENT_DATA_2 = pd.DataFrame(
   [
@@ -142,7 +142,7 @@ DATETIME_AGENT_DATA_2 = pd.DataFrame(
     [10]
   ],
   columns=["a"],
-  index=pd.date_range("20130101 12:00:00", periods=10, freq="H").tz_localize('Asia/Shanghai')
+  index=pd.date_range("20130101 12:00:00", periods=10, freq="H").tz_localize("Asia/Shanghai")
 )
 CLIENT = craftai.pandas.Client(settings.CRAFT_CFG)
 
@@ -197,7 +197,7 @@ def test_add_operations_df_unexpected_property():
                     columns=["a", "b", "c", "d", "e", "f"],
                     index=pd.date_range("20130101",
                                         periods=300,
-                                        freq="T").tz_localize('Europe/Paris'))
+                                        freq="T").tz_localize("Europe/Paris"))
 
   assert_raises(
     craftai.pandas.errors.CraftAiBadRequestError,
@@ -216,8 +216,8 @@ def test_get_operations_list_df():
   print(df)
   assert_equal(len(df), 300)
   assert_equal(len(df.dtypes), 5)
-  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz='Europe/Paris'))
-  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-01 04:59:00", tz='Europe/Paris'))
+  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz="Europe/Paris"))
+  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-01 04:59:00", tz="Europe/Paris"))
 
 @with_setup(setup_simple_agent_with_data, teardown)
 def test_get_state_history_df():
@@ -225,8 +225,8 @@ def test_get_state_history_df():
 
   assert_equal(len(df), 180)
   assert_equal(len(df.dtypes), 5)
-  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz='Europe/Paris'))
-  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-01 04:58:20", tz='Europe/Paris'))
+  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz="Europe/Paris"))
+  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-01 04:58:20", tz="Europe/Paris"))
 
 def setup_complex_agent_with_data():
   setup_complex_agent()
@@ -243,8 +243,8 @@ def test_get_operations_list_df_complex_agent():
 
   assert_equal(len(df), 10)
   assert_equal(len(df.dtypes), 3)
-  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz='Europe/Paris'))
-  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-10 00:00:00", tz='Europe/Paris'))
+  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz="Europe/Paris"))
+  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-10 00:00:00", tz="Europe/Paris"))
 
 @with_setup(setup_complex_agent_with_data, teardown)
 def test_decide_from_contexts_df():
@@ -253,8 +253,8 @@ def test_decide_from_contexts_df():
 
   assert_equal(len(df), 10)
   assert_equal(len(df.dtypes), 3)
-  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz='Europe/Paris'))
-  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-10 00:00:00", tz='Europe/Paris'))
+  assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz="Europe/Paris"))
+  assert_equal(df.last_valid_index(), pd.Timestamp("2013-01-10 00:00:00", tz="Europe/Paris"))
 
   # Also works as before, with a plain context
   output = CLIENT.decide(tree, {
@@ -279,7 +279,7 @@ def test_decide_from_contexts_df_null_decisions():
       ["Paul"]
     ],
     columns=["b", "timezone"],
-    index=pd.date_range("20130201", periods=2, freq="D").tz_localize('Europe/Paris'))
+    index=pd.date_range("20130201", periods=2, freq="D").tz_localize("Europe/Paris"))
 
   df = CLIENT.decide_from_contexts_df(tree, test_df)
   assert_equal(len(df), 2)
@@ -304,7 +304,7 @@ def test_decide_from_contexts_df_with_array():
       ["Paul"]
     ],
     columns=["b", "timezone"],
-    index=pd.date_range("20130201", periods=2, freq="D").tz_localize('Europe/Paris'))
+    index=pd.date_range("20130201", periods=2, freq="D").tz_localize("Europe/Paris"))
 
   df = CLIENT.decide_from_contexts_df(tree, test_df)
   assert_equal(len(df), 2)
@@ -324,7 +324,7 @@ def test_datetime_state_history_df():
 
   assert_equal(len(df), 10)
   assert_equal(len(df.dtypes), 3)
-  assert_equal(df['time_of_day'].tolist(), [14, 15, 18, 19, 16, 17, 2, 3, 4, 7])
+  assert_equal(df["time_of_day"].tolist(), [14, 15, 18, 19, 16, 17, 2, 3, 4, 7])
 
 def setup_datetime_agent_2_with_data():
   setup_datetime_agent()
@@ -338,4 +338,4 @@ def test_datetime_state_history_df_2():
 
   assert_equal(len(df), 10)
   assert_equal(len(df.dtypes), 3)
-  assert_equal(df['time_of_day'].tolist(), np.arange(12, 22, 1).tolist())
+  assert_equal(df["time_of_day"].tolist(), np.arange(12, 22, 1).tolist())
