@@ -61,9 +61,10 @@ class Interpreter(object):
 
   @staticmethod
   def _rebuild_context(configuration, state, time=None):
+
     missings = []
-    # Model should come from _parse_tree and is assumed to be checked upon
-    # already
+    # Model should come from _parse_tree and is assumed to be checked
+    # upon already
     output = configuration["output"]
     context = configuration["context"]
 
@@ -79,10 +80,12 @@ class Interpreter(object):
       prop_name = prop[0]
       prop_attributes = prop[1]
       if prop_attributes["type"] in ["time_of_day", "day_of_week", "day_of_month",
-                                     "month_of_year", "timezone"]:
-        # is_generated is at True, we must generate the time for the associated context property
+                                     "month_of_year"]:
+        # is_generated is at True, we must generate the time for the
+        # associated context property
         case_1 = "is_generated" in list(prop_attributes.keys()) and prop[1]["is_generated"]
-        # is_generated is not given, by default at True, so we must generate it as well
+        # is_generated is not given, by default at True, so we must
+        # generate it as well
         case_2 = "is_generated" not in list(prop_attributes.keys())
         if case_1 or case_2:
           to_generate.append(prop_name)

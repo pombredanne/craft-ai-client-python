@@ -91,7 +91,6 @@ class Time(object):
       return time.mktime((date_time.year, date_time.month, date_time.day, date_time.hour,
                           date_time.minute, date_time.second,
                           -1, -1, -1)) + date_time.microsecond / 1e6
-
     return (date_time - _EPOCH).total_seconds()
 
 #pylint: disable=C0103,W0212

@@ -1,17 +1,25 @@
 import pandas as pd
 
 from .. import Interpreter as VanillaInterpreter, Time
-from ..errors import CraftAiBadRequestError, CraftAiNullDecisionError
-from .utils import is_valid_property_value
+from ..errors import CraftAiNullDecisionError
+from .utils import is_valid_property_value, create_timezone_df
 
-def decide_from_row(tree, columns, row):
+def decide_from_row(tree, columns, row, timezone_df):
+  context = {
+    col: row[col] for col in columns if is_valid_property_value(col, row[col])
+  }
+  # If a timezone_df is provided use it
+  # otherwise use the dataframe index timezone
+  if isinstance(timezone_df, pd.DataFrame):
+    timezone = timezone_df.loc[row.name].values[0]
+    context.update({timezone_df.columns[0]: timezone})
+  else:
+    timezone = row.name.tz
+  print(timezone)
   time = Time(
     t=row.name.value // 10 ** 9, # Timestamp.value returns nanoseconds
-    timezone=row.name.tz
+    timezone=timezone
   )
-  context = {
-    col: row[col] for col in columns if is_valid_property_value(row[col])
-  }
   try:
     decision = VanillaInterpreter.decide(tree, [context, time])
 
@@ -28,9 +36,29 @@ def decide_from_row(tree, columns, row):
 class Interpreter(VanillaInterpreter):
   @staticmethod
   def decide_from_contexts_df(tree, contexts_df):
-    if not isinstance(contexts_df.index, pd.DatetimeIndex):
-      raise CraftAiBadRequestError("Invalid dataframe given, it is not time indexed")
-    return contexts_df.apply(lambda row: decide_from_row(tree,
-                                                         contexts_df.columns,
-                                                         row)
-                             , axis=1)
+    _, configuration, _ = VanillaInterpreter._parse_tree(tree)
+    tz_col = [key for key, value in configuration['context'].items()
+              if value["type"] == "timezone"]
+    if tz_col:
+      tz_col = tz_col[0]
+    # If a timezone is needed create a timezone dataframe which will
+    # store the timezone to use. It can either be the DatetimeIndex
+    # timezone or the timezone column if provided.
+    timezone_df = None
+    columns = contexts_df.columns.tolist()
+    if tz_col:
+      timezone_df = create_timezone_df(contexts_df, tz_col)
+      if tz_col in columns:
+        columns.remove(tz_col)
+    if not contexts_df.columns.values.size:
+      # Add dummy column in order to avoid apply() issue (aka feature)
+      # with empty DataFrame.
+      # https://github.com/pandas-dev/pandas/issues/16621
+      df = contexts_df.copy(deep=True)
+      df["CraftGeneratedDummy"] = 0
+    else:
+      df = contexts_df
+    return df.apply(lambda row: decide_from_row(tree,
+                                                columns,
+                                                row,
+                                                timezone_df), axis=1)
