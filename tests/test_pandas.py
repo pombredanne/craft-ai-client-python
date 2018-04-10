@@ -213,7 +213,7 @@ def setup_simple_agent_with_data():
 @with_setup(setup_simple_agent_with_data, teardown)
 def test_get_operations_list_df():
   df = CLIENT.get_operations_list(AGENT_ID)
-  
+
   assert_equal(len(df), 300)
   assert_equal(len(df.dtypes), 5)
   assert_equal(df.first_valid_index(), pd.Timestamp("2013-01-01 00:00:00", tz="Europe/Paris"))
