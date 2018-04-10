@@ -15,7 +15,6 @@ def decide_from_row(tree, columns, row, timezone_df):
     context.update({timezone_df.columns[0]: timezone})
   else:
     timezone = row.name.tz
-  print(timezone)
   time = Time(
     t=row.name.value // 10 ** 9, # Timestamp.value returns nanoseconds
     timezone=timezone

@@ -125,7 +125,6 @@ class Interpreter(object):
     property_type = configuration["context"][property_name]["type"]
     if property_type in _VALUE_VALIDATORS:
       property_value = context[property_name]
-      #print(property_name, property_type, property_value)
       return _VALUE_VALIDATORS[property_type](property_value)
     return True
 
