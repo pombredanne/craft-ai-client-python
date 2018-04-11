@@ -2,7 +2,7 @@ import pandas as pd
 
 from .. import Interpreter as VanillaInterpreter, Time
 from ..errors import CraftAiNullDecisionError
-from .utils import is_valid_property_value, create_timezone_df
+from .utils import is_valid_property_value, create_timezone_df, DUMMY_COLUMN_NAME
 
 def decide_from_row(tree, columns, row, timezone_df):
   context = {
@@ -54,7 +54,7 @@ class Interpreter(VanillaInterpreter):
       # with empty DataFrame.
       # https://github.com/pandas-dev/pandas/issues/16621
       df = contexts_df.copy(deep=True)
-      df["CraftGeneratedDummy"] = 0
+      df[DUMMY_COLUMN_NAME] = 0
     else:
       df = contexts_df
     return df.apply(lambda row: decide_from_row(tree,
