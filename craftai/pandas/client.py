@@ -5,7 +5,7 @@ import pandas as pd
 from .. import Client as VanillaClient
 from ..errors import CraftAiBadRequestError
 from .interpreter import Interpreter
-from .utils import is_valid_property_value, create_timezone_df
+from .utils import is_valid_property_value
 
 def chunker(to_be_chunked_df, chunk_size):
   return (to_be_chunked_df[pos:pos + chunk_size]
@@ -13,21 +13,6 @@ def chunker(to_be_chunked_df, chunk_size):
 
 class Client(VanillaClient):
   """Client class for craft ai's API using pandas dataframe types"""
-
-  def __init__(self, cfg):
-    # Add new specific attribute, the column name of the timezone
-    self.tz_col = None
-    super(Client, self).__init__(cfg)
-
-  def create_agent(self, configuration, agent_id=""):
-    # Reset the column name
-    self.tz_col = None
-    # Check if a timezone is needed. If so, save the column name
-    tz_col = [key for key, value in configuration["context"].items()
-              if value["type"] == "timezone"]
-    if tz_col:
-      self.tz_col = tz_col[0]
-    return super(Client, self).create_agent(configuration, agent_id)
 
   def add_operations(self, agent_id, operations):
     if isinstance(operations, pd.DataFrame):
@@ -37,14 +22,8 @@ class Client(VanillaClient):
         raise CraftAiBadRequestError("""tz-naive DatetimeIndex are not supported,
                                      it must be tz-aware.""")
 
-      # If a timezone is needed and not provided in operations
-      # create a tz dataframe from df index
-      timezone_df = None
-      if self.tz_col and not self.tz_col in operations.columns:
-        timezone_df = create_timezone_df(operations, self.tz_col)
-
       chunk_size = self.config["operationsChunksSize"]
-      for chunk in chunker(pd.concat([operations, timezone_df], axis=1, copy=False), chunk_size):
+      for chunk in chunker(operations, chunk_size):
         chunk_operations = [
           {
             "timestamp": row.name.value // 10 ** 9, # Timestamp.value returns nanoseconds

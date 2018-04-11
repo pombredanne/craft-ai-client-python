@@ -43,7 +43,7 @@ COMPLEX_AGENT_CONFIGURATION = {
     "b": {
       "type": "enum"
     },
-    "timezone": {
+    "tz": {
       "type": "timezone"
     }
   },
@@ -58,7 +58,7 @@ COMPLEX_AGENT_CONFIGURATION_2 = {
     "b": {
       "type": "enum"
     },
-    "timezone": {
+    "tz": {
       "type": "timezone"
     }
   },
@@ -78,7 +78,7 @@ COMPLEX_AGENT_DATA = pd.DataFrame(
     [9],
     [10]
   ],
-  columns=["a", "b", "timezone"],
+  columns=["a", "b", "tz"],
   index=pd.date_range("20130101", periods=10, freq="D").tz_localize("Europe/Paris")
 )
 COMPLEX_AGENT_DATA_2 = pd.DataFrame(
@@ -94,7 +94,7 @@ COMPLEX_AGENT_DATA_2 = pd.DataFrame(
     [9],
     [10]
   ],
-  columns=["a", "b", "timezone", "arrays"],
+  columns=["a", "b", "tz", "arrays"],
   index=pd.date_range("20130101", periods=10, freq="D").tz_localize("Europe/Paris")
 )
 DATETIME_AGENT_CONFIGURATION = {
@@ -102,47 +102,34 @@ DATETIME_AGENT_CONFIGURATION = {
     "a": {
       "type": "continuous"
     },
-    "time_of_day": {
+    "b": {
+      "type": "enum"
+    },
+    "myTimeOfDay": {
       "type": "time_of_day"
     },
-    "tz": {
+    "myCoolTimezone": {
       "type": "timezone"
     }
   },
-  "output": ["a"],
+  "output": ["b"],
   "time_quantum": 3600
 }
 DATETIME_AGENT_DATA = pd.DataFrame(
   [
-    [1, "+02:00"],
-    [2],
-    [3, "+04:00"],
-    [4, "+04:00"],
-    [5, "UTC"],
-    [6, "UTC"],
-    [7, "+08:00"],
-    [8],
-    [9],
-    [10, "+10:00"]
-  ],
-  columns=["a", "tz"],
-  index=pd.date_range("20130101 12:00:00", periods=10, freq="H").tz_localize("UTC")
-)
-DATETIME_AGENT_DATA_2 = pd.DataFrame(
-  [
-    [1],
-    [2],
-    [3],
+    [1, "Pierre", "+02:00"],
+    [2, "Paul"],
+    [3, np.nan, "+04:00"],
     [4],
-    [5],
+    [5, "Jacques", "UTC"],
     [6],
-    [7],
+    [7, np.nan, "+08:00"],
     [8],
     [9],
-    [10]
+    [10, np.nan, "+10:00"]
   ],
-  columns=["a"],
-  index=pd.date_range("20130101 12:00:00", periods=10, freq="H").tz_localize("Asia/Shanghai")
+  columns=["a", "b", "myCoolTimezone"],
+  index=pd.date_range("20130101 00:00:00", periods=10, freq="H").tz_localize("UTC")
 )
 CLIENT = craftai.pandas.Client(settings.CRAFT_CFG)
 
@@ -259,7 +246,7 @@ def test_decide_from_contexts_df():
   # Also works as before, with a plain context
   output = CLIENT.decide(tree, {
     "a": 1,
-    "timezone": "+02:00"
+    "tz": "+02:00"
   })
 
   assert_equal(output["output"]["b"]["predicted_value"], "Pierre")
@@ -278,7 +265,7 @@ def test_decide_from_contexts_df_null_decisions():
       ["Jean-Pierre", "+02:00"],
       ["Paul"]
     ],
-    columns=["b", "timezone"],
+    columns=["b", "tz"],
     index=pd.date_range("20130201", periods=2, freq="D").tz_localize("Europe/Paris"))
 
   df = CLIENT.decide_from_contexts_df(tree, test_df)
@@ -303,7 +290,7 @@ def test_decide_from_contexts_df_with_array():
       ["Jean-Pierre", "+02:00"],
       ["Paul"]
     ],
-    columns=["b", "timezone"],
+    columns=["b", "tz"],
     index=pd.date_range("20130201", periods=2, freq="D").tz_localize("Europe/Paris"))
 
   df = CLIENT.decide_from_contexts_df(tree, test_df)
@@ -323,17 +310,24 @@ def test_datetime_state_history_df():
   df = CLIENT.get_state_history(AGENT_ID)
 
   assert_equal(len(df), 10)
+  assert_equal(len(df.dtypes), 4)
+  assert_equal(df["myTimeOfDay"].tolist(), [2, 3, 6, 7, 4, 5, 14, 15, 16, 19])
+
+@with_setup(setup_datetime_agent_with_data, teardown)
+def test_datetime_decide_from_contexts_df():
+  tree = CLIENT.get_decision_tree(AGENT_ID,
+                                  DATETIME_AGENT_DATA.last_valid_index().value // 10 ** 9)
+
+  test_df = pd.DataFrame(
+    [
+      [1],
+      [3],
+      [7]
+    ],
+    columns=["a"],
+    index=pd.date_range("20130101 00:00:00", periods=3, freq="H").tz_localize("Asia/Shanghai"))
+
+  df = CLIENT.decide_from_contexts_df(tree, test_df)
+  assert_equal(len(df), 3)
   assert_equal(len(df.dtypes), 3)
-  assert_equal(df["time_of_day"].tolist(), [14, 15, 18, 19, 16, 17, 2, 3, 4, 7])
-
-def setup_datetime_agent_2_with_data():
-  setup_datetime_agent()
-  CLIENT.add_operations(AGENT_ID, DATETIME_AGENT_DATA_2)
-
-@with_setup(setup_datetime_agent_2_with_data, teardown)
-def test_datetime_state_history_df_2():
-  df = CLIENT.get_state_history(AGENT_ID)
-
-  assert_equal(len(df), 10)
-  assert_equal(len(df.dtypes), 3)
-  assert_equal(df["time_of_day"].tolist(), np.arange(12, 22, 1).tolist())
+  assert_equal(df["b_predicted_value"].tolist(), ["Pierre", "Paul", "Jacques"])
