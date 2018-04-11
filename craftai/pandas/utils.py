@@ -8,11 +8,8 @@ def is_valid_property_value(key, value):
   # https://pythonhosted.org/six/#six.text_type for unicode in Python 2
   return key != DUMMY_COLUMN_NAME and \
          ( \
-           ( \
-            not hasattr(value, "__len__") \
-            or isinstance(value, str) \
-            or isinstance(value, six.text_type) \
-           ) \
+           (not hasattr(value, "__len__") \
+            or isinstance(value, (str, six.text_type))) \
            and pd.notnull(value) \
          )
 
