@@ -10,17 +10,20 @@ import six
 
 from pytz import utc as pyutc
 from tzlocal import get_localzone
+from dateutil.parser import isoparse
 
 from craftai.errors import CraftAiTimeError
 from craftai.timezones import is_timezone, timezone_offset_in_sec
 
 _EPOCH = datetime(1970, 1, 1, tzinfo=pyutc)
-_ISO_FMT = "%Y-%m-%dT%H:%M:%S%z"
 
 class Time(object):
   """Handles time in a useful way for craft ai's client"""
-  def __init__(self, t, timezone):
-    if isinstance(t, int):
+  def __init__(self, t=None, timezone=None):
+    if t is None:
+      # If no initial timestamp is given, the current local time is used
+      _time = datetime.now(get_localzone())
+    elif isinstance(t, int):
       # Else if t is an int we try to use it as a given timestamp with
       # local UTC offset by default
       try:
@@ -33,7 +36,10 @@ class Time(object):
       # Else if t is a string we try to interprete it as an ISO time
       # string
       try:
-        _time = datetime.strptime(t, _ISO_FMT)
+        # Can't use strptime with %z in Python 2
+        # https://stackoverflow.com/a/23940673
+        _time = isoparse(t)
+        timezone = _time.strftime("%z")
       except ValueError as e:
         raise CraftAiTimeError(
           """Unable to instantiate Time from given string. {}""".
@@ -44,8 +50,10 @@ class Time(object):
         """ It must be integer or string."""
       )
 
+    if timezone is None:
+      timezone = datetime.now(get_localzone()).strftime("%z")
     # If a timezone is specified we can try to use it
-    if isinstance(timezone, tzinfo):
+    elif isinstance(timezone, tzinfo):
       # If it's already a timezone object, no more work is needed
       _time = _time.astimezone(timezone)
     elif isinstance(timezone, six.string_types) and is_timezone(timezone):

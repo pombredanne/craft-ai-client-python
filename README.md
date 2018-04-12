@@ -825,7 +825,7 @@ decision = client.decide(
     "timezone": "+02:00",
     "peopleCount": 3
   },
-  craftai.Time("2010-01-01T07:30:30")
+  craftai.Time("2010-01-01T07:30:30", "+02:00")
 )
 ```
 
@@ -924,12 +924,12 @@ df = client.get_operations_list("impervious_kraken")
 
 # `df` is a pd.DataFrame looking like
 #
-#              peopleCount  lightbulbState   timezone
-# 2013-01-01   0            OFF              +02:00
-# 2013-01-02   1            ON               NaN
-# 2013-01-03   2            NaN              NaN
-# 2013-01-04   NaN          OFF              NaN
-# 2013-01-05   0            NaN              NaN
+#                           peopleCount  lightbulbState    timezone
+# 2013-01-01 00:00:00+00:00   0            OFF              +02:00
+# 2013-01-02 00:00:00+00:00   1            ON               NaN
+# 2013-01-03 00:00:00+00:00   2            NaN              NaN
+# 2013-01-04 00:00:00+00:00   NaN          OFF              NaN
+# 2013-01-05 00:00:00+00:00   0            NaN              NaN
 ```
 
 #### `craftai.pandas.Client.add_operations` #####
@@ -946,7 +946,7 @@ df = pd.DataFrame(
     [0, np.nan, np.nan]
   ],
   columns=['peopleCount', 'lightbulbState', 'timezone'],
-  index=pd.date_range('20130101', periods=5, freq='D')
+  index=pd.date_range('20130101', periods=5, freq='D').tz_localize('UTC')
 )
 client.add_operations("impervious_kraken", df)
 ```
@@ -966,12 +966,12 @@ df = client.get_state_history("impervious_kraken")
 
 # `df` is a pd.DataFrame looking like
 #
-#              peopleCount  lightbulbState   timezone
-# 2013-01-01   0            OFF              +02:00
-# 2013-01-02   1            ON               +02:00
-# 2013-01-03   2            ON               +02:00
-# 2013-01-04   2            OFF              +02:00
-# 2013-01-05   0            OFF              +02:00
+#                           peopleCount   lightbulbState   timezone
+# 2013-01-01 00:00:00+00:00   0            OFF              +02:00
+# 2013-01-02 00:00:00+00:00   1            ON               +02:00
+# 2013-01-03 00:00:00+00:00   2            ON               +02:00
+# 2013-01-04 00:00:00+00:00   2            OFF              +02:00
+# 2013-01-05 00:00:00+00:00   0            OFF              +02:00
 ```
 
 #### `craftai.pandas.Client.decide_from_contexts_df` #####
@@ -988,16 +988,16 @@ decisions_df = client.decide_from_contexts_df(tree, pd.DataFrame(
     [0, np.nan]
   ],
   columns=['peopleCount', 'timezone'],
-  index=pd.date_range('20130101', periods=5, freq='D')
+  index=pd.date_range('20130101', periods=5, freq='D').tz_localize('UTC')
 ))
 # `decisions_df` is a pd.DataFrame looking like
 #
-#              lightbulbState_predicted_value   lightbulbState_confidence ...
-# 2013-01-01   OFF                              0.999449                  ...
-# 2013-01-02   ON                               0.970325                  ...
-# 2013-01-03   ON                               0.970325                  ...
-# 2013-01-04   ON                               0.970325                  ...
-# 2013-01-05   OFF                              0.999449                  ...
+#                           lightbulbState_predicted_value   lightbulbState_confidence   ...
+# 2013-01-01 00:00:00+00:00   OFF                              0.999449                  ...
+# 2013-01-02 00:00:00+00:00   ON                               0.970325                  ...
+# 2013-01-03 00:00:00+00:00   ON                               0.970325                  ...
+# 2013-01-04 00:00:00+00:00   ON                               0.970325                  ...
+# 2013-01-05 00:00:00+00:00   OFF                              0.999449                  ...
 ```
 
 This function never raises `CraftAiNullDecisionError`, instead it inserts these errors in the result `Dataframe` in a specific `error` column.
