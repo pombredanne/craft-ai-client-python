@@ -89,7 +89,7 @@ def test_rebuild_context():
 
   # Case 2:
   # - provide none of the properties that should be generated
-  state = {"car": "Renault", "day_of_week": 2}
+  state = {"car": "Renault", "day_of_week": 2, "timezone": "+01:00"}
   time = Time(1489998174, "+01:00")
   rebuilt_context = Interpreter._rebuild_context(configuration, state, time)["context"]
   expected_context = {
