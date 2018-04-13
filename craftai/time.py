@@ -10,53 +10,68 @@ import six
 
 from pytz import utc as pyutc
 from tzlocal import get_localzone
+from dateutil.parser import isoparse
 
 from craftai.errors import CraftAiTimeError
 from craftai.timezones import is_timezone, timezone_offset_in_sec
 
 _EPOCH = datetime(1970, 1, 1, tzinfo=pyutc)
-_ISO_FMT = "%Y-%m-%dT%H:%M:%S%z"
 
 class Time(object):
   """Handles time in a useful way for craft ai's client"""
-  def __init__(self, t, timezone):
-    if isinstance(t, int):
-      # Else if t is an int we try to use it as a given timestamp with
-      # local UTC offset by default
-      try:
-        _time = datetime.fromtimestamp(t, get_localzone())
-      except (OverflowError, OSError) as e:
+  def __init__(self, t=None, timezone=None):
+    def set_time(timestamp):
+      if timestamp is None:
+        # If no initial timestamp is given, the current local time is used
+        _time = datetime.now(get_localzone())
+      elif isinstance(t, int):
+        # Else if t is an int we try to use it as a given timestamp with
+        # local UTC offset by default
+        try:
+          _time = datetime.fromtimestamp(timestamp, get_localzone())
+        except (OverflowError, OSError) as e:
+          raise CraftAiTimeError(
+            """Unable to instantiate Time from given timestamp. {}""".
+            format(e.__str__()))
+      elif isinstance(timestamp, six.string_types):
+        # Else if t is a string we try to interprete it as an ISO time
+        # string
+        try:
+          # Can't use strptime with %z in Python 2
+          # https://stackoverflow.com/a/23940673
+          _time = isoparse(timestamp)
+        except ValueError as e:
+          raise CraftAiTimeError(
+            """Unable to instantiate Time from given string. {}""".
+            format(e.__str__()))
+        if _time.tzinfo is None:
+          raise CraftAiTimeError("The given datetime string must be tz-aware.")
+      else:
         raise CraftAiTimeError(
-          """Unable to instantiate Time from given timestamp. {}""".
-          format(e.__str__()))
-    elif isinstance(t, six.string_types):
-      # Else if t is a string we try to interprete it as an ISO time
-      # string
-      try:
-        _time = datetime.strptime(t, _ISO_FMT)
-      except ValueError as e:
-        raise CraftAiTimeError(
-          """Unable to instantiate Time from given string. {}""".
-          format(e.__str__()))
-    else:
-      raise CraftAiTimeError(
-        """Unable to instantiate Time from given timestamp."""
-        """ It must be integer or string."""
-      )
+          """Unable to instantiate Time from given timestamp."""
+          """ It must be integer or string."""
+        )
+      return _time
 
+    def set_timezone(timestamp, timezone):
+      if isinstance(timezone, tzinfo):
+        # If it's already a timezone object, no more work is needed
+        _time = timestamp.astimezone(timezone)
+      elif isinstance(timezone, six.string_types) and is_timezone(timezone):
+        # If it's a string, we convert it to a usable timezone object
+        offset = timezone_offset_in_sec(timezone)
+        _time = timestamp.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
+      else:
+        raise CraftAiTimeError(
+          """Unable to instantiate Time with the given timezone."""
+          """ {} is neither a string nor a timezone.""".format(timezone)
+        )
+      return _time
+
+    _time = set_time(t)
     # If a timezone is specified we can try to use it
-    if isinstance(timezone, tzinfo):
-      # If it's already a timezone object, no more work is needed
-      _time = _time.astimezone(timezone)
-    elif isinstance(timezone, six.string_types) and is_timezone(timezone):
-      # If it's a string, we convert it to a usable timezone object
-      offset = timezone_offset_in_sec(timezone)
-      _time = _time.astimezone(tz=dt_timezone(timedelta(seconds=offset)))
-    else:
-      raise CraftAiTimeError(
-        """Unable to instantiate Time with the given timezone."""
-        """ {} is neither a string nor a timezone.""".format(timezone)
-      )
+    if timezone:
+      _time = set_timezone(_time, timezone)
 
     try:
       self.utc_iso = _time.isoformat()
