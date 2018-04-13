@@ -825,7 +825,7 @@ decision = client.decide(
     "timezone": "+02:00",
     "peopleCount": 3
   },
-  craftai.Time("2010-01-01T07:30:30", "+02:00")
+  craftai.Time("2010-01-01T07:30:30+0200")
 )
 ```
 
