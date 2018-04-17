@@ -36,10 +36,10 @@ def _time_formatter(time):
       return time.strftime("%H:%M")
     return time.strftime("%H:%M:%S")
   else:
-    hours = math.floor(time)
+    hours = int(math.floor(time))
     dec_minutes = (time - hours) * 60
-    minutes = math.floor(dec_minutes)
-    seconds = math.floor((dec_minutes - minutes) * 60)
+    minutes = int(math.floor(dec_minutes))
+    seconds = int(math.floor((dec_minutes - minutes) * 60))
 
     if seconds > 0:
       return "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
@@ -80,8 +80,8 @@ def _in_formatter(property_name, operand, operand_formatter):
   return "[{}, {}[".format(operand_formatter(operand[0]), operand_formatter(operand[1]))
 
 def _in_day_of_week_formatter(property_name, operand, operand_formatter):
-  day_from = math.floor(operand[0])
-  day_to = math.floor(operand[1])
+  day_from = int(math.floor(operand[0]))
+  day_to = int(math.floor(operand[1]))
 
   formatted_day_from = operand_formatter(day_from)
 
@@ -98,8 +98,8 @@ def _in_day_of_week_formatter(property_name, operand, operand_formatter):
   return "{} to {}".format(formatted_day_from, formatted_day_to)
 
 def _in_month_of_year_formatter(property_name, operand, operand_formatter):
-  month_from = math.floor(operand[0])
-  month_to = math.floor(operand[1])
+  month_from = int(math.floor(operand[0]))
+  month_to = int(math.floor(operand[1]))
 
   formatted_month_from = operand_formatter(month_from)
 
