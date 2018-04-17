@@ -1,4 +1,4 @@
-from functools import reduce
+from functools import reduce as ft_reduce
 
 from .errors import CraftAiError
 from .formatters import format_decision_rules
@@ -202,5 +202,5 @@ def _unique_seq(seq):
 
 def reduce_decision_rules(rules):
   properties = _unique_seq([rule["property"] for rule in rules])
-  return [reduce(_decision_rules_reducer,
-                 [rule for rule in rules if rule["property"] == p]) for p in properties]
+  return [ft_reduce(_decision_rules_reducer,
+                    [rule for rule in rules if rule["property"] == p]) for p in properties]
