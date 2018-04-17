@@ -12,6 +12,7 @@ from .client import CraftAIClient as Client
 from .interpreter import Interpreter
 from .time import Time
 from .formatters import format_property, format_decision_rule
+from .reducer import reduce_decision_rules
 
 # Defining what will be imported when doing `from craftai import *`
 
