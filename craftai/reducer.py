@@ -9,6 +9,7 @@ def _is_is_reducer(rule_1, rule_2):
     raise CraftAiError("Operator '{}' can't have different value. Set to '{}' and receive '{}'"
                        .format(OPERATORS["IS"], rule_1["operand"], rule_2["operand"]))
   return {
+    "property": rule_1["property"],
     "operator": OPERATORS["IS"],
     "operand": rule_2["operand"]
   }
@@ -48,6 +49,7 @@ def _in_in_reducer(rule_1, rule_2):
     #    |    op_1    |
     #             |   op_2   |
     return {
+      "property": rule_1["property"],
       "operator": OPERATORS["IN"],
       "operand": [op_2_from, op_1_to]
     }
@@ -57,6 +59,7 @@ def _in_in_reducer(rule_1, rule_2):
     #        |    op_1    |
     #     |   op_2   |
     return {
+      "property": rule_1["property"],
       "operator": OPERATORS["IN"],
       "operand": [op_1_from, op_2_to]
     }
@@ -94,6 +97,7 @@ def _in_gte_reducer(rule_1, rule_2):
     #    |    op_1    |
     #           |op_2
     return {
+      "property": rule_1["property"],
       "operator": OPERATORS["IN"],
       "operand": [op_2, op_1_to]
     }
@@ -129,6 +133,7 @@ def _in_lt_reducer(rule_1, rule_2):
     #    |    op_1    |
     #           |op_2
     return {
+      "property": rule_1["property"],
       "operator": OPERATORS["IN"],
       "operand": [op_1_from, op_2]
     }
@@ -146,6 +151,7 @@ def _gte_lt_reducer(rule_1, rule_2):
                        """the resulting rule is not fulfillable."""
                        .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
   return {
+    "property": rule_1["property"],
     "operator": OPERATORS["IN"],
     "operand": [new_lower_bound, new_upper_bound]
   }
@@ -162,6 +168,7 @@ REDUCER_FROM_DECISION_RULE = {
   OPERATORS["GTE"]: {
     OPERATORS["IN"]: lambda rule_1, rule_2: _in_gte_reducer(rule_2, rule_1),
     OPERATORS["GTE"]: lambda rule_1, rule_2: {
+      "property": rule_1["property"],
       "operator": OPERATORS["GTE"],
       "operand": max(rule_1["operand"], rule_2["operand"])
     },
@@ -171,6 +178,7 @@ REDUCER_FROM_DECISION_RULE = {
     OPERATORS["IN"]: lambda rule_1, rule_2: _in_lt_reducer(rule_2, rule_1),
     OPERATORS["GTE"]: lambda rule_1, rule_2: _gte_lt_reducer(rule_2, rule_1),
     OPERATORS["LT"]: lambda rule_1, rule_2: {
+      "property": rule_1["property"],
       "operator": OPERATORS["LT"],
       "operand": min(rule_1["operand"], rule_2["operand"])
     }
@@ -187,5 +195,12 @@ def _decision_rules_reducer(rule_1, rule_2):
                        .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
   return REDUCER_FROM_DECISION_RULE[rule_1["operator"]][rule_2["operator"]](rule_1, rule_2)
 
+def _unique_seq(seq):
+  seen = set()
+  seen_add = seen.add
+  return [x for x in seq if not (x in seen or seen_add(x))]
+
 def reduce_decision_rules(rules):
-  return reduce(_decision_rules_reducer, rules)
+  properties = _unique_seq([rule["property"] for rule in rules])
+  return [reduce(_decision_rules_reducer,
+                 [rule for rule in rules if rule["property"] == p]) for p in properties]
