@@ -1,7 +1,7 @@
 from functools import reduce
 
 from .errors import CraftAiError
-from .formatters import format_decision_rule
+from .formatters import format_decision_rules
 from .operators import OPERATORS
 
 def _is_is_reducer(rule_1, rule_2):
@@ -69,7 +69,7 @@ def _in_in_reducer(rule_1, rule_2):
   #                  |   op_2   |
   raise CraftAiError("""Unable to reduce decision rules '{}' and '{}': """
                      """the resulting rule is not fulfillable."""
-                     .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
+                     .format(format_decision_rules([rule_1]), format_decision_rules([rule_2])))
 
 def _in_gte_reducer(rule_1, rule_2):
   op_1_from = rule_1["operand"][0]
@@ -82,7 +82,7 @@ def _in_gte_reducer(rule_1, rule_2):
     # Cyclics makes no sense with single bound limits
     raise CraftAiError("""Unable to reduce decision rules '{}' and '{}': """
                        """the resulting rule is not fulfillable."""
-                       .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
+                       .format(format_decision_rules([rule_1]), format_decision_rules([rule_2])))
 
   if op_2 >= op_1_to:
     # op_2 after op_1, disjointed
@@ -90,7 +90,7 @@ def _in_gte_reducer(rule_1, rule_2):
     #                  |op_2
     raise CraftAiError("""Unable to reduce decision rules '{}' and '{}': """
                        """the resulting rule is not fulfillable."""
-                       .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
+                       .format(format_decision_rules([rule_1]), format_decision_rules([rule_2])))
 
   if op_2 >= op_1_from and op_2 < op_1_to:
     # op_2 belongs to op_1
@@ -118,7 +118,7 @@ def _in_lt_reducer(rule_1, rule_2):
     # Cyclics makes no sense with single bound limits
     raise CraftAiError("""Unable to reduce decision rules '{}' and '{}': """
                        """the resulting rule is not fulfillable."""
-                       .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
+                       .format(format_decision_rules([rule_1]), format_decision_rules([rule_2])))
 
   if op_2 < op_1_from:
     # op_2 before op_1, disjointed
@@ -126,7 +126,7 @@ def _in_lt_reducer(rule_1, rule_2):
     # op_2|
     raise CraftAiError("""Unable to reduce decision rules '{}' and '{}': """
                        """the resulting rule is not fulfillable."""
-                       .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
+                       .format(format_decision_rules([rule_1]), format_decision_rules([rule_2])))
 
   if op_2 >= op_1_from and op_2 < op_1_to:
     # op_2 belongs to op_1
@@ -149,7 +149,7 @@ def _gte_lt_reducer(rule_1, rule_2):
   if new_upper_bound < new_lower_bound:
     raise CraftAiError("""Unable to reduce decision rules '{}' and '{}': """
                        """the resulting rule is not fulfillable."""
-                       .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
+                       .format(format_decision_rules([rule_1]), format_decision_rules([rule_2])))
   return {
     "property": rule_1["property"],
     "operator": OPERATORS["IN"],
@@ -192,7 +192,7 @@ def _decision_rules_reducer(rule_1, rule_2):
       rule_2["operator"] not in REDUCER_FROM_DECISION_RULE[rule_1["operator"]]):
     raise CraftAiError("""Unable to reduce decision rules '{}' and '{}': """
                        """incompatible operators."""
-                       .format(format_decision_rule(rule_1), format_decision_rule(rule_2)))
+                       .format(format_decision_rules([rule_1]), format_decision_rules([rule_2])))
   return REDUCER_FROM_DECISION_RULE[rule_1["operator"]][rule_2["operator"]](rule_1, rule_2)
 
 def _unique_seq(seq):

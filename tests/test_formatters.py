@@ -1,7 +1,7 @@
 from dateutil.parser import isoparse
 from nose.tools import assert_equal
 
-from craftai import format_property, format_decision_rule
+from craftai import format_property, format_decision_rules
 
 
 def test_format_property_time_of_day():
@@ -33,95 +33,104 @@ def test_format_property_month_of_year():
   assert_equal(formatter(12), "Dec")
 
 def test_format_decision_rule_in_time_of_day():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "[in[",
     "operand": [11.5, 12.3],
     "type": "time_of_day"
-  }), "[11:30, 12:18[")
+  }]), "[11:30, 12:18[")
 
 def test_format_decision_rule_in_continuous():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "[in[",
     "operand": [11.5, 12.3],
     "type": "continuous"
-  }), "[11.5, 12.3[")
+  }]), "[11.5, 12.3[")
 
 def test_format_decision_rule_in_day_of_week():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "[in[",
     "operand": [3, 5],
     "type": "day_of_week"
-  }), "Thu to Fri")
+  }]), "Thu to Fri")
 
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "[in[",
     "operand": [4, 0],
     "type": "day_of_week"
-  }), "Fri to Sun")
+  }]), "Fri to Sun")
 
 def test_format_decision_rule_in_month_of_year():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
+    "property": "foo",
     "operator": "[in[",
     "operand": [1, 12],
     "type": "month_of_year"
-  }), "Jan to Nov")
+  }]), "'foo' from Jan to Nov")
 
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "[in[",
     "operand": [4, 2],
     "type": "month_of_year"
-  }), "Apr to Jan")
+  }]), "Apr to Jan")
 
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "[in[",
     "operand": [5, 1],
     "type": "month_of_year"
-  }), "May to Dec")
+  }]), "May to Dec")
 
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "[in[",
     "operand": [5, 3],
     "type": "month_of_year"
-  }), "May to Feb")
+  }]), "May to Feb")
 
 def test_format_decision_rule_gte_continuous():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
+    "property": "b",
     "operator": ">=",
     "operand": 3.14,
     "type": "continuous"
-  }), ">= 3.14")
+  }]), "'b' >= 3.14")
 
 def test_format_decision_rule_gte_enum():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": ">=",
     "operand": "foo",
     "type": "enum"
-  }), ">= foo")
+  }]), ">= foo")
 
 def test_format_decision_rule_lt_continuous():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "<",
     "operand": 666,
     "type": "continuous"
-  }), "< 666")
+  }]), "< 666")
 
 def test_format_decision_rule_lt_timezone():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "<",
     "operand": "+02:00",
     "type": "timezone"
-  }), "< +02:00")
+  }]), "< +02:00")
 
 def test_format_decision_rule_is_continuous():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "is",
     "operand": 5637,
     "type": "continuous"
-  }), "is 5637")
+  }]), "is 5637")
 
 def test_format_decision_rule_is_enum():
-  assert_equal(format_decision_rule({
+  assert_equal(format_decision_rules([{
     "operator": "is",
     "operand": "abracadabra",
     "type": "enum"
-  }), "is abracadabra")
+  }]), "is abracadabra")
+
+def test_format_several_decision_rules():
+  assert_equal(format_decision_rules([
+    {"property": "b", "operator": "[in[", "operand": [23, 2], "type": "time_of_day"},
+    {"property": "a", "operator": "[in[", "operand": [2, 5], "type": "day_of_week"},
+    {"property": "c", "operator": "<", "operand": 2}
+  ]), "'b' in [23:00, 02:00[ and 'a' from Wed to Fri and 'c' < 2")

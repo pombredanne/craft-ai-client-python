@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.11.0...HEAD) ##
 ### Added ###
 
-- Introducing `reduce_decision_rules` (available through `from craftai import reduce_decision_rules`) a functions that reduces a list of decision rules on one property to a single rule.
-- Introducing `format_property` and `format_decision_rule` (available through `from craftai import format_property, format_decision_rule`) respectively able to nicely format a property value and decision rule into a human readable string.
+- Introducing `reduce_decision_rules` (available through `from craftai import reduce_decision_rules`) a functions that reduces a list of decision rules to a single rule per property.
+- Introducing `format_property`, `format_decision_rules` (available through `from craftai import format_property, format_decision_rule, format_decision_rules`) respectively able to nicely format a property value, or several decision rules into a human readable string.
 
 ## [1.11.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.10.0...v1.11.0) - 2018-04-13 ##
 ### Changed ###
