@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.11.0...HEAD) ##
+### Added ###
+
+- Introducing `format_property` and `format_decision_rule` (available through `from craftai import format_property, format_decision_rule`) respectively able to nicely format a property value and decision rule into a human readable string.
 
 ## [1.11.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.10.0...v1.11.0) - 2018-04-13 ##
 ### Changed ###

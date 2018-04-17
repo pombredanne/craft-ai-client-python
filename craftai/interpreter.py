@@ -4,18 +4,23 @@ import semver
 import six
 
 from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
-from craftai.operators import _OPERATORS
+from craftai.operators import OPERATORS, OPERATORS_FUNCTION
+from craftai.types import TYPES
 from craftai.time import Time
 from craftai.timezones import is_timezone
 
 _VALUE_VALIDATORS = {
-  "continuous": lambda value: isinstance(value, numbers.Real),
-  "enum": lambda value: isinstance(value, six.string_types),
-  "timezone": lambda value: isinstance(value, six.string_types) and is_timezone(value),
-  "time_of_day": lambda value: isinstance(value, numbers.Real) and value >= 0 and value < 24,
-  "day_of_week": lambda value: isinstance(value, six.integer_types) and value >= 0 and value <= 6,
-  "day_of_month": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 31,
-  "month_of_year": lambda value: isinstance(value, six.integer_types) and value >= 1 and value <= 12
+  TYPES["continuous"]: lambda value: isinstance(value, numbers.Real),
+  TYPES["enum"]: lambda value: isinstance(value, six.string_types),
+  TYPES["timezone"]: lambda value: isinstance(value, six.string_types) and is_timezone(value),
+  TYPES["time_of_day"]: lambda value: (isinstance(value, numbers.Real)
+                                       and value >= 0 and value < 24),
+  TYPES["day_of_week"]: lambda value: (isinstance(value, six.integer_types)
+                                       and value >= 0 and value <= 6),
+  TYPES["day_of_month"]: lambda value: (isinstance(value, six.integer_types)
+                                        and value >= 1 and value <= 31),
+  TYPES["month_of_year"]: lambda value: (isinstance(value, six.integer_types)
+                                         and value >= 1 and value <= 12)
 }
 
 _DECISION_VERSION = "1.1.0"
@@ -228,18 +233,18 @@ class Interpreter(object):
           format(property_name)
         )
       if (not isinstance(operator, six.string_types) or
-          not operator in _OPERATORS):
+          not operator in OPERATORS.values()):
         raise CraftAiDecisionError(
           """Invalid decision tree format, {} is not a valid"""
-          """decision operator.""".format(operator)
+          """ decision operator.""".format(operator)
         )
 
       # To be compared, continuous parameters should not be strings
-      if "continuous" in operator:
+      if TYPES["continuous"] in operator:
         context_value = float(context_value)
         operand = float(operand)
 
-      if _OPERATORS[operator](context_value, operand):
+      if OPERATORS_FUNCTION[operator](context_value, operand):
         return child
     return {}
 
