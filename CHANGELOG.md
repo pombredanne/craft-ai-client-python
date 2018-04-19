@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.11.0...HEAD) ##
+### Added ###
+
+- Introducing `reduce_decision_rules` (available through `from craftai import reduce_decision_rules`) a function that reduces a list of decision rules to a single rule per property.
+- Introducing `format_property`, `format_decision_rules` (available through `from craftai import format_property, format_decision_rule, format_decision_rules`) respectively able to nicely format a property value, or several decision rules into a human readable string.
 
 ## [1.11.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.10.0...v1.11.0) - 2018-04-13 ##
 ### Changed ###
