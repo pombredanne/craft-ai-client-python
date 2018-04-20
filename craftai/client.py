@@ -9,6 +9,7 @@ from platform import python_implementation, python_version
 
 import requests
 import six
+from urllib.parse import urlparse
 
 from craftai import __version__ as pkg_version
 from craftai.constants import AGENT_ID_PATTERN
@@ -31,6 +32,7 @@ class CraftAIClient(object):
     self._base_url = ""
     self._headers = {}
     self._config = {}
+    # Requests session: connection pooling and base configuration for all requests
     self._requests_session = requests.Session()
 
     try:
@@ -82,9 +84,15 @@ class CraftAIClient(object):
                                               self.config["owner"],
                                               self.config["project"])
 
-    # Requests session: connection pooling and base configuration for all requests
-    if cfg.get("proxies"):
-      self._requests_session.proxies = cfg.get("proxies")
+    if cfg.get("proxy"):
+      scheme = urlparse(self.config["url"]).scheme
+      if not scheme:
+        raise CraftAiCredentialsError("""Unable to create client with an URL"""
+                                      """ without a scheme. Cannot configure"""
+                                      """ the proxy.""")
+      proxies = {}
+      proxies[scheme] = cfg.get("proxy")
+      self._requests_session.proxies = proxies
     # Headers have to be set here to avoid multiple definitions
     # of the 'Authorization' header if config is modified
     base_headers = {}
