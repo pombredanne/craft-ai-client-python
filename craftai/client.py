@@ -10,7 +10,7 @@ from platform import python_implementation, python_version
 import requests
 import six
 
-from craftai import helpers, __version__ as pkg_version
+from craftai import __version__ as pkg_version
 from craftai.constants import AGENT_ID_PATTERN
 from craftai.errors import CraftAiCredentialsError, CraftAiBadRequestError, CraftAiNotFoundError
 from craftai.errors import CraftAiUnknownError, CraftAiInternalError, CraftAiLongRequestTimeOutError
@@ -31,6 +31,8 @@ class CraftAIClient(object):
     self._base_url = ""
     self._headers = {}
     self._config = {}
+    # Requests session: connection pooling and base configuration for all requests
+    self._requests_session = requests.Session()
 
     try:
       self.config = cfg
@@ -81,20 +83,29 @@ class CraftAIClient(object):
                                               self.config["owner"],
                                               self.config["project"])
 
-    # Headers have to be reset here to avoid multiple definitions
+    if cfg.get("proxy"):
+      scheme = six.moves.urllib.parse.urlparse(self.config["url"]).scheme
+      if not scheme:
+        raise CraftAiCredentialsError("""Unable to create client with an URL"""
+                                      """ without a scheme. Cannot configure"""
+                                      """ the proxy.""")
+      proxies = {}
+      proxies[scheme] = cfg.get("proxy")
+      self._requests_session.proxies = proxies
+    # Headers have to be set here to avoid multiple definitions
     # of the 'Authorization' header if config is modified
-    self._headers = {}
-    self._headers["Authorization"] = "Bearer " + self.config.get("token")
-    self._headers["User-Agent"] = USER_AGENT
+    base_headers = {}
+    base_headers["Authorization"] = "Bearer " + self.config.get("token")
+    base_headers["User-Agent"] = USER_AGENT
+    self._requests_session.headers = base_headers
 
   #################
   # Agent methods #
   #################
 
   def create_agent(self, configuration, agent_id=""):
-    # Building final headers
+    # Extra header in addition to the main session's
     ct_header = {"Content-Type": "application/json; charset=utf-8"}
-    headers = helpers.join_dicts(self._headers, ct_header)
 
     # Building payload and checking that it is valid for a JSON
     # serialization
@@ -113,7 +124,7 @@ class CraftAIClient(object):
                                    .format(e.__str__()))
 
     req_url = "{}/agents".format(self._base_url)
-    resp = requests.post(req_url, headers=headers, data=json_pl)
+    resp = self._requests_session.post(req_url, headers=ct_header, data=json_pl)
 
     agent = self._decode_response(resp)
 
@@ -123,22 +134,17 @@ class CraftAIClient(object):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    # No supplementary headers needed
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}".format(self._base_url, agent_id)
-    resp = requests.get(req_url, headers=headers)
+    resp = self._requests_session.get(req_url)
 
     agent = self._decode_response(resp)
 
     return agent
 
   def list_agents(self):
-    # No supplementary headers needed
-    headers = self._headers.copy()
 
     req_url = "{}/agents".format(self._base_url)
-    resp = requests.get(req_url, headers=headers)
+    resp = self._requests_session.get(req_url)
 
     agents = self._decode_response(resp)
 
@@ -148,12 +154,8 @@ class CraftAIClient(object):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-
-    # No supplementary headers needed
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}".format(self._base_url, agent_id)
-    resp = requests.delete(req_url, headers=headers)
+    resp = self._requests_session.delete(req_url)
 
     decoded_resp = self._decode_response(resp)
 
@@ -163,11 +165,8 @@ class CraftAIClient(object):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    # No supplementary headers needed
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}/shared".format(self._base_url, agent_id)
-    resp = requests.get(req_url, headers=headers)
+    resp = self._requests_session.get(req_url)
 
     url = self._decode_response(resp)
 
@@ -180,11 +179,8 @@ class CraftAIClient(object):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    # No supplementary headers needed
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}/shared".format(self._base_url, agent_id)
-    resp = requests.delete(req_url, headers=headers)
+    resp = self._requests_session.delete(req_url)
 
     decoded_resp = self._decode_response(resp)
 
@@ -198,11 +194,8 @@ class CraftAIClient(object):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    # Building final headers
+    # Extra header in addition to the main session's
     ct_header = {"Content-Type": "application/json; charset=utf-8"}
-    headers = helpers.join_dicts(self._headers, ct_header)
-
-    session = requests.Session()
     offset = 0
 
     is_looping = True
@@ -217,7 +210,7 @@ class CraftAIClient(object):
                                      .format(e.__str__()))
 
       req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
-      resp = session.post(req_url, headers=headers, data=json_pl)
+      resp = self._requests_session.post(req_url, headers=ct_header, data=json_pl)
 
       self._decode_response(resp)
 
@@ -235,9 +228,7 @@ class CraftAIClient(object):
     if url is None:
       return ops_list
 
-    headers = self._headers.copy()
-
-    resp = requests.get(url, headers=headers)
+    resp = self._requests_session.get(url)
 
     new_ops_list = self._decode_response(resp)
     next_page_url = resp.headers.get("x-craft-ai-next-page-url")
@@ -248,14 +239,12 @@ class CraftAIClient(object):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}/context".format(self._base_url, agent_id)
     req_params = {
       "start": start,
       "end": end
     }
-    resp = requests.get(req_url, params=req_params, headers=headers)
+    resp = self._requests_session.get(req_url, params=req_params)
 
     initial_ops_list = self._decode_response(resp)
     next_page_url = resp.headers.get("x-craft-ai-next-page-url")
@@ -266,9 +255,7 @@ class CraftAIClient(object):
     if url is None:
       return state_history
 
-    headers = self._headers.copy()
-
-    resp = requests.get(url, headers=headers)
+    resp = self._requests_session.get(url)
 
     new_state_history = self._decode_response(resp)
     next_page_url = resp.headers.get("x-craft-ai-next-page-url")
@@ -279,14 +266,12 @@ class CraftAIClient(object):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}/context/state/history".format(self._base_url, agent_id)
     req_params = {
       "start": start,
       "end": end
     }
-    resp = requests.get(req_url, params=req_params, headers=headers)
+    resp = self._requests_session.get(req_url, params=req_params)
 
     initial_states_history = self._decode_response(resp)
     next_page_url = resp.headers.get("x-craft-ai-next-page-url")
@@ -297,12 +282,10 @@ class CraftAIClient(object):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}/context/state?t={}".format(self._base_url,
                                                        agent_id,
                                                        timestamp)
-    resp = requests.get(req_url, headers=headers)
+    resp = self._requests_session.get(req_url)
 
     context_state = self._decode_response(resp)
 
@@ -313,13 +296,11 @@ class CraftAIClient(object):
   #########################
 
   def _get_decision_tree(self, agent_id, timestamp):
-    headers = self._headers.copy()
-
     req_url = "{}/agents/{}/decision/tree?t={}".format(self._base_url,
                                                        agent_id,
                                                        timestamp)
 
-    resp = requests.get(req_url, headers=headers)
+    resp = self._requests_session.get(req_url)
 
     decision_tree = self._decode_response(resp)
 
