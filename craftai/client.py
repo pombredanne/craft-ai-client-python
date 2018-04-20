@@ -9,7 +9,6 @@ from platform import python_implementation, python_version
 
 import requests
 import six
-from urllib.parse import urlparse
 
 from craftai import __version__ as pkg_version
 from craftai.constants import AGENT_ID_PATTERN
@@ -85,7 +84,7 @@ class CraftAIClient(object):
                                               self.config["project"])
 
     if cfg.get("proxy"):
-      scheme = urlparse(self.config["url"]).scheme
+      scheme = six.moves.urllib.parse.urlparse(self.config["url"]).scheme
       if not scheme:
         raise CraftAiCredentialsError("""Unable to create client with an URL"""
                                       """ without a scheme. Cannot configure"""
