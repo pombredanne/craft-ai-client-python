@@ -67,6 +67,22 @@ Initialize
     }
     client = craftai.Client(config)
 
+It is possible to provide proxy settings in the ``proxy`` property of
+the client configuration. They will be used to call the craft ai API
+(through HTTPS for craft ai APIs exposed on the Internet). The expected
+format is a host name or IP and port, optionally preceded by
+credentials, as in
+`Requests <http://docs.python-requests.org/en/master/user/advanced/#proxies>`__
+``proxies`` configurations.
+
+.. code:: python
+
+    config = {
+        "token": "{token}"
+        "proxy": "http://user:pass@10.10.1.10:1080"
+    }
+    client = craftai.Client(config)
+
 3 - Create an agent
 ~~~~~~~~~~~~~~~~~~~
 
