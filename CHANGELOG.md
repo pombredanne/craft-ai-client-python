@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.11.0...HEAD) ##
+## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.12.0...HEAD) ##
+
+## [1.12.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.11.0...v1.12.0) - 2018-04-25 ##
 ### Added ###
 
 - Introducing `reduce_decision_rules` (available through `from craftai import reduce_decision_rules`) a function that reduces a list of decision rules to a single rule per property.
