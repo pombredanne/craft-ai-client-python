@@ -1,308 +1,45 @@
-from nose.tools import assert_raises, assert_equal
+import json
+import os
 
+from nose.tools import assert_raises, assert_equal, assert_true
 from craftai import reduce_decision_rules, errors
 
-def test_reduce_decision_rules_is_is():
-  rules = [
-    {"property": "test", "operator": "is", "operand": "toto"},
-    {"property": "test", "operator": "is", "operand": "toto"}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "is", "operand": "toto"}
-  ])
+#pylint: disable=E1101
+assert_equal.__self__.maxDiff = None
+#pylint: enable=E1101
 
-def test_reduce_decision_rules_is():
-  rules = [
-    {"property": "test", "operator": "is", "operand": "toto"}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "is", "operand": "toto"}
-  ])
+HERE = os.path.abspath(os.path.dirname(__file__))
 
-def test_reduce_decision_rules_is_in():
-  rules = [
-    {"property": "test", "operator": "is", "operand": "toto"},
-    {"property": "test", "operator": "[in[", "operand": "titi"}
-  ]
-  assert_raises(errors.CraftAiError,
-                reduce_decision_rules,
-                rules)
+# Assuming we are the test folder and the folder hierarchy is correctly
+# constructed
+EXPECTATIONS_DIR = os.path.join(HERE, "data", "interpreter", "reduce_decision_rules")
 
-def test_reduce_decision_rules_is_is_diff_operands():
-  rules = [
-    {"property": "test", "operator": "is", "operand": "toto"},
-    {"property": "test", "operator": "is", "operand": "titi"}
-  ]
-  assert_raises(errors.CraftAiError,
-                reduce_decision_rules,
-                rules)
+def reduce_decision_rules_tests_generator():
+  expectations_files = os.listdir(EXPECTATIONS_DIR)
+  for expectations_file in expectations_files:
+    # Loading the expectations for this tree
+    with open(os.path.join(EXPECTATIONS_DIR, expectations_file)) as f:
+      expectations = json.load(f)
 
-def test_reduce_decision_rules_in_in_1():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [0, 13]},
-    {"property": "test", "operator": "[in[", "operand": [2, 12]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [2, 12]}
-  ])
+    for expectation in expectations:
+      assert_true("title" in expectation,
+                  "Invalid expectation from '{}': missing \"title\".".format(expectations_file))
+      assert_true("rules" in expectation and "expectation" in expectation,
+                  "Invalid expectation from '{}': missing \"title\".".format(expectations_file))
 
-def test_reduce_decision_rules_in_in_2():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [0, 13]},
-    {"property": "test", "operator": "[in[", "operand": [2, 16]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [2, 13]}
-  ])
+#pylint: disable=W0108
+      test_fn = lambda r, e: check_expectation(r, e)
+#pylint: enable=W0108
 
-def test_reduce_decision_rules_in_in_3():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [1, 13]},
-    {"property": "test", "operator": "[in[", "operand": [0, 12]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [1, 12]}
-  ])
+      test_fn.description = expectation["title"]
+      reduce_decision_rules_tests_generator.compat_func_name = test_fn.description
 
-def test_reduce_decision_rules_in_in_dow():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [5, 3]},
-    {"property": "test", "operator": "[in[", "operand": [2, 3]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [2, 3]}
-  ])
+      yield test_fn, expectation["rules"], expectation["expectation"]
 
-def test_reduce_decision_rules_in_in_dom():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [5, 4]},
-    {"property": "test", "operator": "[in[", "operand": [12, 1]},
-    {"property": "test", "operator": "[in[", "operand": [12, 16]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [12, 16]}
-  ])
-
-def test_reduce_decision_rules_in_in_self():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [3, 4]},
-    {"property": "test", "operator": "[in[", "operand": [3, 4]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [3, 4]}
-  ])
-
-def test_reduce_decision_rules_in_in_self_p():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [4, 2]},
-    {"property": "test", "operator": "[in[", "operand": [4, 2]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [4, 2]}
-  ])
-
-def test_reduce_decision_rules_in_in_pnp_invalid_1():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [15, 20]},
-    {"property": "test", "operator": "[in[", "operand": [22, 14]}
-  ]
-  assert_raises(errors.CraftAiError,
-                reduce_decision_rules,
-                rules)
-
-def test_reduce_decision_rules_in_in_pnp_invalid_2():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [15, 20]},
-    {"property": "test", "operator": "[in[", "operand": [22, 25]}
-  ]
-  assert_raises(errors.CraftAiError,
-                reduce_decision_rules,
-                rules)
-
-def test_reduce_decision_rules_in():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [1, 13]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [1, 13]}
-  ])
-
-def test_reduce_decision_rules_in_is():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [1, 13]},
-    {"property": "test", "operator": "is", "operand": "toto"}
-  ]
-  assert_raises(errors.CraftAiError,
-                reduce_decision_rules,
-                rules)
-
-def test_reduce_decision_rules_in_lt():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [1, 13]},
-    {"property": "test", "operator": "<", "operand": 2}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [1, 2]}
-  ])
-
-def test_reduce_decision_rules_in_gte():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [1, 13]},
-    {"property": "test", "operator": ">=", "operand": 12}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [12, 13]}
-  ])
-
-def test_reduce_decision_rules_in_lt_gte():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [1, 13]},
-    {"property": "test", "operator": "<", "operand": 12},
-    {"property": "test", "operator": ">=", "operand": 2}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [2, 12]}
-  ])
-
-def test_reduce_decision_rules_in_in_p():
-  rules = [
-    {"property": "test", "operator": "[in[", "operand": [23, 3]},
-    {"property": "test", "operator": "[in[", "operand": [22, 2]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [23, 2]}
-  ])
-
-def test_reduce_decision_rules_lt_lt_1():
-  rules = [
-    {"property": "test", "operator": "<", "operand": 2},
-    {"property": "test", "operator": "<", "operand": 6}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "<", "operand": 2}
-  ])
-
-def test_reduce_decision_rules_lt_lt_2():
-  rules = [
-    {"property": "test", "operator": "<", "operand": 2},
-    {"property": "test", "operator": "<", "operand": 2}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "<", "operand": 2}
-  ])
-
-def test_reduce_decision_rules_lt():
-  rules = [
-    {"property": "test", "operator": "<", "operand": 2}
-  ]
-  assert_equal(reduce_decision_rules(rules), rules)
-
-def test_reduce_decision_rules_lt_in():
-  rules = [
-    {"property": "test", "operator": "<", "operand": 2},
-    {"property": "test", "operator": "[in[", "operand": [1, 13]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [1, 2]}
-  ])
-
-def test_reduce_decision_rules_lt_gte():
-  rules = [
-    {"property": "test", "operator": "<", "operand": 13},
-    {"property": "test", "operator": ">=", "operand": 2}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [2, 13]}
-  ])
-
-def test_reduce_decision_rules_lt_gte_complex():
-  rules = [
-    {"property": "test", "operator": "<", "operand": 650},
-    {"property": "test", "operator": ">=", "operand": 232.82},
-    {"property": "test", "operator": "<", "operand": 251.99},
-    {"property": "test", "operator": "<", "operand": 345.22}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [232.82, 251.99]}
-  ])
-
-def test_reduce_decision_rules_gte_1():
-  rules = [
-    {"property": "test", "operator": ">=", "operand": 4},
-    {"property": "test", "operator": ">=", "operand": 2}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": ">=", "operand": 4}
-  ])
-
-def test_reduce_decision_rules_gte_2():
-  rules = [
-    {"property": "test", "operator": ">=", "operand": 2}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": ">=", "operand": 2}
-  ])
-
-def test_reduce_decision_rules_gte_gte_self():
-  rules = [
-    {"property": "test", "operator": ">=", "operand": 2},
-    {"property": "test", "operator": ">=", "operand": 2}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": ">=", "operand": 2}
-  ])
-
-def test_reduce_decision_rules_gte_in():
-  rules = [
-    {"property": "test", "operator": ">=", "operand": 2},
-    {"property": "test", "operator": "[in[", "operand": [1, 13]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [2, 13]}
-  ])
-
-def test_reduce_decision_rules_gte_lt():
-  rules = [
-    {"property": "test", "operator": ">=", "operand": 2},
-    {"property": "test", "operator": "<", "operand": 13}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "test", "operator": "[in[", "operand": [2, 13]}
-  ])
-
-def test_reduce_decision_rules_gte_lt_bad():
-  rules = [
-    {"property": "test", "operator": ">=", "operand": 13},
-    {"property": "test", "operator": "<", "operand": 2}
-  ]
-  assert_raises(errors.CraftAiError,
-                reduce_decision_rules,
-                rules)
-
-
-def test_reduce_decision_rules_2_properties():
-  rules = [
-    {"property": "a", "operator": ">=", "operand": 2},
-    {"property": "b", "operator": "[in[", "operand": [23, 3]},
-    {"property": "a", "operator": "<", "operand": 13},
-    {"property": "b", "operator": "[in[", "operand": [22, 2]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "a", "operator": "[in[", "operand": [2, 13]},
-    {"property": "b", "operator": "[in[", "operand": [23, 2]}
-  ])
-
-
-def test_reduce_decision_rules_3_properties():
-  rules = [
-    {"property": "b", "operator": "[in[", "operand": [23, 3]},
-    {"property": "a", "operator": ">=", "operand": 2},
-    {"property": "c", "operator": "<", "operand": 2},
-    {"property": "a", "operator": "<", "operand": 13},
-    {"property": "b", "operator": "[in[", "operand": [22, 2]}
-  ]
-  assert_equal(reduce_decision_rules(rules), [
-    {"property": "b", "operator": "[in[", "operand": [23, 2]},
-    {"property": "a", "operator": "[in[", "operand": [2, 13]},
-    {"property": "c", "operator": "<", "operand": 2}
-  ])
+def check_expectation(rules, expectation):
+  if "error" in expectation:
+    assert_raises(errors.CraftAiError,
+                  reduce_decision_rules,
+                  rules)
+  else:
+    assert_equal(reduce_decision_rules(rules), expectation["rules"])
