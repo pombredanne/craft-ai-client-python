@@ -22,7 +22,7 @@ CLIENT = Client(settings.CRAFT_CFG)
 def interpreter_tests_generator():
   tree_files = os.listdir(TREES_DIR)
   for tree_file in tree_files:
-    if os.path.splitext(tree_file)[1] == '.json':
+    if os.path.splitext(tree_file)[1] == ".json":
       # Loading the json tree
       with open(os.path.join(TREES_DIR, tree_file)) as f:
         tree = json.load(f)

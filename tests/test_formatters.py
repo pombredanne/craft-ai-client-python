@@ -1,8 +1,10 @@
+import json
+import os
+
 from dateutil.parser import isoparse
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_true, assert_raises
 
-from craftai import format_property, format_decision_rules
-
+from craftai import format_property, format_decision_rules, errors
 
 def test_format_property_time_of_day():
   formatter = format_property("time_of_day")
@@ -32,105 +34,40 @@ def test_format_property_month_of_year():
   assert_equal(formatter(6), "Jun")
   assert_equal(formatter(12), "Dec")
 
-def test_format_decision_rule_in_time_of_day():
-  assert_equal(format_decision_rules([{
-    "operator": "[in[",
-    "operand": [11.5, 12.3],
-    "type": "time_of_day"
-  }]), "[11:30, 12:18[")
+HERE = os.path.abspath(os.path.dirname(__file__))
 
-def test_format_decision_rule_in_continuous():
-  assert_equal(format_decision_rules([{
-    "operator": "[in[",
-    "operand": [11.5, 12.3],
-    "type": "continuous"
-  }]), "[11.5, 12.3[")
+# Assuming we are the test folder and the folder hierarchy is correctly
+# constructed
+EXPECTATIONS_DIR = os.path.join(HERE, "data", "interpreter", "format_decision_rules")
 
-def test_format_decision_rule_in_day_of_week():
-  assert_equal(format_decision_rules([{
-    "operator": "[in[",
-    "operand": [3, 5],
-    "type": "day_of_week"
-  }]), "Thu to Fri")
+def format_decision_rule_tests_generator():
+  expectations_files = os.listdir(EXPECTATIONS_DIR)
+  for expectations_file in expectations_files:
+    if os.path.splitext(expectations_file)[1] == ".json":
+      # Loading the expectations for this tree
+      with open(os.path.join(EXPECTATIONS_DIR, expectations_file)) as f:
+        expectations = json.load(f)
 
-  assert_equal(format_decision_rules([{
-    "operator": "[in[",
-    "operand": [4, 0],
-    "type": "day_of_week"
-  }]), "Fri to Sun")
+      for expectation in expectations:
+        assert_true("title" in expectation,
+                    "Invalid expectation from '{}': missing \"title\".".format(expectations_file))
+        assert_true("rules" in expectation and "expectation" in expectation,
+                    "Invalid expectation from '{}': missing \"rules\" or \"expectation\"."
+                    .format(expectations_file))
 
-def test_format_decision_rule_in_month_of_year():
-  assert_equal(format_decision_rules([{
-    "property": "foo",
-    "operator": "[in[",
-    "operand": [1, 12],
-    "type": "month_of_year"
-  }]), "'foo' from Jan to Nov")
+#pylint: disable=W0108
+        test_fn = lambda r, e: check_expectation(r, e)
+#pylint: enable=W0108
 
-  assert_equal(format_decision_rules([{
-    "operator": "[in[",
-    "operand": [4, 2],
-    "type": "month_of_year"
-  }]), "Apr to Jan")
+        test_fn.description = expectation["title"]
+        format_decision_rule_tests_generator.compat_func_name = test_fn.description
 
-  assert_equal(format_decision_rules([{
-    "operator": "[in[",
-    "operand": [5, 1],
-    "type": "month_of_year"
-  }]), "May to Dec")
+        yield test_fn, expectation["rules"], expectation["expectation"]
 
-  assert_equal(format_decision_rules([{
-    "operator": "[in[",
-    "operand": [5, 3],
-    "type": "month_of_year"
-  }]), "May to Feb")
-
-def test_format_decision_rule_gte_continuous():
-  assert_equal(format_decision_rules([{
-    "property": "b",
-    "operator": ">=",
-    "operand": 3.14,
-    "type": "continuous"
-  }]), "'b' >= 3.14")
-
-def test_format_decision_rule_gte_enum():
-  assert_equal(format_decision_rules([{
-    "operator": ">=",
-    "operand": "foo",
-    "type": "enum"
-  }]), ">= foo")
-
-def test_format_decision_rule_lt_continuous():
-  assert_equal(format_decision_rules([{
-    "operator": "<",
-    "operand": 666,
-    "type": "continuous"
-  }]), "< 666")
-
-def test_format_decision_rule_lt_timezone():
-  assert_equal(format_decision_rules([{
-    "operator": "<",
-    "operand": "+02:00",
-    "type": "timezone"
-  }]), "< +02:00")
-
-def test_format_decision_rule_is_continuous():
-  assert_equal(format_decision_rules([{
-    "operator": "is",
-    "operand": 5637,
-    "type": "continuous"
-  }]), "is 5637")
-
-def test_format_decision_rule_is_enum():
-  assert_equal(format_decision_rules([{
-    "operator": "is",
-    "operand": "abracadabra",
-    "type": "enum"
-  }]), "is abracadabra")
-
-def test_format_several_decision_rules():
-  assert_equal(format_decision_rules([
-    {"property": "b", "operator": "[in[", "operand": [23, 2], "type": "time_of_day"},
-    {"property": "a", "operator": "[in[", "operand": [2, 5], "type": "day_of_week"},
-    {"property": "c", "operator": "<", "operand": 2}
-  ]), "'b' in [23:00, 02:00[ and 'a' from Wed to Fri and 'c' < 2")
+def check_expectation(rules, expectation):
+  if "error" in expectation:
+    assert_raises(errors.CraftAiError,
+                  format_decision_rules,
+                  rules)
+  else:
+    assert_equal(format_decision_rules(rules), expectation["string"])

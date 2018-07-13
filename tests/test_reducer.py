@@ -13,7 +13,7 @@ EXPECTATIONS_DIR = os.path.join(HERE, "data", "interpreter", "reduce_decision_ru
 def reduce_decision_rules_tests_generator():
   expectations_files = os.listdir(EXPECTATIONS_DIR)
   for expectations_file in expectations_files:
-    if os.path.splitext(expectations_file)[1] == '.json':
+    if os.path.splitext(expectations_file)[1] == ".json":
       with open(os.path.join(EXPECTATIONS_DIR, expectations_file)) as f:
         expectations = json.load(f)
 
