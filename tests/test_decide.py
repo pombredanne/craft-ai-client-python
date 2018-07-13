@@ -14,8 +14,8 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 # Assuming we are the test folder and the folder hierarchy is correctly
 # constructed
-EXPECS_DIR = os.path.join(HERE, "data", "interpreter", "expectations")
-TREES_DIR = os.path.join(HERE, "data", "interpreter", "trees")
+EXPECS_DIR = os.path.join(HERE, "data", "interpreter", "decide", "expectations")
+TREES_DIR = os.path.join(HERE, "data", "interpreter", "decide", "trees")
 
 CLIENT = Client(settings.CRAFT_CFG)
 
