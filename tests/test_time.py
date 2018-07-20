@@ -1,7 +1,10 @@
 import unittest
+from datetime import datetime
+import pytz
 
 from craftai import Time
 from craftai.errors import CraftAiTimeError
+
 
 class TestTime(unittest.TestCase):
 
@@ -28,12 +31,17 @@ class TestTime(unittest.TestCase):
     self.assertEqual(Time("2011-04-22 01:00:00+0900").timezone, "+09:00")
     self.assertEqual(Time(t="2017-01-01 00:00:00", timezone="-03:00").timezone, "-03:00")
     self.assertEqual(Time(t="2017-01-01 03:00:00", timezone="+02:00").timezone, "+02:00")
+    self.assertEqual(Time(t=datetime(2011, 1, 1, 0, 0), timezone="+02:00").timezone, "+02:00")
+    self.assertEqual(Time(t=datetime(2012, 9, 12, 6, 0, 0, tzinfo=pytz.utc)).timezone, "+00:00")
     self.assertEqual(Time().timezone, Time().timezone)
 
   def test_parser_format(self):
     # No timezone
     self.assertRaises(CraftAiTimeError, Time, "2010-01-01T07:30:30")
+    self.assertRaises(CraftAiTimeError, Time, datetime(2011, 1, 1, 0, 0))
     # Not ISO format
     self.assertRaises(CraftAiTimeError, Time, "22-04-1977T01:00:00+0100")
     # Two timezones
     self.assertRaises(CraftAiTimeError, Time, "2011-04-22 01:00:00+0900", "-03:00")
+    self.assertRaises(CraftAiTimeError, Time, datetime(2002, 10, 27, 6, 0, 0,
+                                                       tzinfo=pytz.utc), pytz.utc)
