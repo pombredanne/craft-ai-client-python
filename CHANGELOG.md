@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.12.0...HEAD) ##
+### Added ###
+
+- It is now possible to provide a `datetime` object as timestamp with a timezone to create a `Time`: `Time(t=datetime(2011, 1, 1, 0, 0), timezone="+02:00")`
+- It is now possible to provide an ISO string date as timestamp with a timezone to create a `Time`: `Time(t="2017-01-01 03:00:00", timezone="+02:00")`
 
 ## [1.12.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.11.0...v1.12.0) - 2018-04-25 ##
 ### Added ###
