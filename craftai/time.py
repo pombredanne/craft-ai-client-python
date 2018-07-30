@@ -20,32 +20,82 @@ _EPOCH = datetime(1970, 1, 1, tzinfo=pyutc)
 class Time(object):
   """Handles time in a useful way for craft ai's client"""
   def __init__(self, t=None, timezone=None):
-    def set_time(timestamp):
+
+    def time_from_datetime_timestamp_and_timezone(timestamp, timezone):
+      # Handle when datetime already provides timezone :
+      # datetime(2012, 9, 12, 6, 0, 0, tzinfo=pytz.utc)
+      result = timestamp
+      if (result.tzinfo is None) and (not timezone):
+        # Handle this format : Time(datetime(2011, 1, 1, 0, 0), timezone=None)
+        raise CraftAiTimeError("You must provide at least one timezone")
+      elif (result.tzinfo is None) and timezone:
+        # Handle this format : Time(datetime(2011, 1, 1, 0, 0), timezone="+02:00")
+        result = pyutc.localize(result)
+        result = set_timezone(result, timezone)
+      elif (result.tzinfo is not None) and (timezone):
+        #Handle format like : Time(datetime(2002, 10, 27, 6, 0, 0, tzinfo=utc),timezone="+02:00" )
+        raise CraftAiTimeError("You must provide one timezone, but two were provided:"
+                               " in the datetime and in the timezone parameter.")
+      return result
+
+    def time_from_string_timestamp_and_timezone(timestamp, timezone):
+      # Else if t is a string we try to interprete it as an ISO time
+      # string
+      try:
+        # Can't use strptime with %z in Python 2
+        # https://stackoverflow.com/a/23940673
+        result = isoparse(timestamp)
+      except ValueError as e:
+        raise CraftAiTimeError(
+          """Unable to instantiate Time from given string. {}""".
+          format(e.__str__()))
+
+      if result.tzinfo is None:
+        # Handle format like : Time(t="2017-01-01 00:00:00")
+        if timezone:
+          # Handle format like : Time(t="2017-01-01 00:00:00", timezone="-03:00")
+          result = pyutc.localize(result)
+          result = set_timezone(result, timezone)
+        else:
+          raise CraftAiTimeError("The given datetime string must be tz-aware,"
+                                 " or you must provide an explicit timezone.")
+      else:
+        if timezone:
+          #Handle format like : Time("2011-04-22 01:00:00+0900", timezone="-03:00")
+          raise CraftAiTimeError("You must provide one timezone, but two were provided:"
+                                 " in the datetime string and in the timezone parameter.")
+      return result
+
+    def set_time_and_timezone(timestamp, timezone):
       if timestamp is None:
         # If no initial timestamp is given, the current local time is used
         _time = datetime.now(get_localzone())
-      elif isinstance(t, int):
+        # If a timezone is specified we can try to use it
+        if timezone:
+          # Handle theses cases :   Time(timezone="+01:00") & Time(timezone="CET")
+          _time = set_timezone(_time, timezone)
+
+      elif isinstance(timestamp, int):
         # Else if t is an int we try to use it as a given timestamp with
-        # local UTC offset by default
+        # local UTC offset by default .
         try:
+          #Handle format like  : Time().timezone
           _time = datetime.fromtimestamp(timestamp, get_localzone())
         except (OverflowError, OSError) as e:
           raise CraftAiTimeError(
             """Unable to instantiate Time from given timestamp. {}""".
             format(e.__str__()))
+        # If a timezone is specified we can try to use it
+        if timezone:
+          # Handle this type of datetime format : Time(1356998400, timezone="+0100")
+          _time = set_timezone(_time, timezone)
+
+      elif isinstance(timestamp, datetime):
+        _time = time_from_datetime_timestamp_and_timezone(timestamp, timezone)
+
       elif isinstance(timestamp, six.string_types):
-        # Else if t is a string we try to interprete it as an ISO time
-        # string
-        try:
-          # Can't use strptime with %z in Python 2
-          # https://stackoverflow.com/a/23940673
-          _time = isoparse(timestamp)
-        except ValueError as e:
-          raise CraftAiTimeError(
-            """Unable to instantiate Time from given string. {}""".
-            format(e.__str__()))
-        if _time.tzinfo is None:
-          raise CraftAiTimeError("The given datetime string must be tz-aware.")
+        _time = time_from_string_timestamp_and_timezone(timestamp, timezone)
+
       else:
         raise CraftAiTimeError(
           """Unable to instantiate Time from given timestamp."""
@@ -68,10 +118,8 @@ class Time(object):
         )
       return _time
 
-    _time = set_time(t)
-    # If a timezone is specified we can try to use it
-    if timezone:
-      _time = set_timezone(_time, timezone)
+    _time = set_time_and_timezone(t, timezone)
+
 
     try:
       self.utc_iso = _time.isoformat()
