@@ -8,15 +8,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.12.0...HEAD) ##
 ### Added ###
 
-- It is now possible to provide a `datetime` object as timestamp with a timezone to create a `Time`: `Time(t=datetime(2011, 1, 1, 0, 0), timezone="+02:00")`
-- It is now possible to provide an ISO string date as timestamp with a timezone to create a `Time`: `Time(t="2017-01-01 03:00:00", timezone="+02:00")`
+- It is now possible to provide a `datetime` object as timestamp with a timezone to create a `Time`: `Time(t=datetime(2011, 1, 1, 0, 0), timezone="+02:00")`.
+- It is now possible to provide an ISO string date as timestamp with a timezone to create a `Time`: `Time(t="2017-01-01 03:00:00", timezone="+02:00")`.
+
+### Fixed ###
+
+- Fix unreachable server error.
 
 ## [1.12.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.11.0...v1.12.0) - 2018-04-25 ##
 ### Added ###
 
 - Introducing `reduce_decision_rules` (available through `from craftai import reduce_decision_rules`) a function that reduces a list of decision rules to a single rule per property.
 - Introducing `format_property`, `format_decision_rules` (available through `from craftai import format_property, format_decision_rule, format_decision_rules`) respectively able to nicely format a property value, or several decision rules into a human readable string.
-- It is now possible to add proxy settings in the client configuration
+- It is now possible to add proxy settings in the client configuration.
 
 ## [1.11.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.10.0...v1.11.0) - 2018-04-13 ##
 ### Changed ###
