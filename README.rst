@@ -3,7 +3,7 @@
 
 |PyPI| |Build Status| |License| |python|
 
-`**craft ai** cognitive automation API <http://craft.ai>`__ leverages
+`craft ai cognitive automation API <http://craft.ai>`__ leverages
 explainable Artificial Intelligence to 10x your knowledge workers
 productivity. craft ai is the first high level AI API enabling Automated
 Machine Learning at the individual level that generates explainable
@@ -44,44 +44,30 @@ Let's first install the package from pip.
 
 .. code:: sh
 
-    pip install --upgrade craft-ai
+   pip install --upgrade craft-ai
+
+*Depending on your setup you may need to use ``pip3`` or ``pipenv``
+instead of ``pip``.*
 
 Then import it in your code
 
 .. code:: python
 
-    import craftai
+   import craftai
 
 ..
 
-    This client also provides helpers to use it in conjuction with
-    `pandas <#pandas-support>`__
+   This client also provides helpers to use it in conjuction with
+   `pandas <#pandas-support>`__
 
 Initialize
 ^^^^^^^^^^
 
 .. code:: python
 
-    config = {
-        "token": "{token}"
-    }
-    client = craftai.Client(config)
-
-It is possible to provide proxy settings in the ``proxy`` property of
-the client configuration. They will be used to call the craft ai API
-(through HTTPS for craft ai APIs exposed on the Internet). The expected
-format is a host name or IP and port, optionally preceded by
-credentials, as in
-`Requests <http://docs.python-requests.org/en/master/user/advanced/#proxies>`__
-``proxies`` configurations.
-
-.. code:: python
-
-    config = {
-        "token": "{token}"
-        "proxy": "http://user:pass@10.10.1.10:1080"
-    }
-    client = craftai.Client(config)
+   client = craftai.Client({
+     "token": "{token}"
+   })
 
 3 - Create an agent
 ~~~~~~~~~~~~~~~~~~~
@@ -107,29 +93,34 @@ properties:
 -  and finally ``lightbulbState`` which is an ``enum`` property that is
    also the output.
 
+..
+
+   ℹ️ ``timeOfDay`` is auto-generated, you will find more information
+   below.
+
 .. code:: python
 
-    agent_id = "my_first_agent"
-    configuration = {
-      "context": {
-        "peopleCount": {
-          "type": "continuous"
-        },
-        "timeOfDay": {
-          "type": "time_of_day"
-        },
-        "timezone": {
-          "type": "timezone"
-        },
-        "lightbulbState": {
-          "type": "enum"
-        }
-      },
-      "output": ["lightbulbState"]
-    }
+   agent_id = "my_first_agent"
+   configuration = {
+     "context": {
+       "peopleCount": {
+         "type": "continuous"
+       },
+       "timeOfDay": {
+         "type": "time_of_day"
+       },
+       "timezone": {
+         "type": "timezone"
+       },
+       "lightbulbState": {
+         "type": "enum"
+       }
+     },
+     "output": ["lightbulbState"]
+   }
 
-    agent = client.create_agent(configuration, agent_id)
-    print("Agent", agent["id"], "has successfully been created")
+   agent = client.create_agent(configuration, agent_id)
+   print("Agent", agent["id"], "has successfully been created")
 
 Pretty straightforward to test! Open
 ```https://beta.craft.ai/inspector`` <https://beta.craft.ai/inspector>`__,
@@ -141,16 +132,16 @@ before recreating it.
 
 .. code:: python
 
-    agent_id = "my_first_agent"
-    client.delete_agent(agent_id)
-    print("Agent", agent_id, "no longer exists")
+   agent_id = "my_first_agent"
+   client.delete_agent(agent_id)
+   print("Agent", agent_id, "no longer exists")
 
-    configuration = ...
-    agent = client.create_agent(configuration, agent_id)
-    print("Agent", agent["id"], "has successfully been created")
+   configuration = ...
+   agent = client.create_agent(configuration, agent_id)
+   print("Agent", agent["id"], "has successfully been created")
 
-*For further information, check the `'create agent' reference
-documentation <#create>`__.*
+*For further information, check the*\ `'create agent' reference
+documentation <#create>`__\ *.*
 
 4 - Add context operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -173,77 +164,77 @@ In the following we add 8 operations:
 
 .. code:: python
 
-    agent_id = "my_first_agent"
-    client.delete_agent(agent_id)
-    print("Agent", agent_id, "no longer exists")
+   agent_id = "my_first_agent"
+   client.delete_agent(agent_id)
+   print("Agent", agent_id, "no longer exists")
 
-    configuration = ...
-    agent = client.create_agent(configuration, agent_id)
-    print("Agent", agent["id"], "has successfully been created")
+   configuration = ...
+   agent = client.create_agent(configuration, agent_id)
+   print("Agent", agent["id"], "has successfully been created")
 
-    context_list = [
-      {
-        "timestamp": 1469410200,
-        "context": {
-          "timezone": "+02:00",
-          "peopleCount": 0,
-          "lightbulbState": "OFF"
-        }
-      },
-      {
-        "timestamp": 1469415720,
-        "context": {
-          "peopleCount": 1,
-          "lightbulbState": "ON"
-        }
-      },
-      {
-        "timestamp": 1469416500,
-        "context": {
-          "peopleCount": 2
-        }
-      },
-      {
-        "timestamp": 1469417460,
-        "context": {
-          "lightbulbState": "OFF"
-        }
-      },
-      {
-        "timestamp": 1469419920,
-        "context": {
-          "peopleCount": 0
-        }
-      },
-      {
-        "timestamp": 1469460180,
-        "context": {
-          "peopleCount": 2
-        }
-      },
-      {
-        "timestamp": 1469471700,
-        "context": {
-          "lightbulbState": "ON"
-        }
-      },
-      {
-        "timestamp": 1469473560,
-        "context": {
-          "peopleCount": 0,
-          "lightbulbState": "OFF"
-        }
-      }
-    ]
-    client.add_operations(agent_id, context_list)
-    print("Successfully added initial operations to agent", agent_id, "!")
+   context_list = [
+     {
+       "timestamp": 1469410200,
+       "context": {
+         "timezone": "+02:00",
+         "peopleCount": 0,
+         "lightbulbState": "OFF"
+       }
+     },
+     {
+       "timestamp": 1469415720,
+       "context": {
+         "peopleCount": 1,
+         "lightbulbState": "ON"
+       }
+     },
+     {
+       "timestamp": 1469416500,
+       "context": {
+         "peopleCount": 2
+       }
+     },
+     {
+       "timestamp": 1469417460,
+       "context": {
+         "lightbulbState": "OFF"
+       }
+     },
+     {
+       "timestamp": 1469419920,
+       "context": {
+         "peopleCount": 0
+       }
+     },
+     {
+       "timestamp": 1469460180,
+       "context": {
+         "peopleCount": 2
+       }
+     },
+     {
+       "timestamp": 1469471700,
+       "context": {
+         "lightbulbState": "ON"
+       }
+     },
+     {
+       "timestamp": 1469473560,
+       "context": {
+         "peopleCount": 0,
+         "lightbulbState": "OFF"
+       }
+     }
+   ]
+   client.add_operations(agent_id, context_list)
+   print("Successfully added initial operations to agent", agent_id, "!")
 
 In real-world applications, you'll probably do the same kind of things
 when the agent is created and then, regularly throughout the lifetime of
 the agent with newer data.
 
-*For further information, check the `'add context operations' reference
-documentation <#add-operations>`__.*
+*For further information, check the*\ `'add context operations'
+reference documentation <#add-operations>`__\ *.*
 
 5 - Compute the decision tree
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -259,147 +250,147 @@ moment. Let's first try to compute the decision tree at midnight on July
 
 .. code:: python
 
-    agent_id = "my_first_agent"
+   agent_id = "my_first_agent"
 
-    client.delete_agent(agent_id)
-    print("Agent", agent_id, "no longer exists")
+   client.delete_agent(agent_id)
+   print("Agent", agent_id, "no longer exists")
 
-    configuration = ...
-    agent = client.create_agent(configuration, agent_id)
-    print("Agent", agent["id"], "has successfully been created")
+   configuration = ...
+   agent = client.create_agent(configuration, agent_id)
+   print("Agent", agent["id"], "has successfully been created")
 
-    context_list = ...
-    client.add_operations(agent_id, context_list)
-    print("Successfully added initial operations to agent", agent_id, "!")
+   context_list = ...
+   client.add_operations(agent_id, context_list)
+   print("Successfully added initial operations to agent", agent_id, "!")
 
-    dt_timestamp = 1469476800
-    decision_tree = client.get_decision_tree(agent_id, dt_timestamp)
-    print("The full decision tree at timestamp", dt_timestamp, "is the following:")
-    print(decision_tree)
-    """ Outputted tree is the following
-      {
-        "_version":"1.1.0",
-        "trees":{
-          "lightbulbState":{
-            "children":[
-              {
-                "children":[
-                  {
-                    "confidence":0.6774609088897705,
-                    "decision_rule":{
-                      "operand":0.5,
-                      "operator":"<",
-                      "property":"peopleCount"
-                    },
-                    "predicted_value":"OFF"
-                  },
-                  {
-                    "confidence":0.8630361557006836,
-                    "decision_rule":{
-                      "operand":0.5,
-                      "operator":">=",
-                      "property":"peopleCount"
-                    },
-                    "predicted_value":"ON"
-                  }
-                ],
-                "decision_rule":{
-                  "operand":[
-                    5,
-                    5.6666665
-                  ],
-                  "operator":"[in[",
-                  "property":"timeOfDay"
-                }
-              },
-              {
-                "children":[
-                  {
-                    "confidence":0.9947378635406494,
-                    "decision_rule":{
-                      "operand":[
-                        5.6666665,
-                        20.666666
-                      ],
-                      "operator":"[in[",
-                      "property":"timeOfDay"
-                    },
-                    "predicted_value":"OFF"
-                  },
-                  {
-                    "children":[
-                      {
-                        "confidence":0.969236433506012,
-                        "decision_rule":{
-                          "operand":1,
-                          "operator":"<",
-                          "property":"peopleCount"
-                        },
-                        "predicted_value":"OFF"
-                      },
-                      {
-                        "confidence":0.8630361557006836,
-                        "decision_rule":{
-                          "operand":1,
-                          "operator":">=",
-                          "property":"peopleCount"
-                        },
-                        "predicted_value":"ON"
-                      }
-                    ],
-                    "decision_rule":{
-                      "operand":[
-                        20.666666,
-                        5
-                      ],
-                      "operator":"[in[",
-                      "property":"timeOfDay"
-                    }
-                  }
-                ],
-                "decision_rule":{
-                  "operand":[
-                    5.6666665,
-                    5
-                  ],
-                  "operator":"[in[",
-                  "property":"timeOfDay"
-                }
-              }
-            ]
-          }
-        },
-        "configuration":{
-          "time_quantum":600,
-          "learning_period":9000000,
-          "context":{
-            "peopleCount":{
-              "type":"continuous"
-            },
-            "timeOfDay":{
-              "type":"time_of_day",
-              "is_generated":True
-            },
-            "timezone":{
-              "type":"timezone"
-            },
-            "lightbulbState":{
-              "type":"enum"
-            }
-          },
-          "output":[
-            "lightbulbState"
-          ]
-        }
-      }
-    """
+   dt_timestamp = 1469476800
+   decision_tree = client.get_decision_tree(agent_id, dt_timestamp)
+   print("The full decision tree at timestamp", dt_timestamp, "is the following:")
+   print(decision_tree)
+   """ Outputted tree is the following
+     {
+       "_version":"1.1.0",
+       "trees":{
+         "lightbulbState":{
+           "children":[
+             {
+               "children":[
+                 {
+                   "confidence":0.6774609088897705,
+                   "decision_rule":{
+                     "operand":0.5,
+                     "operator":"<",
+                     "property":"peopleCount"
+                   },
+                   "predicted_value":"OFF"
+                 },
+                 {
+                   "confidence":0.8630361557006836,
+                   "decision_rule":{
+                     "operand":0.5,
+                     "operator":">=",
+                     "property":"peopleCount"
+                   },
+                   "predicted_value":"ON"
+                 }
+               ],
+               "decision_rule":{
+                 "operand":[
+                   5,
+                   5.6666665
+                 ],
+                 "operator":"[in[",
+                 "property":"timeOfDay"
+               }
+             },
+             {
+               "children":[
+                 {
+                   "confidence":0.9947378635406494,
+                   "decision_rule":{
+                     "operand":[
+                       5.6666665,
+                       20.666666
+                     ],
+                     "operator":"[in[",
+                     "property":"timeOfDay"
+                   },
+                   "predicted_value":"OFF"
+                 },
+                 {
+                   "children":[
+                     {
+                       "confidence":0.969236433506012,
+                       "decision_rule":{
+                         "operand":1,
+                         "operator":"<",
+                         "property":"peopleCount"
+                       },
+                       "predicted_value":"OFF"
+                     },
+                     {
+                       "confidence":0.8630361557006836,
+                       "decision_rule":{
+                         "operand":1,
+                         "operator":">=",
+                         "property":"peopleCount"
+                       },
+                       "predicted_value":"ON"
+                     }
+                   ],
+                   "decision_rule":{
+                     "operand":[
+                       20.666666,
+                       5
+                     ],
+                     "operator":"[in[",
+                     "property":"timeOfDay"
+                   }
+                 }
+               ],
+               "decision_rule":{
+                 "operand":[
+                   5.6666665,
+                   5
+                 ],
+                 "operator":"[in[",
+                 "property":"timeOfDay"
+               }
+             }
+           ]
+         }
+       },
+       "configuration":{
+         "time_quantum":600,
+         "learning_period":9000000,
+         "context":{
+           "peopleCount":{
+             "type":"continuous"
+           },
+           "timeOfDay":{
+             "type":"time_of_day",
+             "is_generated":True
+           },
+           "timezone":{
+             "type":"timezone"
+           },
+           "lightbulbState":{
+             "type":"enum"
+           }
+         },
+         "output":[
+           "lightbulbState"
+         ]
+       }
+     }
+   """
 
 Try to retrieve the tree at different timestamps to see how it gradually
 learns from the new operations. To visualize the trees, use the
 `inspector <https://beta.craft.ai/inspector>`__!
 
-*For further information, check the `'compute decision tree' reference
-documentation <#compute>`__.*
+*For further information, check the*\ `'compute decision tree' reference
+documentation <#compute>`__\ *.*
 
 6 - Take a decision
 ~~~~~~~~~~~~~~~~~~~
@@ -411,34 +402,34 @@ the room ?".
 
 .. code:: python
 
-    agent_id = "my_first_agent"
+   agent_id = "my_first_agent"
 
-    client.delete_agent(agent_id)
-    print("Agent", agent_id, "no longer exists")
+   client.delete_agent(agent_id)
+   print("Agent", agent_id, "no longer exists")
 
-    configuration = ...
-    agent = client.create_agent(configuration, agent_id)
-    print("Agent", agent["id"], "has successfully been created")
+   configuration = ...
+   agent = client.create_agent(configuration, agent_id)
+   print("Agent", agent["id"], "has successfully been created")
 
-    context_list = ...
-    client.add_operations(agent_id, context_list)
-    print("Successfully added initial operations to agent", agent_id, "!")
+   context_list = ...
+   client.add_operations(agent_id, context_list)
+   print("Successfully added initial operations to agent", agent_id, "!")
 
-    dt_timestamp = 1469476800
-    decision_tree = client.get_decision_tree(agent_id, dt_timestamp)
-    print("The decision tree at timestamp", dt_timestamp, "is the following:")
-    print(decision_tree)
+   dt_timestamp = 1469476800
+   decision_tree = client.get_decision_tree(agent_id, dt_timestamp)
+   print("The decision tree at timestamp", dt_timestamp, "is the following:")
+   print(decision_tree)
 
-    context = {
-      "timezone": "+02:00",
-      "timeOfDay": 7.25,
-      "peopleCount": 2
-    }
-    resp = client.decide(decision_tree, context)
-    print("The anticipated lightbulb state is:", resp["output"]["lightbulbState"]["predicted_value"])
+   context = {
+     "timezone": "+02:00",
+     "timeOfDay": 7.25,
+     "peopleCount": 2
+   }
+   resp = client.decide(decision_tree, context)
+   print("The anticipated lightbulb state is:", resp["output"]["lightbulbState"]["predicted_value"])
 
-*For further information, check the `'take decision' reference
-documentation <#take-decision>`__.*
+*For further information, check the*\ `'take decision' reference
+documentation <#take-decision>`__\ *.*
 
 Python starter kit
 ~~~~~~~~~~~~~~~~~~
@@ -448,8 +439,8 @@ Python starter kit can get you there! Retrieve the sources locally and
 follow the "readme" to get a fully working **Wellness Coach** example
 using *real-world* data.
 
-    `📦 *Get the **craft ai** Python Starter
-    Kit* <https://github.com/craft-ai/craft-ai-starterkit-python>`__
+   `📦 Get the\ craft ai\ Python Starter
+   Kit <https://github.com/craft-ai/craft-ai-starterkit-python>`__
 
 API
 ---
@@ -471,7 +462,9 @@ Each agent has a configuration defining:
 -  the output properties, i.e. the list of property keys on which the
    agent takes decisions,
 
-    ⚠️ In the current version, only one output property can be provided.
+..
+
+   ⚠️ In the current version, only one output property can be provided.
 
 -  the ``time_quantum``, i.e. the minimum amount of time, in seconds,
    that is meaningful for an agent; context updates occurring faster
@@ -483,16 +476,16 @@ Each agent has a configuration defining:
    context that is older than this duration. You should generally choose
    the smallest value that fits this description.
 
-    ⚠️ if no time_quantum is specified, the default value is 600.
+..
+
+   ⚠️ if no time_quantum is specified, the default value is 600.
+
+   ⚠️ if no learning_period is specified, the default value is 15000
+   time quantums.
 
 ..
 
-    ⚠️ if no learning_period is specified, the default value is 15000
-    time quantums.
-
-..
-
-    ⚠️ the maximum learning_period value is 750000 \* time_quantum.
+   ⚠️ the maximum learning_period value is 750000 \* time_quantum.
 
 Context properties types
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -505,8 +498,10 @@ Base types: ``enum`` and ``continuous``
 -  an ``enum`` property is a string;
 -  a ``continuous`` property is a real number.
 
-    ⚠️ the absolute value of a ``continuous`` property must be less than
-    1020.
+..
+
+   ⚠️ the absolute value of a ``continuous`` property must be less than
+   1020.
 
 Time types: ``timezone``, ``time_of_day``, ``day_of_week``, ``day_of_month`` and ``month_of_year``
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -566,19 +561,21 @@ Time types: ``timezone``, ``time_of_day``, ``day_of_week``, ``day_of_month`` and
    -  **ACDT** Australian Central Daylight Time, as UTC+10.5,
    -  **AWST** Australian Western Standard Time, as UTC+8.
 
-    ℹ️ By default, the values of the ``time_of_day`` and ``day_of_week``
-    properties are generated from the ```timestamp`` <#timestamp>`__ of
-    an agent's state and the agent's current ``timezone``. Therefore,
-    whenever you use generated ``time_of_day`` and/or ``day_of_week`` in
-    your configuration, you **must** provide a ``timezone`` value in the
-    context. There can only be one ``timezone`` property.
+..
 
-    If you wish to provide their values manually, add
-    ``is_generated: false`` to the time types properties in your
-    configuration. In this case, since you provide the values, the
-    ``timezone`` property is not required, and you must update the
-    context whenever one of these time values changes in a way that is
-    significant for your system.
+   ℹ️ By default, the values of the ``time_of_day`` and ``day_of_week``
+   properties are generated from the ```timestamp`` <#timestamp>`__ of
+   an agent's state and the agent's current ``timezone``. Therefore,
+   whenever you use generated ``time_of_day`` and/or ``day_of_week`` in
+   your configuration, you **must** provide a ``timezone`` value in the
+   context. There can only be one ``timezone`` property.
+
+   If you wish to provide their values manually, add
+   ``is_generated: false`` to the time types properties in your
+   configuration. In this case, since you provide the values, the
+   ``timezone`` property is not required, and you must update the
+   context whenever one of these time values changes in a way that is
+   significant for your system.
 
 Examples
 ''''''''
@@ -604,28 +601,28 @@ ignored when learning the decision model.
 
 .. code:: json
 
-    {
-      "context": {
-          "lightIntensity":  {
-            "type": "continuous"
-          },
-          "time": {
-            "type": "time_of_day"
-          },
-          "day": {
-            "type": "day_of_week"
-          },
-          "timezone": {
-            "type": "timezone"
-          },
-          "lightbulbColor": {
-              "type": "enum"
-          }
-      },
-      "output": ["lightbulbColor"],
-      "time_quantum": 100,
-      "learning_period": 108000
-    }
+   {
+     "context": {
+         "lightIntensity":  {
+           "type": "continuous"
+         },
+         "time": {
+           "type": "time_of_day"
+         },
+         "day": {
+           "type": "day_of_week"
+         },
+         "timezone": {
+           "type": "timezone"
+         },
+         "lightbulbColor": {
+             "type": "enum"
+         }
+     },
+     "output": ["lightbulbColor"],
+     "time_quantum": 100,
+     "learning_period": 108000
+   }
 
 In this second example, the ``time`` property is not generated, no
 property of type ``timezone`` is therefore needed. However values of
@@ -633,23 +630,23 @@ property of type ``timezone`` is therefore needed. However values of
 
 .. code:: json
 
-    {
-      "context": {
-        "time": {
-          "type": "time_of_day",
-          "is_generated": false
-        },
-        "lightIntensity":  {
-            "type": "continuous"
-        },
-        "lightbulbColor": {
-            "type": "enum"
-        }
-      },
-      "output": ["lightbulbColor"],
-      "time_quantum": 100,
-      "learning_period": 108000
-    }
+   {
+     "context": {
+       "time": {
+         "type": "time_of_day",
+         "is_generated": false
+       },
+       "lightIntensity":  {
+           "type": "continuous"
+       },
+       "lightbulbColor": {
+           "type": "enum"
+       }
+     },
+     "output": ["lightbulbColor"],
+     "time_quantum": 100,
+     "learning_period": 108000
+   }
 
 Timestamp
 ~~~~~~~~~
@@ -659,9 +656,9 @@ instant represented as a `Unix
 time <https://en.wikipedia.org/wiki/Unix_time>`__, that is to say the
 amount of seconds elapsed since Thursday, 1 January 1970 at midnight
 UTC. In most programming languages this representation is easy to
-retrieve, you can refer to `**this
-page** <https://github.com/techgaun/unix-time/blob/master/README.md>`__
-to find out how.
+retrieve, you can refer to `this
+page <https://github.com/techgaun/unix-time/blob/master/README.md>`__ to
+find out how.
 
 ``craftai.Time``
 ^^^^^^^^^^^^^^^^
@@ -673,45 +670,45 @@ from various *datetime* representations, thanks to
 
 .. code:: python
 
-    # From a unix timestamp and an explicit UTC offset
-    t1 = craftai.Time(1465496929, "+10:00")
+   # From a unix timestamp and an explicit UTC offset
+   t1 = craftai.Time(1465496929, "+10:00")
 
-    # t1 == {
-    #   utc: "2016-06-09T18:28:49.000Z",
-    #   timestamp: 1465496929,
-    #   day_of_week: 4,
-    #   time_of_day: 4.480277777777778,
-    #   timezone: "+10:00"
-    # }
+   # t1 == {
+   #   utc: "2016-06-09T18:28:49.000Z",
+   #   timestamp: 1465496929,
+   #   day_of_week: 4,
+   #   time_of_day: 4.480277777777778,
+   #   timezone: "+10:00"
+   # }
 
-    # From a unix timestamp and using the local UTC offset.
-    t2 = craftai.Time(1465496929)
+   # From a unix timestamp and using the local UTC offset.
+   t2 = craftai.Time(1465496929)
 
-    # Value are valid if in Paris !
-    # t2 == {
-    #   utc: "2016-06-09T18:28:49.000Z",
-    #   timestamp: 1465496929,
-    #   day_of_week: 3,
-    #   time_of_day: 20.480277777777776,
-    #   timezone: "+02:00"
-    # }
+   # Value are valid if in Paris !
+   # t2 == {
+   #   utc: "2016-06-09T18:28:49.000Z",
+   #   timestamp: 1465496929,
+   #   day_of_week: 3,
+   #   time_of_day: 20.480277777777776,
+   #   timezone: "+02:00"
+   # }
 
-    # From a ISO 8601 string. Note that here it should not have any ":" in the timezone part
-    t3 = craftai.Time("1977-04-22T01:00:00-0500")
+   # From a ISO 8601 string. Note that here it should not have any ":" in the timezone part
+   t3 = craftai.Time("1977-04-22T01:00:00-0500")
 
-    # t3 == {
-    #   utc: "1977-04-22T06:00:00.000Z",
-    #   timestamp: 230536800,
-    #   day_of_week: 4,
-    #   time_of_day: 1,
-    #   timezone: "-05:00"
-    # }
+   # t3 == {
+   #   utc: "1977-04-22T06:00:00.000Z",
+   #   timestamp: 230536800,
+   #   day_of_week: 4,
+   #   time_of_day: 1,
+   #   timezone: "-05:00"
+   # }
 
-    # Retrieve the current time with the local UTC offset
-    now = craftai.Time()
+   # Retrieve the current time with the local UTC offset
+   now = craftai.Time()
 
-    # Retrieve the current time with the given UTC offset
-    nowP5 = craftai.Time(timezone="+05:00")
+   # Retrieve the current time with the given UTC offset
+   nowP5 = craftai.Time(timezone="+05:00")
 
 Advanced configuration
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -719,22 +716,22 @@ Advanced configuration
 The following **advanced** configuration parameters can be set in
 specific cases. They are **optional**. Usually you would not need them.
 
--  ``operations_as_events`` is a boolean, either ``true`` or ``false``.
-   The default value is ``false``. If it is set to true, all context
-   operations are treated as events, as opposed to context updates. This
-   is appropriate if the data for an agent is made of events that have
-   no duration, and if many events are more significant than a few. If
-   ``operations_as_events`` is ``true``, ``learning_period`` and the
-   advanced parameter ``tree_max_operations`` must be set as well. In
-   that case, ``time_quantum`` is ignored because events have no
-   duration, as opposed to the evolution of an agent's context over
-   time.
--  ``tree_max_operations`` is a positive integer. It **can and must** be
-   set only if ``operations_as_events`` is ``true``. It defines the
-   maximum number of events on which a single decision tree can be
-   based. It is complementary to ``learning_period``, which limits the
-   maximum age of events on which a decision tree is based.
--  ``tree_max_depth`` is a positive integer. It defines the maximum
+-  **``operations_as_events``** is a boolean, either ``true`` or
+   ``false``. The default value is ``false``. If it is set to true, all
+   context operations are treated as events, as opposed to context
+   updates. This is appropriate if the data for an agent is made of
+   events that have no duration, and if many events are more significant
+   than a few. If ``operations_as_events`` is ``true``,
+   ``learning_period`` and the advanced parameter
+   ``tree_max_operations`` must be set as well. In that case,
+   ``time_quantum`` is ignored because events have no duration, as
+   opposed to the evolution of an agent's context over time.
+-  **``tree_max_operations``** is a positive integer. It **can and
+   must** be set only if ``operations_as_events`` is ``true``. It
+   defines the maximum number of events on which a single decision tree
+   can be based. It is complementary to ``learning_period``, which
+   limits the maximum age of events on which a decision tree is based.
+-  **``tree_max_depth``** is a positive integer. It defines the maximum
    depth of decision trees, which is the maximum distance between the
    root node and a leaf (terminal) node. A depth of 0 means that the
    tree is made of a single root node. By default, ``tree_max_depth`` is
@@ -754,61 +751,61 @@ Create
 
 Create a new agent, and create its `configuration <#configuration>`__.
 
-    The agent's identifier is a case sensitive string between 1 and 36
-    characters long. It only accepts letters, digits, hyphen-minuses and
-    underscores (i.e. the regular expression ``/[a-zA-Z0-9_-]{1,36}/``).
+   The agent's identifier is a case sensitive string between 1 and 36
+   characters long. It only accepts letters, digits, hyphen-minuses and
+   underscores (i.e. the regular expression ``/[a-zA-Z0-9_-]{1,36}/``).
 
 .. code:: python
 
-    client.create_agent(
-      { # The configuration
-        "context": {
-          "peopleCount": {
-            "type": "continuous"
-          },
-          "timeOfDay": {
-            "type": "time_of_day"
-          },
-          "timezone": {
-            "type": "timezone"
-          },
-          "lightbulbState": {
-            "type": "enum"
-          }
-        },
-        "output": [ "lightbulbState" ],
-        "time_quantum": 100,
-        "learning_period": 108000
-      },
-      "impervious_kraken" # id for the agent, if undefined a random id is generated
-    )
+   client.create_agent(
+     { # The configuration
+       "context": {
+         "peopleCount": {
+           "type": "continuous"
+         },
+         "timeOfDay": {
+           "type": "time_of_day"
+         },
+         "timezone": {
+           "type": "timezone"
+         },
+         "lightbulbState": {
+           "type": "enum"
+         }
+       },
+       "output": [ "lightbulbState" ],
+       "time_quantum": 100,
+       "learning_period": 108000
+     },
+     "my_new_agent" # id for the agent, if undefined a random id is generated
+   )
 
 Delete
 ^^^^^^
 
 .. code:: python
 
-    client.delete_agent(
-      "impervious_kraken" # The agent id
-    )
+   client.delete_agent(
+     "my_new_agent" # The agent id
+   )
 
 Retrieve
 ^^^^^^^^
 
 .. code:: python
 
-    client.get_agent(
-      "impervious_kraken" # The agent id
-    )
+   client.get_agent(
+     "my_new_agent" # The agent id
+   )
 
 List
 ^^^^
 
 .. code:: python
 
-    client.list_agents()
-    # Return a list of agents' name
-    # Example: [ "impervious_kraken", "joyful_octopus", ... ]
+   client.list_agents()
+   # Return a list of agents' name
+   # Example: [ "my_new_agent", "joyful_octopus", ... ]
 
 Create and retrieve shared url
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -818,10 +815,10 @@ be created at a time.
 
 .. code:: python
 
-    client.get_shared_agent_inspector_url(
-      "impervious_kraken", # The agent id.
-      1464600256 # optional, the timestamp for which you want to inspect the tree.
-    )
+   client.get_shared_agent_inspector_url(
+     "my_new_agent", # The agent id.
+     1464600256 # optional, the timestamp for which you want to inspect the tree.
+   )
 
 Delete shared url
 ^^^^^^^^^^^^^^^^^
@@ -831,9 +828,9 @@ anymore.
 
 .. code:: python
 
-    client.delete_shared_agent_inspector_url(
-      'impervious_kraken' # The agent id.
-    )
+   client.delete_shared_agent_inspector_url(
+     'my_new_agent' # The agent id.
+   )
 
 Context
 ~~~~~~~
@@ -843,104 +840,104 @@ Add operations
 
 .. code:: python
 
-    client.add_operations(
-      "impervious_kraken", # The agent id
-      [ # The list of context operations
-        {
-          "timestamp": 1469410200,
-          "context": {
-            "timezone": "+02:00",
-            "peopleCount": 0,
-            "lightbulbState": "OFF"
-          }
-        },
-        {
-          "timestamp": 1469415720,
-          "context": {
-            "peopleCount": 1,
-            "lightbulbState": "ON"
-          }
-        },
-        {
-          "timestamp": 1469416500,
-          "context": {
-            "peopleCount": 2
-          }
-        },
-        {
-          "timestamp": 1469417460,
-          "context": {
-            "lightbulbState": "OFF"
-          }
-        },
-        {
-          "timestamp": 1469419920,
-          "context": {
-            "peopleCount": 0
-          }
-        },
-        {
-          "timestamp": 1469460180,
-          "context": {
-            "peopleCount": 2
-          }
-        },
-        {
-          "timestamp": 1469471700,
-          "context": {
-            "lightbulbState": "ON"
-          }
-        },
-        {
-          "timestamp": 1469473560,
-          "context": {
-            "peopleCount": 0,
-            "lightbulbState": "OFF"
-          }
-        }
-      ]
-    )
+   client.add_operations(
+     "my_new_agent", # The agent id
+     [ # The list of context operations
+       {
+         "timestamp": 1469410200,
+         "context": {
+           "timezone": "+02:00",
+           "peopleCount": 0,
+           "lightbulbState": "OFF"
+         }
+       },
+       {
+         "timestamp": 1469415720,
+         "context": {
+           "peopleCount": 1,
+           "lightbulbState": "ON"
+         }
+       },
+       {
+         "timestamp": 1469416500,
+         "context": {
+           "peopleCount": 2
+         }
+       },
+       {
+         "timestamp": 1469417460,
+         "context": {
+           "lightbulbState": "OFF"
+         }
+       },
+       {
+         "timestamp": 1469419920,
+         "context": {
+           "peopleCount": 0
+         }
+       },
+       {
+         "timestamp": 1469460180,
+         "context": {
+           "peopleCount": 2
+         }
+       },
+       {
+         "timestamp": 1469471700,
+         "context": {
+           "lightbulbState": "ON"
+         }
+       },
+       {
+         "timestamp": 1469473560,
+         "context": {
+           "peopleCount": 0,
+           "lightbulbState": "OFF"
+         }
+       }
+     ]
+   )
 
 List operations
 ^^^^^^^^^^^^^^^
 
 .. code:: python
 
-    client.get_operations_list(
-      "impervious_kraken", # The agent id
-      1478894153, # Optional, the **start** timestamp from which the
-                  # operations are retrieved (inclusive bound)
-      1478895266, # Optional, the **end** timestamp up to which the
-                  # operations are retrieved (inclusive bound)
-    )
+   client.get_operations_list(
+     "my_new_agent", # The agent id
+     1478894153, # Optional, the **start** timestamp from which the
+                 # operations are retrieved (inclusive bound)
+     1478895266, # Optional, the **end** timestamp up to which the
+                 # operations are retrieved (inclusive bound)
+   )
 
 ..
 
-    This call can generate multiple requests to the craft ai API as
-    results are paginated.
+   This call can generate multiple requests to the craft ai API as
+   results are paginated.
 
 Retrieve state
 ^^^^^^^^^^^^^^
 
 .. code:: python
 
-    client.get_context_state(
-      "impervious_kraken", # The agent id
-      1469473600 # The timestamp at which the context state is retrieved
-    )
+   client.get_context_state(
+     "my_new_agent", # The agent id
+     1469473600 # The timestamp at which the context state is retrieved
+   )
 
 Retrieve state history
 ^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
-    client.get_state_history(
-      "impervious_kraken", # The agent id
-      1478894153, # Optional, the **start** timestamp from which the
-                  # operations are retrieved (inclusive bound)
-      1478895266, # Optional, the **end** timestamp up to which the
-                  # operations are retrieved (inclusive bound)
-    )
+   client.get_state_history(
+     "my_new_agent", # The agent id
+     1478894153, # Optional, the **start** timestamp from which the
+                 # operations are retrieved (inclusive bound)
+     1478895266, # Optional, the **end** timestamp up to which the
+                 # operations are retrieved (inclusive bound)
+   )
 
 Decision tree
 ~~~~~~~~~~~~~
@@ -976,101 +973,219 @@ Compute
 
 .. code:: python
 
-    client.get_decision_tree(
-      "impervious_kraken", # The agent id
-      1469473600 # The timestamp at which the decision tree is retrieved
-    )
+   client.get_decision_tree(
+     "my_new_agent", # The agent id
+     1469473600 # The timestamp at which the decision tree is retrieved
+   )
 
 Take decision
 ^^^^^^^^^^^^^
 
-To get a chance to store and reuse the decision tree, use
-``get_decision_tree`` and use ``decide``, a simple function evaluating a
-decision tree offline.
+   ℹ️ To take a decision, first compute the decision tree then use the
+   **offline interpreter**.
+
+Advanced client configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The simple configuration to create the ``client`` is just the token. For
+special needs, additional advanced configuration can be provided.
+
+Amount of operations sent in one chunk
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``client.add_operations`` splits the provided operations into chunks in
+order to limit the size of the http requests to the craft ai API. In the
+client configuration, ``operationsChunksSize`` can be increased in order
+to limit the number of request, or decreased when large http requests
+cause errors.
 
 .. code:: python
 
-    tree = { ... } # Decision tree as retrieved through the craft ai REST API
+   client = craftai.Client({
+       # Mandatory, the token
+       "token": "{token}",
+       # Optional, default value is 200
+       "operationsChunksSize": {max_number_of_operations_sent_at_once}
+   })
 
-    # Compute the decision on a fully described context
-    decision = client.decide(
-      tree,
-      { # The context on which the decision is taken
-        "timezone": "+02:00",
-        "timeOfDay": 7.5,
-        "peopleCount": 3
-      }
-    )
+Timeout duration for decision trees retrieval
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    # Or Compute the decision on a context created from the given one and filling the
-    # `day_of_week`, `time_of_day` and `timezone` properties from the given `Time`
+It is possible to increase or decrease the timeout duration of
+``client.get_decision_tree``, for exemple to account for especially long
+computations.
 
-    decision = client.decide(
-      tree,
-      {
-        "timezone": "+02:00",
-        "peopleCount": 3
-      },
-      craftai.Time("2010-01-01T07:30:30+0200")
-    )
+.. code:: python
+
+   client = craftai.Client({
+       # Mandatory, the token
+       "token": "{token}",
+       # Optional, default value is 5 minutes (300000)
+       ": {timeout_duration_for_decision_trees_retrieval}
+   })
+
+Proxy
+^^^^^
+
+It is possible to provide proxy configuration in the ``proxy`` property
+of the client configuration. It will be used to call the craft ai API
+(through HTTPS). The expected format is a host name or IP and port,
+optionally preceded by credentials such as
+``http://user:pass@10.10.1.10:1080``.
+
+.. code:: python
+
+   client = craftai.Client({
+       # Mandatory, the token
+       "token": "{token}",
+       # Optional, no default value
+       "proxy": "http://{user}:{password}@{host_or_ip}:{port}"
+   })
+
+Advanced network configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more advanced network configuration, it is possible to access the
+`Requests
+Session <http://docs.python-requests.org/en/master/user/advanced/#session-objects>`__
+used by the client to send requests to the craft ai API, through
+``client._requests_session``.
+
+.. code:: python
+
+   # Disable SSL certificate verification
+   client._requests_session.verify = False
+
+Interpreter
+-----------
+
+The decision tree interpreter can be used offline from decisions tree
+computed through the API.
+
+Take decision
+~~~~~~~~~~~~~
+
+.. code:: python
+
+   tree = { ... } # Decision tree as retrieved through the craft ai REST API
+
+   # Compute the decision on a fully described context
+   decision = craftai.Interpreter.decide(
+     tree,
+     { # The context on which the decision is taken
+       "timezone": "+02:00",
+       "timeOfDay": 7.5,
+       "peopleCount": 3
+     }
+   )
+
+   # Or Compute the decision on a context created from the given one and filling the
+   # `day_of_week`, `time_of_day` and `timezone` properties from the given `Time`
+
+   decision = craftai.Interpreter.decide(
+     tree,
+     {
+       "timezone": "+02:00",
+       "peopleCount": 3
+     },
+     craftai.Time("2010-01-01T07:30:30+0200")
+   )
 
 A computed ``decision`` on an ``enum`` output type would look like:
 
 .. code:: python
 
-    {
-      "context": { # In which context the decision was taken
-        "timezone": "+02:00",
-        "timeOfDay": 7.5,
-        "peopleCount": 3
-      },
-      "output": { # The decision itself
-        "lightbulbState": {
-          "predicted_value": "ON"
-          "confidence": 0.9937745256361138, # The confidence in the decision
-          "decision_rules": [ # The ordered list of decision_rules that were validated to reach this decision
-            {
-              "property": "timeOfDay",
-              "operator": ">=",
-              "operand": 6
-            },
-            {
-              "property": "peopleCount",
-              "operator": ">=",
-              "operand": 2
-            }
-          ]
-        },
-      }
-    }
+   {
+     "context": { # In which context the decision was taken
+       "timezone": "+02:00",
+       "timeOfDay": 7.5,
+       "peopleCount": 3
+     },
+     "output": { # The decision itself
+       "lightbulbState": {
+         "predicted_value": "ON"
+         "confidence": 0.9937745256361138, # The confidence in the decision
+         "decision_rules": [ # The ordered list of decision_rules that were validated to reach this decision
+           {
+             "property": "timeOfDay",
+             "operator": ">=",
+             "operand": 6
+           },
+           {
+             "property": "peopleCount",
+             "operator": ">=",
+             "operand": 2
+           }
+         ]
+       },
+     }
+   }
 
 A ``decision`` for a numerical output type would look like:
 
 .. code:: python
 
-      "output": {
-        "lightbulbIntensity": {
-          "predicted_value": 10.5,
-          "standard_deviation": 1.25, // For numerical types, this field is returned in decisions.
-          "decision_rules": [ ... ],
-          "confidence": ...
-        }
-      }
+     "output": {
+       "lightbulbIntensity": {
+         "predicted_value": 10.5,
+         "standard_deviation": 1.25, // For numerical types, this field is returned in decisions.
+         "decision_rules": [ ... ],
+         "confidence": ...
+       }
+     }
 
 A ``decision`` in a case where the tree cannot make a prediction:
 
 .. code:: python
 
-      "output": {
-        "lightbulbState": {
-          "predicted_value": None,
-          "confidence": 0 // Zero confidence if the decision is null
-          "decision_rules": [ ... ]
-        }
-      }
+     "output": {
+       "lightbulbState": {
+         "predicted_value": None,
+         "confidence": 0 // Zero confidence if the decision is null
+         "decision_rules": [ ... ]
+       }
+     }
+
+Reduce decision rules
+~~~~~~~~~~~~~~~~~~~~~
+
+From a list of decision rules, as retrieved when taking a decision, when
+taking a decision compute an equivalent & minimal list of rules.
+
+.. code:: python
+
+   from craftai import reduce_decision_rules
+
+   # `decision` is the decision tree as retrieved from taking a decision
+   decision = craftai.Interpreter.decide( ... )
+
+   # `decision_rules` is the decision rules that led to decision for the `lightBulbState` value
+   decision_rules = decision["output"]["lightBulbState"]["decision_rules"]
+
+   # `minimal_decision_rules` has the mininum list of rules strictly equivalent to `decision_rules`
+   minimal_decision_rules = reduce_decision_rules(decisionRules)
+
+Format decision rules
+~~~~~~~~~~~~~~~~~~~~~
+
+From a list of decision rules, compute a *human readable* version of
+these rules, in english.
+
+.. code:: python
+
+   from craftai import reduce_decision_rules
+
+   # `decision` is the decision tree as retrieved from taking a decision
+   decision = craftai.Interpreter.decide( ... )
+
+   # `decision_rules` is the decision rules that led to decision for the `lightBulbState` value
+   decision_rules = decision["output"]["lightBulbState"]["decision_rules"]
+
+   # // `decision_rules_str` is a human readable string representation of the rules.
+   decision_rules_str = format_decision_rules(decisionRules)
 
 Error Handling
-~~~~~~~~~~~~~~
+--------------
 
 When using this client, you should be careful wrapping calls to the API
 with ``try/except`` blocks, in accordance with the
@@ -1089,7 +1204,7 @@ The ``decide`` method only raises ``CrafAIDecisionError`` of
 when no the given context is valid but no decision can be taken.
 
 Pandas support
-~~~~~~~~~~~~~~
+--------------
 
 The craft ai python client optionally supports
 `pandas <http://pandas.pydata.org/>`__ a very popular library used for
@@ -1100,11 +1215,11 @@ following
 
 .. code:: python
 
-    import craftai.pandas
+   import craftai.pandas
 
-    # Most of the time you'll need the following
-    import numpy as np
-    import pandas as pd
+   # Most of the time you'll need the following
+   import numpy as np
+   import pandas as pd
 
 The craft ai pandas module is derived for the *vanilla* one, with the
 following methods are overriden to support pandas'
@@ -1117,24 +1232,25 @@ Retrieves the desired operations as a ``DataFrame`` where:
 
 -  each operation is a row,
 -  each context property is a column,
--  the index is `*time
-   based* <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`__
-   matching the operations timestamps,
+-  the index is `time
+   based <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`__,
+   `timezone-aware <https://pandas.pydata.org/pandas-docs/stable/timeseries.html#working-with-time-zones>`__
+   and matching the operations timestamps,
 -  ``np.NaN`` means no value were given at this property for this
    timestamp.
 
 .. code:: python
 
-    df = client.get_operations_list("impervious_kraken")
+   df = client.get_operations_list("my_new_agent")
 
-    # `df` is a pd.DataFrame looking like
-    #
-    #                            peopleCount  lightbulbState   timezone
-    # 2013-01-01 00:00:00+00:00   0            OFF              +02:00
-    # 2013-01-02 00:00:00+00:00   1            ON               NaN
-    # 2013-01-03 00:00:00+00:00   2            NaN              NaN
-    # 2013-01-04 00:00:00+00:00   NaN          OFF              NaN
-    # 2013-01-05 00:00:00+00:00   0            NaN              NaN
+   # `df` is a pd.DataFrame looking like
+   #
+   #                            peopleCount  lightbulbState   timezone
+   # 2013-01-01 00:00:00+00:00   0            OFF              +02:00
+   # 2013-01-02 00:00:00+00:00   1            ON               NaN
+   # 2013-01-03 00:00:00+00:00   2            NaN              NaN
+   # 2013-01-04 00:00:00+00:00   NaN          OFF              NaN
+   # 2013-01-05 00:00:00+00:00   0            NaN              NaN
 
 ``craftai.pandas.Client.add_operations``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1144,18 +1260,18 @@ the same as above.
 
 .. code:: python
 
-    df = pd.DataFrame(
-      [
-        [0, "OFF", "+02:00"],
-        [1, "ON", np.nan],
-        [2, np.nan, np.nan],
-        [np.nan, "OFF", np.nan],
-        [0, np.nan, np.nan]
-      ],
-      columns=['peopleCount', 'lightbulbState', 'timezone'],
-      index=pd.date_range('20130101', periods=5, freq='D').tz_localize("UTC")
-    )
-    client.add_operations("impervious_kraken", df)
+   df = pd.DataFrame(
+     [
+       [0, "OFF", "+02:00"],
+       [1, "ON", np.nan],
+       [2, np.nan, np.nan],
+       [np.nan, "OFF", np.nan],
+       [0, np.nan, np.nan]
+     ],
+     columns=['peopleCount', 'lightbulbState', 'timezone'],
+     index=pd.date_range('20130101', periods=5, freq='D').tz_localize("UTC")
+   )
+   client.add_operations("my_new_agent", df)
 
 Given something that is not a ``DataFrame`` this method behave like the
 *vanilla* ``craftai.Client.add_operations``.
@@ -1167,22 +1283,23 @@ Retrieves the desired state history as a ``DataFrame`` where:
 
 -  each state is a row,
 -  each context property is a column,
--  the index is `*time
-   based* <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`__
-   matching the state timestamps
+-  the index is `time
+   based <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`__,
+   `timezone-aware <https://pandas.pydata.org/pandas-docs/stable/timeseries.html#working-with-time-zones>`__
+   and matching the operations timestamps.
 
 .. code:: python
 
-    df = client.get_state_history("impervious_kraken")
+   df = client.get_state_history("my_new_agent")
 
-    # `df` is a pd.DataFrame looking like
-    #
-    #                            peopleCount  lightbulbState   timezone
-    # 2013-01-01 00:00:00+00:00   0            OFF              +02:00
-    # 2013-01-02 00:00:00+00:00   1            ON               +02:00
-    # 2013-01-03 00:00:00+00:00   2            ON               +02:00
-    # 2013-01-04 00:00:00+00:00   2            OFF              +02:00
-    # 2013-01-05 00:00:00+00:00   0            OFF              +02:00
+   # `df` is a pd.DataFrame looking like
+   #
+   #                            peopleCount  lightbulbState   timezone
+   # 2013-01-01 00:00:00+00:00   0            OFF              +02:00
+   # 2013-01-02 00:00:00+00:00   1            ON               +02:00
+   # 2013-01-03 00:00:00+00:00   2            ON               +02:00
+   # 2013-01-04 00:00:00+00:00   2            OFF              +02:00
+   # 2013-01-05 00:00:00+00:00   0            OFF              +02:00
 
 ``craftai.pandas.Client.decide_from_contexts_df``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1192,25 +1309,25 @@ format as above.
 
 .. code:: python
 
-    decisions_df = client.decide_from_contexts_df(tree, pd.DataFrame(
-      [
-        [0, "+02:00"],
-        [1, np.nan],
-        [2, np.nan],
-        [np.nan, np.nan],
-        [0, np.nan]
-      ],
-      columns=['peopleCount', 'timezone'],
-      index=pd.date_range('20130101', periods=5, freq='D').tz_localize("UTC")
-    ))
-    # `decisions_df` is a pd.DataFrame looking like
-    #
-    #                            lightbulbState_predicted_value   lightbulbState_confidence  ...
-    # 2013-01-01 00:00:00+00:00   OFF                              0.999449                  ...
-    # 2013-01-02 00:00:00+00:00   ON                               0.970325                  ...
-    # 2013-01-03 00:00:00+00:00   ON                               0.970325                  ...
-    # 2013-01-04 00:00:00+00:00   ON                               0.970325                  ...
-    # 2013-01-05 00:00:00+00:00   OFF                              0.999449                  ...
+   decisions_df = client.decide_from_contexts_df(tree, pd.DataFrame(
+     [
+       [0, "+02:00"],
+       [1, np.nan],
+       [2, np.nan],
+       [np.nan, np.nan],
+       [0, np.nan]
+     ],
+     columns=['peopleCount', 'timezone'],
+     index=pd.date_range('20130101', periods=5, freq='D').tz_localize("UTC")
+   ))
+   # `decisions_df` is a pd.DataFrame looking like
+   #
+   #                            lightbulbState_predicted_value   lightbulbState_confidence  ...
+   # 2013-01-01 00:00:00+00:00   OFF                              0.999449                  ...
+   # 2013-01-02 00:00:00+00:00   ON                               0.970325                  ...
+   # 2013-01-03 00:00:00+00:00   ON                               0.970325                  ...
+   # 2013-01-04 00:00:00+00:00   ON                               0.970325                  ...
+   # 2013-01-05 00:00:00+00:00   OFF                              0.999449                  ...
 
 This function never raises ``CraftAiNullDecisionError``, instead it
 inserts these errors in the result ``Dataframe`` in a specific ``error``

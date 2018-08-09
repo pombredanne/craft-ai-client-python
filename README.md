@@ -27,6 +27,8 @@ Let's first install the package from pip.
 ```sh
 pip install --upgrade craft-ai
 ```
+_Depending on your setup you may need to use `pip3` or `pipenv` instead of `pip`._
+
 Then import it in your code
 
 ```python
@@ -37,20 +39,9 @@ import craftai
 #### Initialize ####
 
 ```python
-config = {
-    "token": "{token}"
-}
-client = craftai.Client(config)
-```
-
-It is possible to provide proxy settings in the `proxy` property of the client configuration. They will be used to call the craft ai API (through HTTPS for craft ai APIs exposed on the Internet). The expected format is a host name or IP and port, optionally preceded by credentials, as in [Requests](http://docs.python-requests.org/en/master/user/advanced/#proxies) `proxies` configurations.
-
-```python
-config = {
-    "token": "{token}"
-    "proxy": "http://user:pass@10.10.1.10:1080"
-}
-client = craftai.Client(config)
+client = craftai.Client({
+  "token": "{token}"
+})
 ```
 
 ### 3 - Create an agent ###
@@ -65,6 +56,8 @@ In this example, we will create an agent that learns the **decision model** of a
 - `timeOfDay` which is a `time_of_day` property,
 - `timezone`, a property of type `timezone` needed to generate proper values for `timeOfDay` (cf. the [context properties type section](#context-properties-types) for further information),
 - and finally `lightbulbState` which is an `enum` property that is also the output.
+
+> :information_source: `timeOfDay` is auto-generated, you will find more information below.
 
 ```python
 agent_id = "my_first_agent"
@@ -418,15 +411,11 @@ Each agent has a configuration defining:
 
 **craft ai** defines the following types related to time:
 
-- a `time_of_day` property is a real number belonging to **[0.0; 24.0[**, each value represents the number of hours in the day since midnight (e.g. 13.5 means
-13:30),
-- a `day_of_week` property is an integer belonging to **[0, 6]**, each
-value represents a day of the week starting from Monday (0 is Monday, 6 is
-Sunday).
+- a `time_of_day` property is a real number belonging to **[0.0; 24.0[**, each value represents the number of hours in the day since midnight (e.g. 13.5 means 13:30),
+- a `day_of_week` property is an integer belonging to **[0, 6]**, each value represents a day of the week starting from Monday (0 is Monday, 6 is Sunday).
 - a `day_of_month` property is an integer belonging to **[1, 31]**, each value represents a day of the month.
 - a `month_of_year` property is an integer belonging to **[1, 12]**, each value represents a month of the year.
-- a `timezone` property is a string value representing the timezone as an
-offset from UTC, supported format are:
+- a `timezone` property is a string value representing the timezone as an offset from UTC, supported format are:
   - **±[hh]:[mm]**,
   - **±[hh][mm]**,
   - **±[hh]**,
@@ -601,9 +590,9 @@ nowP5 = craftai.Time(timezone="+05:00")
 
 The following **advanced** configuration parameters can be set in specific cases. They are **optional**. Usually you would not need them.
 
-- `operations_as_events` is a boolean, either `true` or `false`. The default value is `false`. If it is set to true, all context operations are treated as events, as opposed to context updates. This is appropriate if the data for an agent is made of events that have no duration, and if many events are more significant than a few. If `operations_as_events` is `true`, `learning_period` and the advanced parameter `tree_max_operations` must be set as well. In that case, `time_quantum` is ignored because events have no duration, as opposed to the evolution of an agent's context over time.
-- `tree_max_operations` is a positive integer. It **can and must** be set only if `operations_as_events` is `true`. It defines the maximum number of events on which a single decision tree can be based. It is complementary to `learning_period`, which limits the maximum age of events on which a decision tree is based.
-- `tree_max_depth` is a positive integer. It defines the maximum depth of decision trees, which is the maximum distance between the root node and a leaf (terminal) node. A depth of 0 means that the tree is made of a single root node. By default, `tree_max_depth` is set to 6 if the output is categorical (e.g. `enum`), or to 4 if the output is numerical (e.g. `continuous`).
+- **`operations_as_events`** is a boolean, either `true` or `false`. The default value is `false`. If it is set to true, all context operations are treated as events, as opposed to context updates. This is appropriate if the data for an agent is made of events that have no duration, and if many events are more significant than a few. If `operations_as_events` is `true`, `learning_period` and the advanced parameter `tree_max_operations` must be set as well. In that case, `time_quantum` is ignored because events have no duration, as opposed to the evolution of an agent's context over time.
+- **`tree_max_operations`** is a positive integer. It **can and must** be set only if `operations_as_events` is `true`. It defines the maximum number of events on which a single decision tree can be based. It is complementary to `learning_period`, which limits the maximum age of events on which a decision tree is based.
+- **`tree_max_depth`** is a positive integer. It defines the maximum depth of decision trees, which is the maximum distance between the root node and a leaf (terminal) node. A depth of 0 means that the tree is made of a single root node. By default, `tree_max_depth` is set to 6 if the output is categorical (e.g. `enum`), or to 4 if the output is numerical (e.g. `continuous`).
 
 These advanced configuration parameters are optional, and will appear in the agent information returned by **craft ai** only if you set them to something other than their default value. If you intend to use them in a production environment, please get in touch with us.
 
@@ -636,7 +625,7 @@ client.create_agent(
     "time_quantum": 100,
     "learning_period": 108000
   },
-  "impervious_kraken" # id for the agent, if undefined a random id is generated
+  "my_new_agent" # id for the agent, if undefined a random id is generated
 )
 ```
 
@@ -644,7 +633,7 @@ client.create_agent(
 
 ```python
 client.delete_agent(
-  "impervious_kraken" # The agent id
+  "my_new_agent" # The agent id
 )
 ```
 
@@ -652,7 +641,7 @@ client.delete_agent(
 
 ```python
 client.get_agent(
-  "impervious_kraken" # The agent id
+  "my_new_agent" # The agent id
 )
 ```
 
@@ -661,28 +650,30 @@ client.get_agent(
 ```python
 client.list_agents()
 # Return a list of agents' name
-# Example: [ "impervious_kraken", "joyful_octopus", ... ]
+# Example: [ "my_new_agent", "joyful_octopus", ... ]
 
 ```
 
 #### Create and retrieve shared url ####
+
 Create and get a shareable url to view an agent tree.
 Only one url can be created at a time.
 
 ```python
 client.get_shared_agent_inspector_url(
-  "impervious_kraken", # The agent id.
+  "my_new_agent", # The agent id.
   1464600256 # optional, the timestamp for which you want to inspect the tree.
 )
 ```
 
 #### Delete shared url ####
+
 Delete a shareable url.
 The previous url cannot access the agent tree anymore.
 
 ```python
 client.delete_shared_agent_inspector_url(
-  'impervious_kraken' # The agent id.
+  'my_new_agent' # The agent id.
 )
 ```
 
@@ -694,7 +685,7 @@ client.delete_shared_agent_inspector_url(
 
 ```python
 client.add_operations(
-  "impervious_kraken", # The agent id
+  "my_new_agent", # The agent id
   [ # The list of context operations
     {
       "timestamp": 1469410200,
@@ -756,7 +747,7 @@ client.add_operations(
 
 ```python
 client.get_operations_list(
-  "impervious_kraken", # The agent id
+  "my_new_agent", # The agent id
   1478894153, # Optional, the **start** timestamp from which the
               # operations are retrieved (inclusive bound)
   1478895266, # Optional, the **end** timestamp up to which the
@@ -770,7 +761,7 @@ client.get_operations_list(
 
 ```python
 client.get_context_state(
-  "impervious_kraken", # The agent id
+  "my_new_agent", # The agent id
   1469473600 # The timestamp at which the context state is retrieved
 )
 ```
@@ -779,7 +770,7 @@ client.get_context_state(
 
 ```python
 client.get_state_history(
-  "impervious_kraken", # The agent id
+  "my_new_agent", # The agent id
   1478894153, # Optional, the **start** timestamp from which the
               # operations are retrieved (inclusive bound)
   1478895266, # Optional, the **end** timestamp up to which the
@@ -792,32 +783,90 @@ client.get_state_history(
 Decision trees are computed at specific timestamps, directly by **craft ai** which learns from the context operations [added](#add-operations) throughout time.
 
 When you [compute](#compute) a decision tree, **craft ai** returns an object containing:
+
 - the **API version**
 - the agent's configuration as specified during the agent's [creation](#create-agent)
 - the tree itself as a JSON object:
 
-  * Internal nodes are represented by a `"decision_rule"` object and a `"children"` array. The first one, contains the `"property`, and the `"property"`'s value, to decide which child matches a context.
-  * Leaves have a `"predicted_value"`, `"confidence"` and `"decision_rule"` object for this value, instead of a `"children"` array. `"predicted_value`" is an estimation of the output in the contexts matching the node. `"confidence"` is a number between 0 and 1 that indicates how confident **craft ai** is that the output is a reliable prediction.  When the output is a numerical type, leaves also have a `"standard_deviation"` that indicates a margin of error around the `"predicted_value"`.
-  * The root only contains a `"children"` array.
+  - Internal nodes are represented by a `"decision_rule"` object and a `"children"` array. The first one, contains the `"property`, and the `"property"`'s value, to decide which child matches a context.
+  - Leaves have a `"predicted_value"`, `"confidence"` and `"decision_rule"` object for this value, instead of a `"children"` array. `"predicted_value`" is an estimation of the output in the contexts matching the node. `"confidence"` is a number between 0 and 1 that indicates how confident **craft ai** is that the output is a reliable prediction.  When the output is a numerical type, leaves also have a `"standard_deviation"` that indicates a margin of error around the `"predicted_value"`.
+  - The root only contains a `"children"` array.
 
 #### Compute ####
 
 ```python
 client.get_decision_tree(
-  "impervious_kraken", # The agent id
+  "my_new_agent", # The agent id
   1469473600 # The timestamp at which the decision tree is retrieved
 )
 ```
 
 #### Take decision ####
 
-To get a chance to store and reuse the decision tree, use `get_decision_tree` and use `decide`, a simple function evaluating a decision tree offline.
+> :information_source: To take a decision, first compute the decision tree then use the **offline interpreter**.
+
+### Advanced client configuration ###
+
+The simple configuration to create the `client` is just the token. For special needs, additional advanced configuration can be provided.
+
+#### Amount of operations sent in one chunk ####
+
+`client.add_operations` splits the provided operations into chunks in order to limit the size of the http requests to the craft ai API. In the client configuration, `operationsChunksSize` can be increased in order to limit the number of request, or decreased when large http requests cause errors.
+
+```python
+client = craftai.Client({
+    # Mandatory, the token
+    "token": "{token}",
+    # Optional, default value is 200
+    "operationsChunksSize": {max_number_of_operations_sent_at_once}
+})
+```
+
+#### Timeout duration for decision trees retrieval ####
+
+It is possible to increase or decrease the timeout duration of `client.get_decision_tree`, for exemple to account for especially long computations.
+
+```python
+client = craftai.Client({
+    # Mandatory, the token
+    "token": "{token}",
+    # Optional, default value is 5 minutes (300000)
+    ": {timeout_duration_for_decision_trees_retrieval}
+})
+```
+
+#### Proxy ####
+
+It is possible to provide proxy configuration in the `proxy` property of the client configuration. It will be used to call the craft ai API (through HTTPS). The expected format is a host name or IP and port, optionally preceded by credentials such as `http://user:pass@10.10.1.10:1080`.
+
+```python
+client = craftai.Client({
+    # Mandatory, the token
+    "token": "{token}",
+    # Optional, no default value
+    "proxy": "http://{user}:{password}@{host_or_ip}:{port}"
+})
+```
+
+#### Advanced network configuration ####
+
+For more advanced network configuration, it is possible to access the [Requests Session](http://docs.python-requests.org/en/master/user/advanced/#session-objects) used by the client to send requests to the craft ai API, through `client._requests_session`.
+
+```python
+# Disable SSL certificate verification
+client._requests_session.verify = False
+```
+## Interpreter ##
+
+The decision tree interpreter can be used offline from decisions tree computed through the API.
+
+### Take decision ###
 
 ```python
 tree = { ... } # Decision tree as retrieved through the craft ai REST API
 
 # Compute the decision on a fully described context
-decision = client.decide(
+decision = craftai.Interpreter.decide(
   tree,
   { # The context on which the decision is taken
     "timezone": "+02:00",
@@ -829,7 +878,7 @@ decision = client.decide(
 # Or Compute the decision on a context created from the given one and filling the
 # `day_of_week`, `time_of_day` and `timezone` properties from the given `Time`
 
-decision = client.decide(
+decision = craftai.Interpreter.decide(
   tree,
   {
     "timezone": "+02:00",
@@ -894,7 +943,41 @@ A `decision` in a case where the tree cannot make a prediction:
   }
 ```
 
-### Error Handling ###
+### Reduce decision rules ###
+
+From a list of decision rules, as retrieved when taking a decision, when taking a decision compute an equivalent & minimal list of rules.
+
+```python
+from craftai import reduce_decision_rules
+
+# `decision` is the decision tree as retrieved from taking a decision
+decision = craftai.Interpreter.decide( ... )
+
+# `decision_rules` is the decision rules that led to decision for the `lightBulbState` value
+decision_rules = decision["output"]["lightBulbState"]["decision_rules"]
+
+# `minimal_decision_rules` has the mininum list of rules strictly equivalent to `decision_rules`
+minimal_decision_rules = reduce_decision_rules(decisionRules)
+```
+
+### Format decision rules ###
+
+From a list of decision rules, compute a _human readable_ version of these rules, in english.
+
+```python
+from craftai import reduce_decision_rules
+
+# `decision` is the decision tree as retrieved from taking a decision
+decision = craftai.Interpreter.decide( ... )
+
+# `decision_rules` is the decision rules that led to decision for the `lightBulbState` value
+decision_rules = decision["output"]["lightBulbState"]["decision_rules"]
+
+# // `decision_rules_str` is a human readable string representation of the rules.
+decision_rules_str = format_decision_rules(decisionRules)
+```
+
+## Error Handling ##
 
 When using this client, you should be careful wrapping calls to the API with `try/except` blocks, in accordance with the [EAFP](https://docs.python.org/3/glossary.html#term-eafp) principle.
 
@@ -904,7 +987,7 @@ All methods which have to send an http request (all of them except `decide`) may
 
 The `decide` method only raises `CrafAIDecisionError` of `CraftAiNullDecisionError` type of exceptions. The latter is raised when no the given context is valid but no decision can be taken.
 
-### Pandas support ###
+## Pandas support ##
 
 The craft ai python client optionally supports [pandas](http://pandas.pydata.org/) a very popular library used for all things data.
 
@@ -926,11 +1009,11 @@ Retrieves the desired operations as a `DataFrame` where:
 
 - each operation is a row,
 - each context property is a column,
-- the index is [_time based_](https://pandas.pydata.org/pandas-docs/stable/timeseries.html) matching the operations timestamps,
+- the index is [_time based_](https://pandas.pydata.org/pandas-docs/stable/timeseries.html), [timezone-aware](https://pandas.pydata.org/pandas-docs/stable/timeseries.html#working-with-time-zones) and matching the operations timestamps,
 - `np.NaN` means no value were given at this property for this timestamp.
 
 ```python
-df = client.get_operations_list("impervious_kraken")
+df = client.get_operations_list("my_new_agent")
 
 # `df` is a pd.DataFrame looking like
 #
@@ -958,7 +1041,7 @@ df = pd.DataFrame(
   columns=['peopleCount', 'lightbulbState', 'timezone'],
   index=pd.date_range('20130101', periods=5, freq='D').tz_localize("UTC")
 )
-client.add_operations("impervious_kraken", df)
+client.add_operations("my_new_agent", df)
 ```
 
 Given something that is not a `DataFrame` this method behave like the _vanilla_ `craftai.Client.add_operations`.
@@ -969,10 +1052,10 @@ Retrieves the desired state history as a `DataFrame` where:
 
 - each state is a row,
 - each context property is a column,
-- the index is [_time based_](https://pandas.pydata.org/pandas-docs/stable/timeseries.html) matching the state timestamps
+- the index is [_time based_](https://pandas.pydata.org/pandas-docs/stable/timeseries.html), [timezone-aware](https://pandas.pydata.org/pandas-docs/stable/timeseries.html#working-with-time-zones) and matching the operations timestamps.
 
 ```python
-df = client.get_state_history("impervious_kraken")
+df = client.get_state_history("my_new_agent")
 
 # `df` is a pd.DataFrame looking like
 #
