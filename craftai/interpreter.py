@@ -58,7 +58,7 @@ class Interpreter(object):
     decision = {}
     decision["output"] = {}
     for output in configuration.get("output"):
-      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context)
+      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context, tree["output_values"])
     decision["context"] = context
     decision["_version"] = _DECISION_VERSION
 
@@ -138,7 +138,7 @@ class Interpreter(object):
     return True
 
   @staticmethod
-  def _decide_recursion(node, context):
+  def _decide_recursion(node, context, values):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
       predicted_value = node.get("predicted_value")
@@ -163,31 +163,58 @@ class Interpreter(object):
     # operator condition with given context
     matching_child = Interpreter._find_matching_child(node, context)
 
-    if not matching_child:
-      prop = node.get("children")[0].get("decision_rule").get("property")
-      raise CraftAiNullDecisionError(
-        """Unable to take decision: value '{}' for property '{}' doesn't"""
-        """ validate any of the decision rules.""".format(context.get(prop), prop)
-      )
+    if matching_child == "Missing":
+      result, _ = Interpreter._probabilistic_distribution(node)
+      final_result = { "predicted_value" : {value : result[i] for i, value in enumerate(values)}}
+      final_result["confidence"] = 0
+      final_result["decision_rules"] = []
 
-    # If a matching child is found, recurse
-    result = Interpreter._decide_recursion(matching_child, context)
-    new_predicates = [{
-      "property": matching_child["decision_rule"]["property"],
-      "operator": matching_child["decision_rule"]["operator"],
-      "operand": matching_child["decision_rule"]["operand"]
-    }]
+    else:
+      if not matching_child:
+        prop = node.get("children")[0].get("decision_rule").get("property")
+        raise CraftAiNullDecisionError(
+          """Unable to take decision: value '{}' for property '{}' doesn't"""
+          """ validate any of the decision rules.""".format(context.get(prop), prop)
+        )
 
-    final_result = {
-      "predicted_value": result["predicted_value"],
-      "confidence": result["confidence"],
-      "decision_rules": new_predicates + result["decision_rules"]
-    }
+      # If a matching child is found, recurse
+      result = Interpreter._decide_recursion(matching_child, context, values)
+      new_predicates = [{
+        "property": matching_child["decision_rule"]["property"],
+        "operator": matching_child["decision_rule"]["operator"],
+        "operand": matching_child["decision_rule"]["operand"]
+      }]
 
-    if result.get("standard_deviation", None) is not None:
-      final_result["standard_deviation"] = result.get("standard_deviation")
+      final_result = {
+        "predicted_value": result["predicted_value"],
+        "confidence": result["confidence"],
+        "decision_rules": new_predicates + result["decision_rules"]
+      }
+
+      if result.get("standard_deviation", None) is not None:
+        final_result["standard_deviation"] = result.get("standard_deviation")
 
     return final_result
+
+  @staticmethod
+  def _probabilistic_distribution(node):
+    # It is a leaf
+    if not (node.get("children") is not None and len(node.get("children"))):
+      value_repartition = node.get("weighted_repartition")
+      total = sum(value_repartition)
+      probability_distribution = [p/total for p in value_repartition]
+      return [probability_distribution, total]
+
+    p_size = [Interpreter._probabilistic_distribution(child) for child in node.get("children")]
+    _, sizes = zip(*p_size)
+    total_size = sum(sizes)
+
+    new_repartition = [0. for i in range(len(p_size[0][0]))]
+    for (prob, size) in p_size:
+      new_repartition = [sum(x) for x in zip(new_repartition, [p * size / total_size for p in prob])]
+
+    return [new_repartition, total_size]
+
 
   @staticmethod
   def _check_context(configuration, context):
@@ -197,31 +224,20 @@ class Interpreter(object):
       if not p in configuration["output"]
     ]
 
-    # Retrieve the missing properties
-    missing_properties = [
-      p for p in expected_properties
-      if not p in context or context[p] is None
-    ]
-
     # Validate the values
     bad_properties = [
       p for p in expected_properties
       if not Interpreter._validate_property_value(configuration, context, p)
     ]
 
-    if missing_properties or bad_properties:
-      missing_properties = sorted(missing_properties)
-      missing_properties_messages = [
-        "expected property '{}' is not defined"
-        .format(p) for p in missing_properties
-      ]
+    if bad_properties:
       bad_properties = sorted(bad_properties)
       bad_properties_messages = [
         "'{}' is not a valid value for property '{}' of type '{}'"
         .format(context[p], p, configuration["context"][p]["type"]) for p in bad_properties
       ]
 
-      return missing_properties_messages + bad_properties_messages
+      return bad_properties_messages
     return []
 
   @staticmethod
@@ -232,10 +248,11 @@ class Interpreter(object):
       operator = child["decision_rule"]["operator"]
       context_value = context.get(property_name)
       if context_value is None:
-        raise CraftAiDecisionError(
-          """Unable to take decision, property '{}' is missing from the given context.""".
-          format(property_name)
-        )
+        return "Missing"
+        # raise CraftAiDecisionError(
+        #   """Unable to take decision, property '{}' is missing from the given context.""".
+        #   format(property_name)
+        # )
       if (not isinstance(operator, six.string_types) or
           not operator in OPERATORS.values()):
         raise CraftAiDecisionError(
