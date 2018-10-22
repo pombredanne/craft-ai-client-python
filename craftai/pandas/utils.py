@@ -25,7 +25,7 @@ def create_timezone_df(df, name):
   return timezone_df
 
 # Display the given tree
-
+# Return a function to be executed in order to display the tree
 def display_tree(decision_tree, configuration=None):
   html_template = """ <html>
   <body>
@@ -64,5 +64,8 @@ def display_tree(decision_tree, configuration=None):
     decision_tree["trees"][configuration["output"][0]] = decision_tree["trees"].pop("Standalone_agent")
 
   html_tree = html_template.format(element="{height: 500, data: "+json.dumps(decision_tree)+"}")
-  return html_tree
-  display(HTML(html_tree))
+
+  def execute():
+    display(HTML(html_tree))
+
+  return execute
