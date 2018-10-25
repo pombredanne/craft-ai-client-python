@@ -1,7 +1,7 @@
 import random
 import semver
 
-from nose.tools import assert_is_instance, assert_not_equal, assert_raises, with_setup
+from nose.tools import assert_equal, assert_is_instance, assert_not_equal, assert_raises, with_setup
 import craftai
 
 from . import settings
@@ -83,6 +83,17 @@ def test_get_decision_tree_with_specific_version():
   assert_not_equal(decision_tree.get("trees"), None)
 
 @with_setup(setup_agent_w_operations, teardown)
+def test_get_decision_tree_without_timestamp():
+  # test if we get the latest decision tree
+  decision_tree = CLIENT.get_decision_tree(AGENT_ID)
+  ground_truth_decision_tree = decision_tree = CLIENT.get_decision_tree(AGENT_ID, 1458741262)
+  assert_is_instance(decision_tree, dict)
+  assert_not_equal(decision_tree.get("_version"), None)
+  assert_not_equal(decision_tree.get("configuration"), None)
+  assert_not_equal(decision_tree.get("trees"), None)
+  assert_equal(decision_tree, ground_truth_decision_tree)
+
+@with_setup(setup_agent_w_operations, teardown)
 def test_get_decision_tree_with_invalid_id():
   """get_decision_tree should fail when given a non-string/empty string ID
 
@@ -111,13 +122,20 @@ def test_get_decision_tree_with_unknown_id():
     valid_data.VALID_TIMESTAMP)
 
 @with_setup(setup_agent_w_operations, teardown)
-def test_get_decision_tree_with_invalid_timestamp():
-  for inv_ts in invalid_data.INVALID_TIMESTAMPS:
-    assert_raises(
-      craftai.errors.CraftAiBadRequestError,
-      CLIENT.get_decision_tree,
-      AGENT_ID,
-      invalid_data.INVALID_TIMESTAMPS[inv_ts])
+def test_get_decision_tree_with_negative_timestamp():
+  assert_raises(
+    craftai.errors.CraftAiBadRequestError,
+    CLIENT.get_decision_tree,
+    AGENT_ID,
+    invalid_data.INVALID_TIMESTAMPS["negative_ts"])
+
+@with_setup(setup_agent_w_operations, teardown)
+def test_get_decision_tree_with_float_timestamp():
+  assert_raises(
+    craftai.errors.CraftAiBadRequestError,
+    CLIENT.get_decision_tree,
+    AGENT_ID,
+    invalid_data.INVALID_TIMESTAMPS["float_ts"])
 
 ###
 ### The following tests are quite long, they are disabled atm.
