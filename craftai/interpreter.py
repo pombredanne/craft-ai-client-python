@@ -2,6 +2,7 @@ import numbers
 import re
 import semver
 import six
+import numpy as np
 
 from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
 from craftai.operators import OPERATORS, OPERATORS_FUNCTION
@@ -55,10 +56,11 @@ class Interpreter(object):
 
       raise CraftAiDecisionError(message)
 
+    missing_method = configuration["missing_value_method"]
     decision = {}
     decision["output"] = {}
     for output in configuration.get("output"):
-      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context, tree["output_values"])
+      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context, tree["output_values"], missing_method)
     decision["context"] = context
     decision["_version"] = _DECISION_VERSION
 
@@ -138,7 +140,7 @@ class Interpreter(object):
     return True
 
   @staticmethod
-  def _decide_recursion(node, context, values):
+  def _decide_recursion(node, context, values, missing_method):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
       predicted_value = node.get("predicted_value")
@@ -161,58 +163,55 @@ class Interpreter(object):
 
     # Finding the first element in this node's childrens matching the
     # operator condition with given context
-    matching_child = Interpreter._find_matching_child(node, context)
+    matching_child = Interpreter._find_matching_child(node, context, missing_method)
 
-    if matching_child == "Missing":
-      result, _ = Interpreter._probabilistic_distribution(node)
-      final_result = { "predicted_value" : {value : result[i] for i, value in enumerate(values)}}
+    # If there is no child corresponding matching the operators then we compute
+    # the probabilistic distribution from this node.
+    if not matching_child:
+      result, _ = Interpreter._probabilistic_distribution(node, len(values))
+      final_result = {"predicted_value" : {value : result[i] for i, value in enumerate(values)}}
       final_result["confidence"] = 0
       final_result["decision_rules"] = []
+      return final_result
 
-    else:
-      if not matching_child:
-        prop = node.get("children")[0].get("decision_rule").get("property")
-        raise CraftAiNullDecisionError(
-          """Unable to take decision: value '{}' for property '{}' doesn't"""
-          """ validate any of the decision rules.""".format(context.get(prop), prop)
-        )
+    # If a matching child is found, recurse
+    result = Interpreter._decide_recursion(matching_child, context, values, missing_method)
+    new_predicates = [{
+      "property": matching_child["decision_rule"]["property"],
+      "operator": matching_child["decision_rule"]["operator"],
+      "operand": matching_child["decision_rule"]["operand"]
+    }]
 
-      # If a matching child is found, recurse
-      result = Interpreter._decide_recursion(matching_child, context, values)
-      new_predicates = [{
-        "property": matching_child["decision_rule"]["property"],
-        "operator": matching_child["decision_rule"]["operator"],
-        "operand": matching_child["decision_rule"]["operand"]
-      }]
+    final_result = {
+      "predicted_value": result["predicted_value"],
+      "confidence": result["confidence"],
+      "decision_rules": new_predicates + result["decision_rules"]
+    }
 
-      final_result = {
-        "predicted_value": result["predicted_value"],
-        "confidence": result["confidence"],
-        "decision_rules": new_predicates + result["decision_rules"]
-      }
-
-      if result.get("standard_deviation", None) is not None:
-        final_result["standard_deviation"] = result.get("standard_deviation")
+    if result.get("standard_deviation", None) is not None:
+      final_result["standard_deviation"] = result.get("standard_deviation")
 
     return final_result
 
   @staticmethod
-  def _probabilistic_distribution(node):
-    # It is a leaf
+  def _probabilistic_distribution(node, nb_outputs):
+    # If it is a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
       value_repartition = node.get("weighted_repartition")
       total = sum(value_repartition)
       probability_distribution = [p/total for p in value_repartition]
       return [probability_distribution, total]
 
-    p_size = [Interpreter._probabilistic_distribution(child) for child in node.get("children")]
-    _, sizes = zip(*p_size)
+    # If it is not a leaf recurse
+    # For 3 children, it return: [[[P11, P22 ..], T1], [[P12, P22, ..], T2], [[P13, P23, ..], T3]]
+    prob_sizes = [Interpreter._probabilistic_distribution(child, nb_outputs) for child in node.get("children")]
+    # Unzip the children size to compute the total size of the children node
+    _, sizes = zip(*prob_sizes)
     total_size = sum(sizes)
 
-    new_repartition = [0. for i in range(len(p_size[0][0]))]
-    for (prob, size) in p_size:
-      new_repartition = [sum(x) for x in zip(new_repartition, [p * size / total_size for p in prob])]
-
+    new_repartition = np.zeros(nb_outputs)
+    for (prob, size) in prob_sizes:
+      new_repartition += np.array(prob) * size / total_size
     return [new_repartition, total_size]
 
 
@@ -241,18 +240,32 @@ class Interpreter(object):
     return []
 
   @staticmethod
-  def _find_matching_child(node, context):
+  def _find_matching_child(node, context, missing_method):
     for child in node["children"]:
       property_name = child["decision_rule"]["property"]
       operand = child["decision_rule"]["operand"]
       operator = child["decision_rule"]["operator"]
       context_value = context.get(property_name)
+
+      # If there is no context value
+      # For the Quinlan method we return that there is no matching children
+      # For the Null Branch method if the operand is 'None' it means that this child
+      # is a Null branch that we should explore. Otherwise we continue and check if this
+      # branch correspond to the Enum branch "Null". And finally if none of these have
+      # been found we return that there is no matching children.If no Missing value method
+      # is activated raises an error.
       if context_value is None:
-        return "Missing"
-        # raise CraftAiDecisionError(
-        #   """Unable to take decision, property '{}' is missing from the given context.""".
-        #   format(property_name)
-        # )
+        if missing_method:
+          if missing_method == "Quinlan":
+            return {}
+          if missing_method == "NullBranch" and operand is None:
+            return child
+        else:
+          raise CraftAiDecisionError(
+            """Unable to take decision, property '{}' is missing from the given context.""".
+            format(property_name)
+          )
+
       if (not isinstance(operator, six.string_types) or
           not operator in OPERATORS.values()):
         raise CraftAiDecisionError(
