@@ -211,7 +211,7 @@ class Interpreter(object):
 
     new_repartition = np.zeros(nb_outputs)
     for (prob, size) in prob_sizes:
-      new_repartition += np.array(prob) * size / total_size
+      new_repartition += np.array(prob) * (size / float(total_size))
     return [new_repartition, total_size]
 
 
@@ -247,24 +247,26 @@ class Interpreter(object):
       operator = child["decision_rule"]["operator"]
       context_value = context.get(property_name)
 
-      # If there is no context value
-      # For the Quinlan method we return that there is no matching children
-      # For the Null Branch method if the operand is 'None' it means that this child
-      # is a Null branch that we should explore. Otherwise we continue and check if this
-      # branch correspond to the Enum branch "Null". And finally if none of these have
-      # been found we return that there is no matching children.If no Missing value method
-      # is activated raises an error.
+      # If there is no context value:
+      # - For the Quinlan method we return that there is no matching children
+      # - For the Null Branch method if the operand is 'None' it means that this child
+      #  is a Null branch that we should explore. Otherwise we continue and check if this
+      #  branch correspond to the Enum branch "Null". And finally if none of these have
+      #  been found we return that there is no matching children.If no Missing value method
+      #  is activated raises an error.
       if context_value is None:
         if missing_method:
+          # If the context is None and the current operand is None as well
+          # Then it's a match corresponding to a Null Branch
+          if "NullBranch" in missing_method and operand is None:
+            return child
           if missing_method == "Quinlan":
             return {}
-          if missing_method == "NullBranch" and operand is None:
-            return child
-        else:
-          raise CraftAiDecisionError(
-            """Unable to take decision, property '{}' is missing from the given context.""".
-            format(property_name)
-          )
+          continue
+        raise CraftAiDecisionError(
+          """Unable to take decision, property '{}' is missing from the given context.""".
+          format(property_name)
+        )
 
       if (not isinstance(operator, six.string_types) or
           not operator in OPERATORS.values()):
