@@ -24,8 +24,9 @@ def create_timezone_df(df, name):
     timezone_df[name] = df.index.strftime("%z")
   return timezone_df
 
-# Display the given tree
-# Return a function to be executed in order to display the tree
+# Display the given tree:
+# Return the hmtl tree and a function to be executed in order to display the tree
+# in a jupyter cell.
 def display_tree(decision_tree, configuration=None):
   html_template = """ <html>
   <body>
@@ -56,7 +57,12 @@ def display_tree(decision_tree, configuration=None):
   if configuration:
     decision_tree["configuration"] = configuration
   else:
-    configuration = decision_tree["configuration"]
+    try:
+      configuration = decision_tree["configuration"]
+    except:
+      print("""Couldn't find the 'configuration' key in the given decision tree. Add it to
+      the decision tree JSON or give the configuration JSON to this function.""")
+      raise
 
   # If it is a Standalone Agent tree, change 'Standalone agent' to the
   # actual output name - Suppose that there is a unique output here.
@@ -68,4 +74,4 @@ def display_tree(decision_tree, configuration=None):
   def execute():
     display(HTML(html_tree))
 
-  return execute
+  return html_tree, execute
