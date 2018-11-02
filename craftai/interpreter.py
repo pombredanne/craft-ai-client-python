@@ -40,7 +40,9 @@ class Interpreter(object):
     else:
       context = Interpreter.join_decide_args(args)
 
-    errors = Interpreter._check_context(configuration, context)
+    missing_method = configuration["missing_value_method"]
+
+    errors = Interpreter._check_context(configuration, context, missing_method)
 
     # Convert timezones as integers into standard +/hh:mm format
     # This should only happen when no time generated value is required
@@ -56,7 +58,6 @@ class Interpreter(object):
 
       raise CraftAiDecisionError(message)
 
-    missing_method = configuration["missing_value_method"]
     decision = {}
     decision["output"] = {}
     for output in configuration.get("output"):
@@ -168,11 +169,17 @@ class Interpreter(object):
     # If there is no child corresponding matching the operators then we compute
     # the probabilistic distribution from this node.
     if not matching_child:
-      result, _ = Interpreter._probabilistic_distribution(node, len(values))
-      final_result = {"predicted_value" : {value : result[i] for i, value in enumerate(values)}}
-      final_result["confidence"] = 0
-      final_result["decision_rules"] = []
-      return final_result
+      if missing_method:
+        result, _ = Interpreter._probabilistic_distribution(node, len(values))
+        final_result = {"predicted_value" : {value : result[i] for i, value in enumerate(values)}}
+        final_result["confidence"] = 0
+        final_result["decision_rules"] = []
+        return final_result
+      prop = node.get("children")[0].get("decision_rule").get("property")
+      raise CraftAiNullDecisionError(
+        """Unable to take decision: value '{}' for property '{}' doesn't"""
+        """ validate any of the decision rules.""".format(context.get(prop), prop)
+      )
 
     # If a matching child is found, recurse
     result = Interpreter._decide_recursion(matching_child, context, values, missing_method)
@@ -249,7 +256,7 @@ class Interpreter(object):
         "'{}' is not a valid value for property '{}' of type '{}'"
         .format(context[p], p, configuration["context"][p]["type"]) for p in bad_properties
       ]
-      
+
       return missing_properties_messages + bad_properties_messages
     return []
 
@@ -271,7 +278,8 @@ class Interpreter(object):
       if context_value is None:
         if missing_method:
           # If the context is None and the current operand is None as well
-          # Then it's a match corresponding to a Null Branch
+          # If the NullBranch method is used,
+          # then it's a match corresponding to a Null Branch
           if "NullBranch" in missing_method and operand is None:
             return child
           if missing_method == "Quinlan":
