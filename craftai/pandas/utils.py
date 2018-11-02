@@ -1,7 +1,10 @@
 import json
+import re
 import pandas as pd
 import six
 from IPython.core.display import display, HTML
+import semver
+from ..errors import CraftAiError
 
 DUMMY_COLUMN_NAME = "CraftGeneratedDummy"
 
@@ -27,7 +30,7 @@ def create_timezone_df(df, name):
 # Display the given tree:
 # Return the hmtl tree and a function to be executed in order to display the tree
 # in a jupyter cell.
-def display_tree(decision_tree, configuration=None):
+def display_tree(tree_object):
   html_template = """ <html>
   <body>
     <div id="tree-div">
@@ -54,22 +57,41 @@ def display_tree(decision_tree, configuration=None):
   </body>
   </html>"""
 
-  if configuration:
-    decision_tree["configuration"] = configuration
+  # Checking definition of tree_object
+  if not isinstance(tree_object, dict):
+    raise CraftAiError("Invalid decision tree format, the given json is not an object.")
+
+  # Checking version existence
+  tree_version = tree_object.get("_version")
+  if not tree_version:
+    raise CraftAiError(
+      """Invalid decision tree format, unable to find the version"""
+      """ informations."""
+    )
+
+  # Checking version and tree validity according to version
+  if re.compile(r"\d+.\d+.\d+").match(tree_version) is None:
+    raise CraftAiError(
+      """Invalid decision tree format, "{}" is not a valid version.""".
+      format(tree_version)
+    )
+  elif semver.match(tree_version, ">=1.0.0") and semver.match(tree_version, "<2.0.0"):
+    if tree_object.get("configuration") is None:
+      raise CraftAiError(
+        """Invalid decision tree format, no configuration found"""
+      )
+    if tree_object.get("trees") is None:
+      raise CraftAiError(
+        """Invalid decision tree format, no tree found."""
+      )
   else:
-    try:
-      configuration = decision_tree["configuration"]
-    except:
-      print("""Couldn't find the 'configuration' key in the given decision tree. Add it to
-      the decision tree JSON or give the configuration JSON to this function.""")
-      raise
+    raise CraftAiError(
+      """Invalid decision tree format, {} is not a supported"""
+      """ version.""".
+      format(tree_version)
+    )
 
-  # If it is a Standalone Agent tree, change 'Standalone agent' to the
-  # actual output name - Suppose that there is a unique output here.
-  if "Standalone_agent" in decision_tree["trees"].keys():
-    decision_tree["trees"][configuration["output"][0]] = decision_tree["trees"].pop("Standalone_agent")
-
-  html_tree = html_template.format(element="{height: 500, data: "+json.dumps(decision_tree)+"}")
+  html_tree = html_template.format(element="{height: 500, data: "+json.dumps(tree_object)+"}")
 
   def execute():
     display(HTML(html_tree))

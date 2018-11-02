@@ -331,3 +331,14 @@ def test_datetime_decide_from_contexts_df():
   assert_equal(len(df), 3)
   assert_equal(len(df.dtypes), 3)
   assert_equal(df["b_predicted_value"].tolist(), ["Pierre", "Paul", "Jacques"])
+
+@with_setup(setup_simple_agent_with_data, teardown)
+def test_tree_visualization():
+  tree1 = CLIENT.get_decision_tree(AGENT_ID,
+                                   DATETIME_AGENT_DATA.last_valid_index().value // 10 ** 9)
+  tree2 = CLIENT.get_decision_tree(AGENT_ID,
+                                   DATETIME_AGENT_DATA.last_valid_index().value // 10 ** 9)
+  html1, display_function = craftai.pandas.utils.display_tree(tree1)
+  html2, _ = craftai.pandas.utils.display_tree(tree2)
+  assert callable(display_function)
+  assert_equal(html1, html2)
