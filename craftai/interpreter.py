@@ -171,7 +171,7 @@ class Interpreter(object):
     if not matching_child:
       if missing_method:
         result, _ = Interpreter._probabilistic_distribution(node, len(values))
-        final_result = {"predicted_value" : {value : result[i] for i, value in enumerate(values)}}
+        final_result = {"predicted_value" : values[np.argmax(result)]}
         final_result["confidence"] = 0
         final_result["decision_rules"] = []
         return final_result
