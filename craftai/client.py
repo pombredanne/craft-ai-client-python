@@ -11,7 +11,7 @@ import requests
 import six
 
 from craftai import __version__ as pkg_version
-from craftai.constants import AGENT_ID_PATTERN
+from craftai.constants import AGENT_ID_PATTERN, DEFAULT_DECISION_TREE_VERSION
 from craftai.errors import CraftAiCredentialsError, CraftAiBadRequestError, CraftAiNotFoundError
 from craftai.errors import CraftAiUnknownError, CraftAiInternalError, CraftAiLongRequestTimeOutError
 from craftai.errors import CraftAiNetworkError
@@ -296,7 +296,10 @@ class CraftAIClient(object):
   # Decision tree methods #
   #########################
 
-  def _get_decision_tree(self, agent_id, timestamp):
+  def _get_decision_tree(self, agent_id, timestamp, version):
+    headers = self._headers.copy()
+    headers["x-craft-ai-tree-version"] = version
+
     req_url = "{}/agents/{}/decision/tree?t={}".format(self._base_url,
                                                        agent_id,
                                                        timestamp)
@@ -307,13 +310,13 @@ class CraftAIClient(object):
 
     return decision_tree
 
-  def get_decision_tree(self, agent_id, timestamp):
+  def get_decision_tree(self, agent_id, timestamp, version=DEFAULT_DECISION_TREE_VERSION):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
 
     if self._config["decisionTreeRetrievalTimeout"] is False:
       # Don't retry
-      return self._get_decision_tree(agent_id, timestamp)
+      return self._get_decision_tree(agent_id, timestamp, version)
     else:
       start = current_time_ms()
       while True:
@@ -322,7 +325,7 @@ class CraftAIClient(object):
           # Client side timeout
           raise CraftAiLongRequestTimeOutError()
         try:
-          return self._get_decision_tree(agent_id, timestamp)
+          return self._get_decision_tree(agent_id, timestamp, version)
         except CraftAiLongRequestTimeOutError:
           # Do nothing and continue.
           continue
