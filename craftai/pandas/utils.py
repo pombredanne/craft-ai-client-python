@@ -1,5 +1,10 @@
+import json
+import re
 import pandas as pd
 import six
+from IPython.core.display import display, HTML
+import semver
+from ..errors import CraftAiError
 
 DUMMY_COLUMN_NAME = "CraftGeneratedDummy"
 
@@ -21,3 +26,77 @@ def create_timezone_df(df, name):
   else:
     timezone_df[name] = df.index.strftime("%z")
   return timezone_df
+
+# Display the given tree:
+# Return the hmtl tree and a function to be executed in order to display the tree
+# in a jupyter cell.
+def display_tree(tree_object, height=500):
+  html_template = """ <html>
+  <body>
+    <div id="tree-div">
+    </div>
+    <script src="https://unpkg.com/react@15/dist/react.min.js">
+    </script>
+    <script src="https://unpkg.com/react-dom@15/dist/react-dom.min.js">
+    </script>
+    <script src="https://unpkg.com/glamor@2/umd/index.min.js">
+    </script>
+    <script src="https://unpkg.com/glamorous@4/dist/glamorous.umd.min.js">
+    </script>
+    <script src="https://d3js.org/d3.v4.min.js">
+    </script>
+    <script src="https://unpkg.com/react-craft-ai-decision-tree">
+    </script>
+    <script>
+    var tree = "json_arbre_ici"
+  ReactDOM.render(
+          React.createElement(DecisionTree, {{height: {height}, data: {tree}}}),
+          document.getElementById('tree-div')
+        );
+    </script>
+  </body>
+  </html>"""
+
+  if height <= 0:
+    raise CraftAiError("A strictly positive height value must be given.")
+
+  # Checking definition of tree_object
+  if not isinstance(tree_object, dict):
+    raise CraftAiError("Invalid decision tree format, the given json is not an object.")
+
+  # Checking version existence
+  tree_version = tree_object.get("_version")
+  if not tree_version:
+    raise CraftAiError(
+      """Invalid decision tree format, unable to find the version"""
+      """ informations."""
+    )
+
+  # Checking version and tree validity according to version
+  if re.compile(r"\d+.\d+.\d+").match(tree_version) is None:
+    raise CraftAiError(
+      """Invalid decision tree format, "{}" is not a valid version.""".
+      format(tree_version)
+    )
+  elif semver.match(tree_version, ">=1.0.0") and semver.match(tree_version, "<2.0.0"):
+    if tree_object.get("configuration") is None:
+      raise CraftAiError(
+        """Invalid decision tree format, no configuration found"""
+      )
+    if tree_object.get("trees") is None:
+      raise CraftAiError(
+        """Invalid decision tree format, no tree found."""
+      )
+  else:
+    raise CraftAiError(
+      """Invalid decision tree format, {} is not a supported"""
+      """ version.""".
+      format(tree_version)
+    )
+
+  html_tree = html_template.format(height=height, tree=json.dumps(tree_object))
+
+  def execute():
+    display(HTML(html_tree))
+
+  return html_tree, execute

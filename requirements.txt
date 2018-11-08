@@ -10,3 +10,4 @@ python-dotenv==0.5.1
 pandas==0.20
 semver==2.7.7
 python-dateutil==2.7.2
+IPython==5.8.0
