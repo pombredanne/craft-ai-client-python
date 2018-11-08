@@ -30,7 +30,7 @@ def create_timezone_df(df, name):
 # Display the given tree:
 # Return the hmtl tree and a function to be executed in order to display the tree
 # in a jupyter cell.
-def display_tree(tree_object):
+def display_tree(tree_object, height=500):
   html_template = """ <html>
   <body>
     <div id="tree-div">
@@ -50,12 +50,15 @@ def display_tree(tree_object):
     <script>
     var tree = "json_arbre_ici"
   ReactDOM.render(
-          React.createElement(DecisionTree, {element}),
+          React.createElement(DecisionTree, {{height: {height}, data: {tree}}}),
           document.getElementById('tree-div')
         );
     </script>
   </body>
   </html>"""
+
+  if height <= 0:
+    raise CraftAiError("A strictly positive height value must be given.")
 
   # Checking definition of tree_object
   if not isinstance(tree_object, dict):
@@ -91,7 +94,7 @@ def display_tree(tree_object):
       format(tree_version)
     )
 
-  html_tree = html_template.format(element="{height: 500, data: "+json.dumps(tree_object)+"}")
+  html_tree = html_template.format(height=height, tree=json.dumps(tree_object))
 
   def execute():
     display(HTML(html_tree))
