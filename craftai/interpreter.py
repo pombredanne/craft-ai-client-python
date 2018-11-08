@@ -2,7 +2,6 @@ import numbers
 import re
 import semver
 import six
-import numpy as np
 
 from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
 from craftai.operators import OPERATORS, OPERATORS_FUNCTION
@@ -40,7 +39,7 @@ class Interpreter(object):
     else:
       context = Interpreter.join_decide_args(args)
 
-    missing_method = configuration["missing_value_method"]
+    missing_method = configuration.get("missing_value_method")
 
     errors = Interpreter._check_context(configuration, context, missing_method)
 
@@ -61,7 +60,9 @@ class Interpreter(object):
     decision = {}
     decision["output"] = {}
     for output in configuration.get("output"):
-      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context, tree["output_values"], missing_method)
+      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context,
+                                                                 tree["output_values"],
+                                                                 missing_method)
     decision["context"] = context
     decision["_version"] = _DECISION_VERSION
 
@@ -171,7 +172,7 @@ class Interpreter(object):
     if not matching_child:
       if missing_method:
         result, _ = Interpreter._probabilistic_distribution(node, len(values))
-        final_result = {"predicted_value" : values[np.argmax(result)]}
+        final_result = {"predicted_value" : values[result.index(max(result))]}
         final_result["confidence"] = 0
         final_result["decision_rules"] = []
         return final_result
@@ -205,22 +206,23 @@ class Interpreter(object):
     # If it is a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
       value_repartition = node.get("weighted_repartition")
-      total = sum(value_repartition)
-      probability_distribution = [p/total for p in value_repartition]
-      return [probability_distribution, total]
+      probability_distribution = [p/sum(value_repartition) for p in value_repartition]
+      return [probability_distribution, sum(value_repartition)]
 
     # If it is not a leaf recurse
     # For 3 children, it return: [[[P11, P22 ..], T1], [[P12, P22, ..], T2], [[P13, P23, ..], T3]]
-    prob_sizes = [Interpreter._probabilistic_distribution(child, nb_outputs) for child in node.get("children")]
+    prob_sizes = [Interpreter._probabilistic_distribution(child, nb_outputs)
+                  for child in node.get("children")]
     # Unzip the children size to compute the total size of the children node
-    _, sizes = zip(*prob_sizes)
+    prob, sizes = zip(*prob_sizes)
     total_size = sum(sizes)
 
-    new_repartition = np.zeros(nb_outputs)
-    for (prob, size) in prob_sizes:
-      new_repartition += np.array(prob) * (size / float(total_size))
-    return [new_repartition, total_size]
-
+    # Compute the ratio of each branch
+    ratios = [size/float(total_size) for size in sizes]
+    # Apply the corresponding ratio to the branch probability distribution
+    prob_ratio = [[p * ratio for p in probs] for probs, ratio in zip(prob, ratios)]
+    # Sum all these probabilities to obtain the new repartition
+    return [list(map(sum, zip(*prob_ratio))), total_size]
 
   @staticmethod
   def _check_context(configuration, context, missing_method):
