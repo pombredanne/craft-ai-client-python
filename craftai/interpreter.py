@@ -60,9 +60,9 @@ class Interpreter(object):
     decision = {}
     decision["output"] = {}
     for output in configuration.get("output"):
+      output_values = bare_tree[output]["output_values"]
       decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context,
-                                                                 tree["output_values"],
-                                                                 missing_method)
+                                                                 output_values, missing_method)
     decision["context"] = context
     decision["_version"] = _DECISION_VERSION
 
