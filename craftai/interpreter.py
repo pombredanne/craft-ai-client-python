@@ -171,8 +171,11 @@ class Interpreter(object):
     # the probabilistic distribution from this node.
     if not matching_child:
       if missing_method:
-        result, _ = Interpreter._probabilistic_distribution(node, len(values))
-        final_result = {"predicted_value" : values[result.index(max(result))]}
+        result, _ = Interpreter._distribution(node, len(values))
+        if isinstance(result, list):
+          final_result = {"predicted_value": values[result.index(max(result))]}
+        else:
+          final_result = {"predicted_value": result}
         final_result["confidence"] = 0
         final_result["decision_rules"] = []
         return final_result
@@ -202,27 +205,47 @@ class Interpreter(object):
     return final_result
 
   @staticmethod
-  def _probabilistic_distribution(node, nb_outputs):
+  def _distribution(node, nb_outputs):
     # If it is a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
+
       value_repartition = node.get("weighted_repartition")
-      probability_distribution = [p/sum(value_repartition) for p in value_repartition]
-      return [probability_distribution, sum(value_repartition)]
+      if value_repartition is not None:
+        probability_distribution = [p/sum(value_repartition) for p in value_repartition]
+        return [probability_distribution, sum(value_repartition)]
 
-    # If it is not a leaf recurse
-    # For 3 children, it return: [[[P11, P22 ..], T1], [[P12, P22, ..], T2], [[P13, P23, ..], T3]]
-    prob_sizes = [Interpreter._probabilistic_distribution(child, nb_outputs)
-                  for child in node.get("children")]
-    # Unzip the children size to compute the total size of the children node
-    prob, sizes = zip(*prob_sizes)
-    total_size = sum(sizes)
+      predicted_value = node.get("predicted_value")
+      if predicted_value is not None:
+        return [predicted_value, node["nb_samples"]]
 
-    # Compute the ratio of each branch
-    ratios = [size/float(total_size) for size in sizes]
-    # Apply the corresponding ratio to the branch probability distribution
-    prob_ratio = [[p * ratio for p in probs] for probs, ratio in zip(prob, ratios)]
-    # Sum all these probabilities to obtain the new repartition
-    return [list(map(sum, zip(*prob_ratio))), total_size]
+      raise CraftAiDecisionError(
+        """Unable to take decision: the decision tree has no valid"""
+        """ predicted value for the given context."""
+      )
+
+    # If it is not a leaf, we recurse into the children and store the distributions
+    # and sizes of each child branch.
+    results = [Interpreter._distribution(child, nb_outputs)
+               for child in node.get("children")]
+
+    result, sizes = zip(*results)
+    total_size = float(sum(sizes))
+
+    # If the distribution is an list object then it is a classification problem
+    # and the probabilty distribution of this node is computed.
+    # Otherwise it is a regression problem and the mean value of this node is
+    # computed.
+    if isinstance(result[0], list):
+      # For 3 children, it return: [[[P11, P22 ..], T1], [[P12, P22, ..], T2], [[P13, P23, ..], T3]]
+      # Unzip the children size to compute the total size of the children node
+      # Mutliply the branch probability distribution with its corresponding
+      # ratio ( size / total size )
+      prob_ratio = [[p * size / total_size for p in probs] for probs, size in zip(result, sizes)]
+      # Sum all these probabilities to obtain the new distribution
+      return [list(map(sum, zip(*prob_ratio))), total_size]
+
+    new_mean = sum([(mean * size)/ total_size for mean, size in zip(result, sizes)])
+    return [new_mean, total_size]
 
   @staticmethod
   def _check_context(configuration, context, missing_method):
