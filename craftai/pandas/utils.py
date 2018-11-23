@@ -5,6 +5,7 @@ import six
 from IPython.core.display import display, HTML
 import semver
 from ..errors import CraftAiError
+from ..constants import REACT_CRAFT_AI_DECISION_TREE_VERSION
 
 DUMMY_COLUMN_NAME = "CraftGeneratedDummy"
 
@@ -27,10 +28,8 @@ def create_timezone_df(df, name):
     timezone_df[name] = df.index.strftime("%z")
   return timezone_df
 
-# Display the given tree:
-# Return the hmtl tree and a function to be executed in order to display the tree
-# in a jupyter cell.
-def display_tree(tree_object, height=500):
+# Return a html version of the given tree
+def create_tree_html(tree_object, height=500):
   html_template = """ <html>
   <body>
     <div id="tree-div">
@@ -39,13 +38,7 @@ def display_tree(tree_object, height=500):
     </script>
     <script src="https://unpkg.com/react-dom@15/dist/react-dom.min.js">
     </script>
-    <script src="https://unpkg.com/glamor@2/umd/index.min.js">
-    </script>
-    <script src="https://unpkg.com/glamorous@4/dist/glamorous.umd.min.js">
-    </script>
-    <script src="https://d3js.org/d3.v4.min.js">
-    </script>
-    <script src="https://unpkg.com/react-craft-ai-decision-tree">
+    <script src="https://unpkg.com/react-craft-ai-decision-tree@{version}">
     </script>
     <script>
     var tree = "json_arbre_ici"
@@ -94,9 +87,11 @@ def display_tree(tree_object, height=500):
       format(tree_version)
     )
 
-  html_tree = html_template.format(height=height, tree=json.dumps(tree_object))
+  return html_template.format(height=height,
+                              tree=json.dumps(tree_object),
+                              version=REACT_CRAFT_AI_DECISION_TREE_VERSION)
 
-  def execute():
-    display(HTML(html_tree))
-
-  return html_tree, execute
+# Display the given decision tree
+def display_tree(tree_object, height=500):
+  tree_html = create_tree_html(tree_object, height)
+  display(HTML(tree_html))

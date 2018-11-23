@@ -338,7 +338,6 @@ def test_tree_visualization():
                                    DATETIME_AGENT_DATA.last_valid_index().value // 10 ** 9)
   tree2 = CLIENT.get_decision_tree(AGENT_ID,
                                    DATETIME_AGENT_DATA.last_valid_index().value // 10 ** 9)
-  html1, display_function = craftai.pandas.utils.display_tree(tree1)
-  html2, _ = craftai.pandas.utils.display_tree(tree2)
-  assert callable(display_function)
+  html1 = craftai.pandas.utils.create_tree_html(tree1)
+  html2 = craftai.pandas.utils.create_tree_html(tree2)
   assert_equal(html1, html2)

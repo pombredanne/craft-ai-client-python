@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.13.0...HEAD) ##
 
+- Add a function to plot a decision tree in a Jupyter cell (available through `from craftai.pandas.utils import display_tree`) which returns a function to launch in order to display the tree and its corresponding html.
+
 ## [1.13.0](https://github.com/craft-ai/craft-ai-client-python/compare/v1.12.0...v1.13.0) - 2018-08-09 ##
 ### Added ###
 
