@@ -4,19 +4,19 @@
 
 [**craft ai** cognitive automation API](http://craft.ai) leverages explainable Artificial Intelligence to 10x your knowledge workers productivity. craft ai is the first high level AI API enabling Automated Machine Learning at the individual level that generates explainable predictive models on the fly.
 
-## Get Started! ##
+## Get Started!
 
-### 0 - Signup ###
+### 0 - Signup
 
 If you're reading this you are probably already registered with **craft ai**, if not, head to [`https://beta.craft.ai/signup`](https://beta.craft.ai/signup).
 
-### 1 - Create a project ###
+### 1 - Create a project
 
 Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/projects), and press **Create a project**.
 
 Once it's done, you can click on your newly created project to retrieve its tokens. There are two types of tokens: **read** and **write**. You'll need the **write** token to create, update and delete your agent.
 
-### 2 - Setup ###
+### 2 - Setup
 
 #### Install ####
 
@@ -44,7 +44,7 @@ client = craftai.Client({
 })
 ```
 
-### 3 - Create an agent ###
+### 3 - Create an agent
 
 **craft ai** is based on the concept of **agents**. In most use cases, one agent is created per user or per device.
 
@@ -99,7 +99,7 @@ print("Agent", agent["id"], "has successfully been created")
 
 _For further information, check the ['create agent' reference documentation](#create)._
 
-### 4 - Add context operations ###
+### 4 - Add context operations
 
 We have now created our first agent but it is not able to do much, yet. To learn a decision model it needs to be provided with data, in **craft ai** these are called context operations.
 
@@ -185,7 +185,7 @@ In real-world applications, you'll probably do the same kind of things when the 
 
 _For further information, check the ['add context operations' reference documentation](#add-operations)._
 
-### 5 - Compute the decision tree ###
+### 5 - Compute the decision tree
 
 The agent has acquired a context history, we can now compute a decision tree from it! A decision tree models the output, allowing us to estimate what the output would be in a given context.
 
@@ -332,7 +332,7 @@ Try to retrieve the tree at different timestamps to see how it gradually learns 
 
 _For further information, check the ['compute decision tree' reference documentation](#compute)._
 
-### 6 - Take a decision ###
+### 6 - Take a decision
 
 Once the decision tree is computed it can be used to take a decision. In our case it is basically answering this type of question: "What is the anticipated **state of the lightbulb** at 7:15 if there are 2 persons in the room ?".
 
@@ -372,13 +372,13 @@ If you prefer to get started from an existing code base, the official Python sta
 
 > [:package: _Get the **craft ai** Python Starter Kit_](https://github.com/craft-ai/craft-ai-starterkit-python)
 
-## API ##
+## API
 
-### Project ###
+### Project
 
 **craft ai** agents belong to **projects**. In the current version, each identified users defines a owner and can create projects for themselves, in the future we will introduce shared projects.
 
-### Configuration ###
+### Configuration
 
 Each agent has a configuration defining:
 
@@ -394,11 +394,11 @@ Each agent has a configuration defining:
 
 > :warning: if no learning_period is specified, the default value is 15000 time quantums.
 
-> :warning: the maximum learning_period value is 750000 * time_quantum.
+> :warning: the maximum learning_period value is 55000 \* time_quantum.
 
-#### Context properties types ####
+#### Context properties types
 
-##### Base types: `enum` and `continuous` #####
+##### Base types: `enum` and `continuous`
 
 `enum` and `continuous` are the two base **craft ai** types:
 
@@ -407,7 +407,7 @@ Each agent has a configuration defining:
 
 > :warning: the absolute value of a `continuous` property must be less than 10<sup>20</sup>.
 
-##### Time types: `timezone`, `time_of_day`, `day_of_week`, `day_of_month` and `month_of_year` #####
+##### Time types: `timezone`, `time_of_day`, `day_of_week`, `day_of_month` and `month_of_year`
 
 **craft ai** defines the following types related to time:
 
@@ -416,6 +416,7 @@ Each agent has a configuration defining:
 - a `day_of_month` property is an integer belonging to **[1, 31]**, each value represents a day of the month.
 - a `month_of_year` property is an integer belonging to **[1, 12]**, each value represents a month of the year.
 - a `timezone` property is a string value representing the timezone as an offset from UTC, supported format are:
+
   - **±[hh]:[mm]**,
   - **±[hh][mm]**,
   - **±[hh]**,
@@ -424,6 +425,7 @@ Each agent has a configuration defining:
   `+14:00`.
 
   Some abbreviations are also supported:
+
   - **UTC** or **Z** Universal Time Coordinated,
   - **GMT** Greenwich Mean Time, as UTC,
   - **BST** British Summer Time, as UTC+1 hour,
@@ -466,7 +468,7 @@ Each agent has a configuration defining:
 > `timezone` property is not required, and you must update the context whenever
 > one of these time values changes in a way that is significant for your system.
 
-##### Examples #####
+##### Examples
 
 Let's take a look at the following configuration. It is designed to model the **color**
 of a lightbulb (the `lightbulbColor` property, defined as an output) depending
@@ -490,21 +492,21 @@ the decision model.
 ```json
 {
   "context": {
-      "lightIntensity":  {
-        "type": "continuous"
-      },
-      "time": {
-        "type": "time_of_day"
-      },
-      "day": {
-        "type": "day_of_week"
-      },
-      "timezone": {
-        "type": "timezone"
-      },
-      "lightbulbColor": {
-          "type": "enum"
-      }
+    "lightIntensity": {
+      "type": "continuous"
+    },
+    "time": {
+      "type": "time_of_day"
+    },
+    "day": {
+      "type": "day_of_week"
+    },
+    "timezone": {
+      "type": "timezone"
+    },
+    "lightbulbColor": {
+      "type": "enum"
+    }
   },
   "output": ["lightbulbColor"],
   "time_quantum": 100,
@@ -523,11 +525,11 @@ provided continuously.
       "type": "time_of_day",
       "is_generated": false
     },
-    "lightIntensity":  {
-        "type": "continuous"
+    "lightIntensity": {
+      "type": "continuous"
     },
     "lightbulbColor": {
-        "type": "enum"
+      "type": "enum"
     }
   },
   "output": ["lightbulbColor"],
@@ -536,7 +538,7 @@ provided continuously.
 }
 ```
 
-### Timestamp ###
+### Timestamp
 
 **craft ai** API heavily relies on `timestamps`. A `timestamp` is an instant represented as a [Unix time](https://en.wikipedia.org/wiki/Unix_time), that is to say the amount of seconds elapsed since Thursday, 1 January 1970 at midnight UTC. In most programming languages this representation is easy to retrieve, you can refer to [**this page**](https://github.com/techgaun/unix-time/blob/master/README.md) to find out how.
 
@@ -586,7 +588,7 @@ now = craftai.Time()
 nowP5 = craftai.Time(timezone="+05:00")
 ```
 
-### Advanced configuration ###
+### Advanced configuration
 
 The following **advanced** configuration parameters can be set in specific cases. They are **optional**. Usually you would not need them.
 
@@ -596,9 +598,9 @@ The following **advanced** configuration parameters can be set in specific cases
 
 These advanced configuration parameters are optional, and will appear in the agent information returned by **craft ai** only if you set them to something other than their default value. If you intend to use them in a production environment, please get in touch with us.
 
-### Agent ###
+### Agent
 
-#### Create ####
+#### Create
 
 Create a new agent, and create its [configuration](#configuration).
 
@@ -629,7 +631,7 @@ client.create_agent(
 )
 ```
 
-#### Delete ####
+#### Delete
 
 ```python
 client.delete_agent(
@@ -637,7 +639,7 @@ client.delete_agent(
 )
 ```
 
-#### Retrieve ####
+#### Retrieve
 
 ```python
 client.get_agent(
@@ -645,7 +647,7 @@ client.get_agent(
 )
 ```
 
-#### List ####
+#### List
 
 ```python
 client.list_agents()
@@ -654,7 +656,7 @@ client.list_agents()
 
 ```
 
-#### Create and retrieve shared url ####
+#### Create and retrieve shared url
 
 Create and get a shareable url to view an agent tree.
 Only one url can be created at a time.
@@ -666,7 +668,7 @@ client.get_shared_agent_inspector_url(
 )
 ```
 
-#### Delete shared url ####
+#### Delete shared url
 
 Delete a shareable url.
 The previous url cannot access the agent tree anymore.
@@ -679,9 +681,9 @@ client.delete_shared_agent_inspector_url(
 
 
 
-### Context ###
+### Context
 
-#### Add operations ####
+#### Add operations
 
 ```python
 client.add_operations(
@@ -743,7 +745,7 @@ client.add_operations(
 )
 ```
 
-#### List operations ####
+#### List operations
 
 ```python
 client.get_operations_list(
@@ -757,7 +759,7 @@ client.get_operations_list(
 
 > This call can generate multiple requests to the craft ai API as results are paginated.
 
-#### Retrieve state ####
+#### Retrieve state
 
 ```python
 client.get_context_state(
@@ -766,7 +768,7 @@ client.get_context_state(
 )
 ```
 
-#### Retrieve state history ####
+#### Retrieve state history
 
 ```python
 client.get_state_history(
@@ -778,7 +780,7 @@ client.get_state_history(
 )
 ```
 
-### Decision tree ###
+### Decision tree
 
 Decision trees are computed at specific timestamps, directly by **craft ai** which learns from the context operations [added](#add-operations) throughout time.
 
@@ -789,19 +791,21 @@ When you [compute](#compute) a decision tree, **craft ai** returns an object con
 - the tree itself as a JSON object:
 
   - Internal nodes are represented by a `"decision_rule"` object and a `"children"` array. The first one, contains the `"property`, and the `"property"`'s value, to decide which child matches a context.
-  - Leaves have a `"predicted_value"`, `"confidence"` and `"decision_rule"` object for this value, instead of a `"children"` array. `"predicted_value`" is an estimation of the output in the contexts matching the node. `"confidence"` is a number between 0 and 1 that indicates how confident **craft ai** is that the output is a reliable prediction.  When the output is a numerical type, leaves also have a `"standard_deviation"` that indicates a margin of error around the `"predicted_value"`.
+  - Leaves have a `"predicted_value"`, `"confidence"` and `"decision_rule"` object for this value, instead of a `"children"` array. `"predicted_value`" is an estimation of the output in the contexts matching the node. `"confidence"` is a number between 0 and 1 that indicates how confident **craft ai** is that the output is a reliable prediction. When the output is a numerical type, leaves also have a `"standard_deviation"` that indicates a margin of error around the `"predicted_value"`.
   - The root only contains a `"children"` array.
 
-#### Compute ####
+#### Compute
 
 ```python
 client.get_decision_tree(
   "my_new_agent", # The agent id
-  1469473600 # The timestamp at which the decision tree is retrieved
+  1469473600 # Optional the timestamp at which we want the decision
+             # tree, default behavior is to return the decision tree
+             # from the latest timestamp in context operations
 )
 ```
 
-#### Take decision ####
+#### Take decision
 
 > :information_source: To take a decision, first compute the decision tree then use the **offline interpreter**.
 
@@ -830,8 +834,8 @@ It is possible to increase or decrease the timeout duration of `client.get_decis
 client = craftai.Client({
     # Mandatory, the token
     "token": "{token}",
-    # Optional, default value is 5 minutes (300000)
-    ": {timeout_duration_for_decision_trees_retrieval}
+    # Optional, default value is 600000 (10 minutes)
+    "decisionTreeRetrievalTimeout": "{timeout_duration_for_decision_trees_retrieval}"
 })
 ```
 
@@ -1094,3 +1098,41 @@ decisions_df = client.decide_from_contexts_df(tree, pd.DataFrame(
 ```
 
 This function never raises `CraftAiNullDecisionError`, instead it inserts these errors in the result `Dataframe` in a specific `error` column.
+
+#### `craftai.pandas.utils.create_tree_html` #####
+
+Returns a HTML version of the given decision tree. If this latter is saved in a `.html` file, it can be opened in 
+a browser to be visualized.
+
+```python
+
+from  craftai.pandas.utils import create_tree_html
+
+tree = client.get_decision_tree(
+  "my_agent", # The agent id
+  timestamp # The timestamp at which the decision tree is retrieved
+)
+
+html = create_tree_html(tree)
+
+# ...
+# ... save the html string to visualize it in a browser
+# ...
+```
+
+#### `craftai.pandas.utils.display_tree` #####
+
+Display a decision tree in a Jupyter Notebook. 
+This function can be useful for analyzing the induced decision trees.
+
+```python
+
+from  craftai.pandas.utils import display_tree
+
+tree = client.get_decision_tree(
+  "my_agent", # The agent id
+  timestamp # The timestamp at which the decision tree is retrieved
+)
+
+display_tree(tree)
+```

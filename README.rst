@@ -485,7 +485,7 @@ Each agent has a configuration defining:
 
 ..
 
-   ⚠️ the maximum learning_period value is 750000 \* time_quantum.
+   ⚠️ the maximum learning_period value is 55000 \* time_quantum.
 
 Context properties types
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -603,21 +603,21 @@ ignored when learning the decision model.
 
    {
      "context": {
-         "lightIntensity":  {
-           "type": "continuous"
-         },
-         "time": {
-           "type": "time_of_day"
-         },
-         "day": {
-           "type": "day_of_week"
-         },
-         "timezone": {
-           "type": "timezone"
-         },
-         "lightbulbColor": {
-             "type": "enum"
-         }
+       "lightIntensity": {
+         "type": "continuous"
+       },
+       "time": {
+         "type": "time_of_day"
+       },
+       "day": {
+         "type": "day_of_week"
+       },
+       "timezone": {
+         "type": "timezone"
+       },
+       "lightbulbColor": {
+         "type": "enum"
+       }
      },
      "output": ["lightbulbColor"],
      "time_quantum": 100,
@@ -636,11 +636,11 @@ property of type ``timezone`` is therefore needed. However values of
          "type": "time_of_day",
          "is_generated": false
        },
-       "lightIntensity":  {
-           "type": "continuous"
+       "lightIntensity": {
+         "type": "continuous"
        },
        "lightbulbColor": {
-           "type": "enum"
+         "type": "enum"
        }
      },
      "output": ["lightbulbColor"],
@@ -975,7 +975,9 @@ Compute
 
    client.get_decision_tree(
      "my_new_agent", # The agent id
-     1469473600 # The timestamp at which the decision tree is retrieved
+     1469473600 # Optional the timestamp at which we want the decision
+                # tree, default behavior is to return the decision tree
+                # from the latest timestamp in context operations
    )
 
 Take decision
@@ -1020,8 +1022,8 @@ computations.
    client = craftai.Client({
        # Mandatory, the token
        "token": "{token}",
-       # Optional, default value is 5 minutes (300000)
-       ": {timeout_duration_for_decision_trees_retrieval}
+       # Optional, default value is 600000 (10 minutes)
+       "decisionTreeRetrievalTimeout": "{timeout_duration_for_decision_trees_retrieval}"
    })
 
 Proxy
@@ -1332,6 +1334,47 @@ format as above.
 This function never raises ``CraftAiNullDecisionError``, instead it
 inserts these errors in the result ``Dataframe`` in a specific ``error``
 column.
+
+``craftai.pandas.utils.create_tree_html``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns a HTML version of the given decision tree. If this latter is
+saved in a ``.html`` file, it can be opened in a browser to be
+visualized.
+
+.. code:: python
+
+
+   from  craftai.pandas.utils import create_tree_html
+
+   tree = client.get_decision_tree(
+     "my_agent", # The agent id
+     timestamp # The timestamp at which the decision tree is retrieved
+   )
+
+   html = create_tree_html(tree)
+
+   # ...
+   # ... save the html string to visualize it in a browser
+   # ...
+
+``craftai.pandas.utils.display_tree``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Display a decision tree in a Jupyter Notebook. This function can be
+useful for analyzing the induced decision trees.
+
+.. code:: python
+
+
+   from  craftai.pandas.utils import display_tree
+
+   tree = client.get_decision_tree(
+     "my_agent", # The agent id
+     timestamp # The timestamp at which the decision tree is retrieved
+   )
+
+   display_tree(tree)
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/craft-ai.svg?style=flat-square
    :target: https://pypi.python.org/pypi?:action=display&name=craft-ai
