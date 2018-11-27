@@ -299,10 +299,11 @@ class CraftAIClient(object):
   def _get_decision_tree(self, agent_id, timestamp, version):
     headers = self._headers.copy()
     headers["x-craft-ai-tree-version"] = version
-
-    req_url = "{}/agents/{}/decision/tree?t={}".format(self._base_url,
-                                                       agent_id,
-                                                       timestamp)
+    # If we give no timestamp the default behaviour is to give the tree from the latest timestamp
+    if timestamp is None:
+      req_url = "{}/agents/{}/decision/tree?".format(self._base_url, agent_id)
+    else:
+      req_url = "{}/agents/{}/decision/tree?t={}".format(self._base_url, agent_id, timestamp)
 
     resp = self._requests_session.get(req_url)
 
@@ -310,10 +311,9 @@ class CraftAIClient(object):
 
     return decision_tree
 
-  def get_decision_tree(self, agent_id, timestamp, version=DEFAULT_DECISION_TREE_VERSION):
+  def get_decision_tree(self, agent_id, timestamp=None, version=DEFAULT_DECISION_TREE_VERSION):
     # Raises an error when agent_id is invalid
     self._check_agent_id(agent_id)
-
     if self._config["decisionTreeRetrievalTimeout"] is False:
       # Don't retry
       return self._get_decision_tree(agent_id, timestamp, version)
