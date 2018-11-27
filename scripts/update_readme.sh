@@ -10,7 +10,7 @@ hash pandoc 2>/dev/null || { echo >&2 "This script requires 'pandoc', which is n
 cd ${BASH_SOURCE%/*}/..
 # Download the markdown readme
 echo "Downloading the README.md..."
-curl -s -o README.md http://www.craft.ai/content/api/python.md
+curl -s -o README.md https://www.craft.ai/content/api/python.md
 # Convert to rst
 echo "Converting to README.rst..."
 pandoc --from=markdown_github --to=rst --output=README.rst README.md
