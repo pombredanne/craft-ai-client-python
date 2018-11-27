@@ -54,7 +54,7 @@ setup(
 
   packages=["craftai"],
   install_requires=[
-    "requests==2.13.0",
+    "requests==2.20.1",
     "six==1.10",
     "datetime==4.1.1",
     "semver==2.7.7",
