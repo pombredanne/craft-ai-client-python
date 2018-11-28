@@ -18,7 +18,7 @@ def get_package_metadata(package, key):
     src = init_py.read().decode('utf-8')
     return re.search("__" + key + "__ = ['\"]([^'\"]+)['\"]", src).group(1)
 
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(here, 'README.md'), mode='r', encoding='utf-8') as f:
   long_description = f.read()
 
 setup(
@@ -27,6 +27,7 @@ setup(
 
   description="craft ai API client for python",
   long_description=long_description,
+  long_description_content_type="text/markdown",
 
   author=get_package_metadata("craftai", "author"),
   author_email="contact@craft.ai",

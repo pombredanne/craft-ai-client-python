@@ -1,8 +1,8 @@
 language: python
 python:
-  - "2.7"
-  - "3.3"
-  - "3.5"
+- '2.7'
+- '3.3'
+- '3.5'
 git:
   submodules: false
 before_install:
@@ -20,12 +20,12 @@ deploy:
   provider: pypi
   user: ops
   password:
-    secure: BV855ZvX9A+93Zn3o8OjbxJCJ4GiHjcPLzerd4TiuBHFh4e78i9UAcjCS4f1GjgdDe+QM+c/PKxHDI0Fgk/QcNSjAWNPyreY5qNfScLVbfD2GGWoi71Oqt2Yo82lGOGEQjbiOruJhbnnPTJ0tYCedtYsgy/aDAK5Asl9lpzlZm0mH+5FNJbyuPWr0KkWh3oR5kZ9yaO3kSAvTkn3gCS4E14s/n+qYCBQPaHHmDCDoE6J021kHTIqXQpTXY39Xoc1q5z+cJXJ01L2c/z/MDRbFrLvetglqD6sru9ZwSV1U9HUMbzuHv/+yrxydyuZoRE/IHfD8BfWkq+A8dGLytLs0R4EJlVS2bTBCGIIRQ+STWlFl8JjkG4ONkzeCWR0VppEKMQ41YGU7pexm7Z7c7dwxsTsOU5wV5TNS3jHJTvbkVBWtIrJSgN//DDTIwo3kP/ayeZ+Ndz29b17/MTkCScUXxU0QD5Qril3JMPEJo/O1g1pw7FcvaAWRkcGzTyi1Nt//6dqGWTvTX89WZ5F9mnwDN7PL3WPqVNIg/eZq2pQIdT6S6iiVdS9pmrFAJ+u51kV4Udedp70HlR6RxxWILCKmP3wiV9YA9NX8vk8woOoWq9WCJ89/oI2VcOPOvwnUXiLEbQqb89uqGpCzhwluKZrlSt+y6tHXsmu0P47MwDwpn0=
+    secure: tIR4sBdg/GI6frjUQSwYASCtUxYWopvFencyaukCLgK4OSz65ibsa5/qj9xHUigyFRI5JL03sG2IS3yJ21pcz+B4Ejt5uxPWpb9Z9zvuEIt/Az1chZg4AowG3wBaCmEZwWty6w8tZqWYtuSuycGl8pC71E4HeOC94XrT7O+pkd7PHYEvpcKprj+Sll64m7JtvxFA1LDTuNS1xe+jnibTB/qQg6dfTlsbNVCQqSqKCKMzS6mmTgbcyAnKt+r1q8KghdQjK+4I+S7YDv4yS+PTVdDEO1ha0lAjEMBBhhfPw7KFpefy4k5sTTh9CffJf3MlNCMRp+uzgTIBf0QkTVtRSFn98deagirPbfUR4OSo8Gj6tG4NX1sSKRWRA9WCjohtp9oLc629kScn3bqEzZl3VOpSwQs1H4c0m8HFxc5Umjgv5NEQ/kVW1u5Ja3DeGdfIE22HJmwwWZGknOjoZaVa7hA7+w/mfGPDa/75oUPQ8dagPu0BTe4pW+a7wmhdQYIQRiiCwLctOrwtExdXmEZQYx2A6SdXNJHWTwh4/XnKbP0juEYQeJKTbecNf8zHA88IxmR1BjSHetYFl3mL1iJ01lYPHCciBy5cBdE7R4xZfQiskDVmBC7FtBWlwePBLvmICjep9FhViZaw4RbvsPLHFEi6v69UXTOEXU+JRYitD+Q=
   distributions: bdist_wheel
   on:
     tags: true
     branch: master
-    python: "3.5"
+    python: '3.5'
 notifications:
   slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
   email:
