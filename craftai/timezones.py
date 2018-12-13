@@ -1,4 +1,5 @@
 import re
+import six
 
 _TIMEZONE_REGEX = re.compile(r"^([+-](2[0-3]|[01][0-9])(:?[0-5][0-9])?|Z)$")
 
@@ -36,11 +37,30 @@ TIMEZONES = {
 }
 
 def is_timezone(value):
+  if isinstance(value, six.integer_types) and value <= 840 and value >= -720:
+    return True
+  if not isinstance(value, six.string_types):
+    return False
+  if value in TIMEZONES:
+    return True
   result_reg_exp = _TIMEZONE_REGEX.match(value) is not None
-  result_abbreviations = value in TIMEZONES
-  return result_reg_exp or result_abbreviations
+  return result_reg_exp
+
+# def get_timezone_key(configuration):
+
+def get_timezone_key(configuration):
+  for key in configuration:
+    if configuration[key]["type"] == "timezone":
+      return key
+  return None
 
 def timezone_offset_in_sec(timezone):
+  if isinstance(timezone, six.integer_types):
+    # If the UTC offset is between -16 and +16, consider it as a
+    # number of hours to reproduce the platform's moment behavior
+    if timezone > -16 and timezone < 16:
+      return timezone * 60 * 60
+    return timezone * 60
   if timezone in TIMEZONES:
     timezone = TIMEZONES[timezone]
   if len(timezone) > 3:
@@ -53,3 +73,13 @@ def timezone_offset_in_sec(timezone):
     offset = -offset
 
   return offset
+
+def timezone_offset_in_standard_format(timezone):
+  if isinstance(timezone, six.integer_types):
+    sign = '+' if timezone >= 0 else '-'
+    absolute_offset = abs(timezone)
+    if absolute_offset < 16:
+      return  '%s%02d:00' % (sign, absolute_offset)
+    return '%s%02d:%02d' % (sign, int(absolute_offset / 60),
+                            int(absolute_offset % 60))
+  return timezone

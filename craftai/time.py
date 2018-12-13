@@ -107,7 +107,7 @@ class Time(object):
       if isinstance(timezone, tzinfo):
         # If it's already a timezone object, no more work is needed
         _time = timestamp.astimezone(timezone)
-      elif isinstance(timezone, six.string_types) and is_timezone(timezone):
+      elif is_timezone(timezone):
         # If it's a string, we convert it to a usable timezone object
         offset = timezone_offset_in_sec(timezone)
         _time = timestamp.astimezone(tz=dt_timezone(timedelta(seconds=offset)))

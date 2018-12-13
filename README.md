@@ -415,16 +415,22 @@ Each agent has a configuration defining:
 - a `day_of_week` property is an integer belonging to **[0, 6]**, each value represents a day of the week starting from Monday (0 is Monday, 6 is Sunday).
 - a `day_of_month` property is an integer belonging to **[1, 31]**, each value represents a day of the month.
 - a `month_of_year` property is an integer belonging to **[1, 12]**, each value represents a month of the year.
-- a `timezone` property is a string value representing the timezone as an offset from UTC, supported format are:
+- a `timezone` property can be:
+  * a string value representing the timezone as an offset from UTC, supported formats are:
 
-  - **±[hh]:[mm]**,
-  - **±[hh][mm]**,
-  - **±[hh]**,
+    - **±[hh]:[mm]**,
+    - **±[hh][mm]**,
+    - **±[hh]**,
 
-  where `hh` represent the hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
-  `+14:00`.
+    where `hh` represent the hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
+    `+14:00`.
 
-  Some abbreviations are also supported:
+  * an integer belonging to **[-720, 840]** which represents the timezone as an offset from UTC:
+
+    - in hours if the integer belongs to **[-15, 15]**
+    - in minutes otherwise
+
+  * an abbreviation among the following:
 
   - **UTC** or **Z** Universal Time Coordinated,
   - **GMT** Greenwich Mean Time, as UTC,
@@ -1101,7 +1107,7 @@ This function never raises `CraftAiNullDecisionError`, instead it inserts these 
 
 #### `craftai.pandas.utils.create_tree_html` #####
 
-Returns a HTML version of the given decision tree. If this latter is saved in a `.html` file, it can be opened in 
+Returns a HTML version of the given decision tree. If this latter is saved in a `.html` file, it can be opened in
 a browser to be visualized.
 
 ```python
@@ -1122,7 +1128,7 @@ html = create_tree_html(tree)
 
 #### `craftai.pandas.utils.display_tree` #####
 
-Display a decision tree in a Jupyter Notebook. 
+Display a decision tree in a Jupyter Notebook.
 This function can be useful for analyzing the induced decision trees.
 
 ```python

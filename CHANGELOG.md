@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-python/compare/v1.14.1...HEAD) ##
 
+### Added
+
+- Support timezones as UTC offset in minutes
+
 ## [1.14.1](https://github.com/craft-ai/craft-ai-client-python/compare/v1.14.0...v1.14.1) - 2018-11-28 ##
 
 ### Changed

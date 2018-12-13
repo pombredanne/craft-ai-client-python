@@ -7,12 +7,12 @@ from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
 from craftai.operators import OPERATORS, OPERATORS_FUNCTION
 from craftai.types import TYPES
 from craftai.time import Time
-from craftai.timezones import is_timezone
+from craftai.timezones import is_timezone, get_timezone_key, timezone_offset_in_standard_format
 
 _VALUE_VALIDATORS = {
   TYPES["continuous"]: lambda value: isinstance(value, numbers.Real),
   TYPES["enum"]: lambda value: isinstance(value, six.string_types),
-  TYPES["timezone"]: lambda value: isinstance(value, six.string_types) and is_timezone(value),
+  TYPES["timezone"]: lambda value: is_timezone(value),
   TYPES["time_of_day"]: lambda value: (isinstance(value, numbers.Real)
                                        and value >= 0 and value < 24),
   TYPES["day_of_week"]: lambda value: (isinstance(value, six.integer_types)
@@ -40,6 +40,10 @@ class Interpreter(object):
       context = Interpreter.join_decide_args(args)
 
     errors = Interpreter._check_context(configuration, context)
+
+    # Convert timezones as integers into standard +/hh:mm format
+    # This should only happen when no time generated value is required
+    context = Interpreter._convert_timezones_to_standard_format(configuration, context)
 
     # deal with missing properties
     if errors:
@@ -262,6 +266,13 @@ class Interpreter(object):
           """ or Time instances."""
         )
     return joined_args
+
+  @staticmethod
+  def _convert_timezones_to_standard_format(configuration, context):
+    timezone_key = get_timezone_key(configuration["context"])
+    if timezone_key:
+      context[timezone_key] = timezone_offset_in_standard_format(context[timezone_key])
+    return context
 
   @staticmethod
   def _parse_tree(tree_object):
