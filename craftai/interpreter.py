@@ -39,9 +39,11 @@ class Interpreter(object):
     else:
       context = Interpreter.join_decide_args(args)
 
-    missing_method = configuration.get("missing_value_method")
+    # Check if missing values are handled
+    enable_missing_values = False if configuration.get(
+      "deactivate_missing_values") is True else True
 
-    errors = Interpreter._check_context(configuration, context, missing_method)
+    errors = Interpreter._check_context(configuration, context, enable_missing_values)
 
     # Convert timezones as integers into standard +/hh:mm format
     # This should only happen when no time generated value is required
@@ -60,9 +62,11 @@ class Interpreter(object):
     decision = {}
     decision["output"] = {}
     for output in configuration.get("output"):
-      output_values = bare_tree[output]["output_values"]
-      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output], context,
-                                                                 output_values, missing_method)
+      decision["output"][output] = Interpreter._decide_recursion(bare_tree[output],
+                                                                 context,
+                                                                 bare_tree[output].get(
+                                                                   "output_values"),
+                                                                 enable_missing_values)
     decision["context"] = context
     decision["_version"] = _DECISION_VERSION
 
@@ -142,7 +146,7 @@ class Interpreter(object):
     return True
 
   @staticmethod
-  def _decide_recursion(node, context, values, missing_method):
+  def _decide_recursion(node, context, values, enable_missing_values):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
       predicted_value = node.get("predicted_value")
@@ -165,12 +169,12 @@ class Interpreter(object):
 
     # Finding the first element in this node's childrens matching the
     # operator condition with given context
-    matching_child = Interpreter._find_matching_child(node, context, missing_method)
+    matching_child = Interpreter._find_matching_child(node, context, enable_missing_values)
 
     # If there is no child corresponding matching the operators then we compute
     # the probabilistic distribution from this node.
     if not matching_child:
-      if missing_method:
+      if enable_missing_values:
         result, _ = Interpreter._distribution(node, len(values))
         if isinstance(result, list):
           final_result = {"predicted_value": values[result.index(max(result))]}
@@ -186,7 +190,7 @@ class Interpreter(object):
       )
 
     # If a matching child is found, recurse
-    result = Interpreter._decide_recursion(matching_child, context, values, missing_method)
+    result = Interpreter._decide_recursion(matching_child, context, values, enable_missing_values)
     new_predicates = [{
       "property": matching_child["decision_rule"]["property"],
       "operator": matching_child["decision_rule"]["operator"],
@@ -209,22 +213,23 @@ class Interpreter(object):
     # If it is a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
 
-      value_repartition = node.get("weighted_repartition")
-      if value_repartition is not None:
-        probability_distribution = [p/sum(value_repartition) for p in value_repartition]
-        return [probability_distribution, sum(value_repartition)]
+      value_distribution = node.get("distribution")
+      # It is a classification problem
+      if value_distribution is not None:
+        probability_distribution = [p/sum(value_distribution) for p in value_distribution]
+        return [probability_distribution, sum(value_distribution)]
 
-      predicted_value = node.get("predicted_value")
-      if predicted_value is not None:
-        return [predicted_value, node["nb_samples"]]
+      # It is a regression problem
+      if node.get("predicted_value") is not None:
+        return [node.get("predicted_value"), node["nb_samples"]]
 
       raise CraftAiDecisionError(
         """Unable to take decision: the decision tree has no valid"""
         """ predicted value for the given context."""
       )
 
-    # If it is not a leaf, we recurse into the children and store the distributions
-    # and sizes of each child branch.
+    # If it is not a leaf, we recurse into the children and store
+    # the distributions/means and sizes of each child branch.
     results = [Interpreter._distribution(child, nb_outputs)
                for child in node.get("children")]
 
@@ -244,18 +249,17 @@ class Interpreter(object):
       # Sum all these probabilities to obtain the new distribution
       return [list(map(sum, zip(*prob_ratio))), total_size]
 
-    new_mean = sum([(mean * size)/ total_size for mean, size in zip(result, sizes)])
-    return [new_mean, total_size]
+    return [sum([(mean * size)/ total_size for mean, size in zip(result, sizes)]), total_size]
 
   @staticmethod
-  def _check_context(configuration, context, missing_method):
+  def _check_context(configuration, context, enable_missing_values):
     # Extract the required properties (i.e. those that are not the output)
     expected_properties = [
       p for p in configuration["context"]
       if not p in configuration["output"]
     ]
 
-    if not missing_method:
+    if not enable_missing_values:
       # Retrieve the missing properties
       missing_properties = [
         p for p in expected_properties
@@ -286,7 +290,7 @@ class Interpreter(object):
     return []
 
   @staticmethod
-  def _find_matching_child(node, context, missing_method):
+  def _find_matching_child(node, context, enable_missing_values):
     for child in node["children"]:
       property_name = child["decision_rule"]["property"]
       operand = child["decision_rule"]["operand"]
@@ -300,16 +304,7 @@ class Interpreter(object):
       #  branch correspond to the Enum branch "Null". And finally if none of these have
       #  been found we return that there is no matching children.If no Missing value method
       #  is activated raises an error.
-      if context_value is None:
-        if missing_method:
-          # If the context is None and the current operand is None as well
-          # If the NullBranch method is used,
-          # then it's a match corresponding to a Null Branch
-          if "NullBranch" in missing_method and operand is None:
-            return child
-          if missing_method == "Quinlan":
-            return {}
-          continue
+      if context_value is None and not enable_missing_values:
         raise CraftAiDecisionError(
           """Unable to take decision, property '{}' is missing from the given context.""".
           format(property_name)
