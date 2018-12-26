@@ -32,9 +32,8 @@ class Interpreter(object):
     errors = []
     bare_tree, configuration, _ = Interpreter._parse_tree(tree)
     if configuration != {}:
-      state = args[0]
       time = None if len(args) == 1 else args[1]
-      context_result = Interpreter._rebuild_context(configuration, state, time)
+      context_result = Interpreter._rebuild_context(configuration, args[0], time)
       context = context_result["context"]
     else:
       context = Interpreter.join_decide_args(args)
@@ -175,7 +174,7 @@ class Interpreter(object):
     # the probabilistic distribution from this node.
     if not matching_child:
       if enable_missing_values:
-        result, _ = Interpreter._distribution(node, len(values))
+        result, _ = Interpreter._distribution(node)
         if isinstance(result, list):
           final_result = {"predicted_value": values[result.index(max(result))]}
         else:
@@ -209,7 +208,7 @@ class Interpreter(object):
     return final_result
 
   @staticmethod
-  def _distribution(node, nb_outputs):
+  def _distribution(node):
     # If it is a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
 
@@ -221,7 +220,7 @@ class Interpreter(object):
 
       # It is a regression problem
       if node.get("predicted_value") is not None:
-        return [node.get("predicted_value"), node["nb_samples"]]
+        return [[node.get("predicted_value")], node["nb_samples"]]
 
       raise CraftAiDecisionError(
         """Unable to take decision: the decision tree has no valid"""
@@ -230,26 +229,20 @@ class Interpreter(object):
 
     # If it is not a leaf, we recurse into the children and store
     # the distributions/means and sizes of each child branch.
-    results = [Interpreter._distribution(child, nb_outputs)
-               for child in node.get("children")]
+    def recurse(_child):
+      return Interpreter._distribution(_child)
+    array_sizes = map(recurse, node.get("children"))
 
-    result, sizes = zip(*results)
+    array, sizes = zip(*array_sizes)
+    return Interpreter.compute_mean(array, sizes)
+
+  @staticmethod
+  def compute_mean(array, sizes):
+    # Compute the total number of element
     total_size = float(sum(sizes))
-
-    # If the distribution is an list object then it is a classification problem
-    # and the probabilty distribution of this node is computed.
-    # Otherwise it is a regression problem and the mean value of this node is
-    # computed.
-    if isinstance(result[0], list):
-      # For 3 children, it return: [[[P11, P22 ..], T1], [[P12, P22, ..], T2], [[P13, P23, ..], T3]]
-      # Unzip the children size to compute the total size of the children node
-      # Mutliply the branch probability distribution with its corresponding
-      # ratio ( size / total size )
-      prob_ratio = [[p * size / total_size for p in probs] for probs, size in zip(result, sizes)]
-      # Sum all these probabilities to obtain the new distribution
-      return [list(map(sum, zip(*prob_ratio))), total_size]
-
-    return [sum([(mean * size)/ total_size for mean, size in zip(result, sizes)]), total_size]
+    ratio_applied = [[x * size / total_size for x in x_array]
+                     for x_array, size in zip(array, sizes)]
+    return map(sum, zip(*ratio_applied))
 
   @staticmethod
   def _check_context(configuration, context, enable_missing_values):
