@@ -46,8 +46,6 @@ def is_timezone(value):
   result_reg_exp = _TIMEZONE_REGEX.match(value) is not None
   return result_reg_exp
 
-# def get_timezone_key(configuration):
-
 def get_timezone_key(configuration):
   for key in configuration:
     if configuration[key]["type"] == "timezone":
@@ -76,10 +74,10 @@ def timezone_offset_in_sec(timezone):
 
 def timezone_offset_in_standard_format(timezone):
   if isinstance(timezone, six.integer_types):
-    sign = '+' if timezone >= 0 else '-'
+    sign = "+" if timezone >= 0 else "-"
     absolute_offset = abs(timezone)
     if absolute_offset < 16:
-      return  '%s%02d:00' % (sign, absolute_offset)
-    return '%s%02d:%02d' % (sign, int(absolute_offset / 60),
+      return  "%s%02d:00" % (sign, absolute_offset)
+    return "%s%02d:%02d" % (sign, int(absolute_offset / 60),
                             int(absolute_offset % 60))
   return timezone
