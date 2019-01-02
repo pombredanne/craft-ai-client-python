@@ -54,8 +54,8 @@ def get_timezone_key(configuration):
 
 def timezone_offset_in_sec(timezone):
   if isinstance(timezone, six.integer_types):
-    # If the UTC offset is between -16 and +16, consider it as a
-    # number of hours to reproduce the platform's moment behavior
+    # If the offset belongs to [-15, 15] it is considered to represent hours.
+    # This reproduces Moment's utcOffset behaviour.
     if timezone > -16 and timezone < 16:
       return timezone * 60 * 60
     return timezone * 60
