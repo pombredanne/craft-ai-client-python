@@ -1,6 +1,6 @@
 [MASTER]
 
-disable=missing-docstring,locally-enabled,locally-disabled,duplicate-code
+disable=missing-docstring,locally-enabled,locally-disabled,duplicate-code,unnecessary-lambda
 
 [BASIC]
 

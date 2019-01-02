@@ -32,6 +32,9 @@ class TestTime(unittest.TestCase):
     self.assertEqual(Time(t="2017-01-01 00:00:00", timezone="-03:00").timezone, "-03:00")
     self.assertEqual(Time(t="2017-01-01 03:00:00", timezone="+02:00").timezone, "+02:00")
     self.assertEqual(Time(t=datetime(2011, 1, 1, 0, 0), timezone="+02:00").timezone, "+02:00")
+    self.assertEqual(Time(t="2017-01-01 03:00:00", timezone=120).timezone, "+02:00")
+    self.assertEqual(Time(t="2017-01-01 03:00:00", timezone=-120).timezone, "-02:00")
+    self.assertEqual(Time(t="2017-01-01 03:00:00", timezone=-2).timezone, "-02:00")
     self.assertEqual(Time(t=datetime(2012, 9, 12, 6, 0, 0, tzinfo=pytz.utc)).timezone, "+00:00")
     self.assertEqual(Time().timezone, Time().timezone)
 
@@ -45,3 +48,6 @@ class TestTime(unittest.TestCase):
     self.assertRaises(CraftAiTimeError, Time, "2011-04-22 01:00:00+0900", "-03:00")
     self.assertRaises(CraftAiTimeError, Time, datetime(2002, 10, 27, 6, 0, 0,
                                                        tzinfo=pytz.utc), pytz.utc)
+    #Invalid UTC offset
+    self.assertRaises(CraftAiTimeError, Time, "2011-04-22 01:00:00+0900", -950)
+    self.assertRaises(CraftAiTimeError, Time, "2011-04-22 01:00:00+0900", 950)
