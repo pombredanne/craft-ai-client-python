@@ -1,7 +1,7 @@
 import numbers
 import re
-import semver
 import six
+import semver
 
 from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
 from craftai.operators import OPERATORS, OPERATORS_FUNCTION
@@ -148,7 +148,12 @@ class Interpreter(object):
   def _decide_recursion(node, context, values, enable_missing_values):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
-      predicted_value = node.get("predicted_value")
+      # We check if a leaf has the key 'prediction' corresponging to a v2 tree
+      prediction = node.get("prediction")
+      if prediction is None:
+        prediction = node
+
+      predicted_value = prediction.get("value")
       if predicted_value is None:
         raise CraftAiNullDecisionError(
           """Unable to take decision: the decision tree has no valid"""
@@ -157,12 +162,12 @@ class Interpreter(object):
 
       leaf = {
         "predicted_value": predicted_value,
-        "confidence": node.get("confidence") or 0,
+        "confidence": prediction.get("confidence") or 0,
         "decision_rules": []
       }
 
-      if node.get("standard_deviation", None) is not None:
-        leaf["standard_deviation"] = node.get("standard_deviation")
+      if prediction["distribution"].get("standard_deviation", None) is not None:
+        leaf["standard_deviation"] = prediction["distribution"].get("standard_deviation")
 
       return leaf
 
@@ -211,16 +216,16 @@ class Interpreter(object):
   def _distribution(node):
     # If it is a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
-
-      value_distribution = node.get("distribution")
+      prediction = node.get("prediction")
+      value_distribution = prediction.get("distribution")
       # It is a classification problem
       if value_distribution is not None:
-        probability_distribution = [p/sum(value_distribution) for p in value_distribution]
-        return [probability_distribution, sum(value_distribution)]
+        return [value_distribution, node["nb_samples"]]
 
       # It is a regression problem
-      if node.get("predicted_value") is not None:
-        return [[node.get("predicted_value")], node["nb_samples"]]
+      predicted_value = prediction.get("predicted_value")
+      if predicted_value is not None:
+        return [[predicted_value], node["nb_samples"]]
 
       raise CraftAiDecisionError(
         """Unable to take decision: the decision tree has no valid"""
@@ -232,7 +237,6 @@ class Interpreter(object):
     def recurse(_child):
       return Interpreter._distribution(_child)
     array_sizes = map(recurse, node.get("children"))
-
     array, sizes = zip(*array_sizes)
     return Interpreter.compute_mean(array, sizes)
 
