@@ -27,7 +27,7 @@ _VALUE_VALIDATORS = {
 class InterpreterV2(object):
 
   @staticmethod
-  def decide_v2(configuration, bare_tree, context):
+  def decide(configuration, bare_tree, context):
     # Check if missing values are handled
     enable_missing_values = False if configuration.get(
       "deactivate_missing_values") is True else True
@@ -65,8 +65,10 @@ class InterpreterV2(object):
         "decision_rules": []
       }
 
-      if prediction["distribution"].get("standard_deviation", None) is not None:
-        leaf["standard_deviation"] = prediction["distribution"].get("standard_deviation")
+      if not isinstance(prediction.get("distribution"), list):
+        standard_deviation = prediction["distribution"].get("standard_deviation")
+        if standard_deviation:
+          leaf["standard_deviation"] = standard_deviation
 
       return leaf
 

@@ -29,9 +29,9 @@ class Interpreter(object):
     decision["output"] = {}
 
     if semver.match(tree_version, ">=1.0.0") and semver.match(tree_version, "<2.0.0"):
-      decision["output"] = InterpreterV1.decide_v1(configuration, bare_tree, context)
+      decision["output"] = InterpreterV1.decide(configuration, bare_tree, context)
     elif semver.match(tree_version, ">=2.0.0") and semver.match(tree_version, "<3.0.0"):
-      decision["output"] = InterpreterV2.decide_v2(configuration, bare_tree, context)
+      decision["output"] = InterpreterV2.decide(configuration, bare_tree, context)
     else:
       raise CraftAiDecisionError(
         """Invalid decision tree format, "{}" is currently not a valid version.""".

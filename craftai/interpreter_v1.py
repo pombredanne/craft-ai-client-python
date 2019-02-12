@@ -27,7 +27,7 @@ _VALUE_VALIDATORS = {
 class InterpreterV1(object):
 
   @staticmethod
-  def decide_v1(configuration, bare_tree, context):
+  def decide(configuration, bare_tree, context):
     InterpreterV1._check_context(configuration, context)
 
     decision_result = {}
