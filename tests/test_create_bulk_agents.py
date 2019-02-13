@@ -9,7 +9,8 @@ from .data import valid_data
 from .data import invalid_data
 
 class TestCreateBulkAgentsSuccess(unittest.TestCase):
-  """Checks that the client succeeds when creating an agent with OK input"""
+  """Checks that the client succeeds when creating
+  an/multiple agent(s) with OK input"""
 
   @classmethod
   def setUpClass(cls):
@@ -24,12 +25,6 @@ class TestCreateBulkAgentsSuccess(unittest.TestCase):
 
     self.assertIsInstance(resp1, dict)
     self.assertIsInstance(resp2, dict)
-
-    resp_keys1 = resp1.keys()
-    resp_keys2 = resp2.keys()
-
-    self.assertTrue("message" in resp_keys1)
-    self.assertTrue("message" in resp_keys2)
 
   def clean_up_agent(self, aid):
     # Makes sure that no agent with the standard ID remains
@@ -113,7 +108,8 @@ class TestCreateBulkAgentsSuccess(unittest.TestCase):
 
 
 class TestCreateBulkAgentsFailure(unittest.TestCase):
-  """Checks that the client fails when creating an agent with bad input"""
+  """Checks that the client fails when creating
+  an/multiple agent(s) with bad input"""
 
   @classmethod
   def setUpClass(cls):
@@ -129,12 +125,6 @@ class TestCreateBulkAgentsFailure(unittest.TestCase):
     self.assertIsInstance(resp1, dict)
     self.assertIsInstance(resp2, dict)
 
-    resp_keys1 = resp1.keys()
-    resp_keys2 = resp2.keys()
-
-    self.assertTrue("message" in resp_keys1)
-    self.assertTrue("message" in resp_keys2)
-
   def clean_up_agent(self, aid):
     # Makes sure that no agent with the standard ID remains
     self.client.delete_agent(aid)
@@ -143,6 +133,7 @@ class TestCreateBulkAgentsFailure(unittest.TestCase):
     # Makes sure that no agent with the standard ID remains
     for aid in aids:
       self.clean_up_agent(aid)
+
 
   def test_create_all_agent_with_existing_agent_id(self):
     """create_bulk_agent should fail when given only IDs that already exist.
@@ -163,7 +154,7 @@ class TestCreateBulkAgentsFailure(unittest.TestCase):
     self.addCleanup(self.clean_up_agents, [self.agent_id1, self.agent_id2])
 
   def test_create_all_agents_with_invalid_agent_id(self):
-    """create_bulk_agents should fail whith all agent id invalid.
+    """create_bulk_agents should fail with all agent id invalid.
 
     It should raise an error upon request for creation of
     multiple agents with invalid id.
@@ -200,6 +191,10 @@ class TestCreateBulkAgentsFailure(unittest.TestCase):
 
 
 class TestCreateBulkAgentsSomeFailure(unittest.TestCase):
+  """Checks that the client succeed when creating
+  an/multiple agent(s) with bad input and an/multiple agent(s)
+  with valid input"""
+
   @classmethod
   def setUpClass(cls):
     cls.client = Client(settings.CRAFT_CFG)
@@ -213,12 +208,6 @@ class TestCreateBulkAgentsSomeFailure(unittest.TestCase):
 
     self.assertIsInstance(resp1, dict)
     self.assertIsInstance(resp2, dict)
-
-    resp_keys1 = resp1.keys()
-    resp_keys2 = resp2.keys()
-
-    self.assertTrue("message" in resp_keys1)
-    self.assertTrue("message" in resp_keys2)
 
   def clean_up_agent(self, aid):
     # Makes sure that no agent with the standard ID remains
@@ -235,7 +224,7 @@ class TestCreateBulkAgentsSomeFailure(unittest.TestCase):
 
     It should give a proper JSON response with a list containing two dicts.
     The first one should have 'id' being the same as the one given as a parameter,
-    'error' field being a CraftAiCredentialsError (error 401).
+    'error' field being a CraftAiBadRequestError.
     The second one should have `id` and `configuration` fields being strings.
     """
     # Calling create_bulk_agents a first time
@@ -245,7 +234,7 @@ class TestCreateBulkAgentsSomeFailure(unittest.TestCase):
     resp2 = self.client.create_bulk_agents(payload)
 
     self.assertEqual(resp2[0].get("id"), self.agent_id1)
-    self.assertIsInstance(resp2[0].get("error"), craft_err.CraftAiCredentialsError)
+    self.assertIsInstance(resp2[0].get("error"), craft_err.CraftAiBadRequestError)
     self.assertFalse("configuration" in resp2[0])
     self.assertIsInstance(resp1[1].get("id"), six.string_types)
     self.assertTrue("configuration" in resp1[1])

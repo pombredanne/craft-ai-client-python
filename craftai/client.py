@@ -549,17 +549,20 @@ class CraftAIClient(object):
     valid_agent_indices = []
     for index, agent in enumerate(payload):
       try:
-        self._check_agent_id(agent["id"])
+        if "id" in agent:
+          self._check_agent_id(agent["id"])
       except CraftAiBadRequestError as _:
         invalid_agent_indices.append(index)
       else:
         valid_agent_indices.append(index)
-      if len(invalid_agent_indices) == len(payload):
-        raise CraftAiBadRequestError(ERROR_ID_MESSAGE)
-      invalid_payload = []
-      for invalid_agent in [payload[i] for i in invalid_agent_indices]:
-        invalid_payload.append({"id": invalid_agent["id"],
-                                "error": CraftAiBadRequestError(ERROR_ID_MESSAGE)})
+
+    if len(invalid_agent_indices) == len(payload):
+      raise CraftAiBadRequestError(ERROR_ID_MESSAGE)
+
+    invalid_payload = []
+    for invalid_agent in [payload[i] for i in invalid_agent_indices]:
+      invalid_payload.append({"id": invalid_agent["id"],
+                              "error": CraftAiBadRequestError(ERROR_ID_MESSAGE)})
 
     return valid_agent_indices, invalid_agent_indices, invalid_payload
 
@@ -585,7 +588,7 @@ class CraftAIClient(object):
 
     if request_type == "POST":
       resp = self._requests_session.post(req_url, headers=ct_header, data=json_pl)
-    if request_type == "DELETE":
+    elif request_type == "DELETE":
       resp = self._requests_session.delete(req_url, headers=ct_header, data=json_pl)
     else:
       resp = self._requests_session.get(req_url, headers=ct_header, data=json_pl)
