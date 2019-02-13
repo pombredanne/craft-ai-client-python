@@ -7,8 +7,6 @@ from craftai.timezones import get_timezone_key, timezone_offset_in_standard_form
 from craftai.interpreter_v1 import InterpreterV1
 from craftai.interpreter_v2 import InterpreterV2
 
-_DECISION_VERSION = "1.1.0"
-
 class Interpreter(object):
 
   @staticmethod
@@ -25,13 +23,10 @@ class Interpreter(object):
     # This should only happen when no time generated value is required
     context = Interpreter._convert_timezones_to_standard_format(configuration, context)
 
-    decision = {}
-    decision["output"] = {}
-
     if semver.match(tree_version, ">=1.0.0") and semver.match(tree_version, "<2.0.0"):
-      decision["output"] = InterpreterV1.decide(configuration, bare_tree, context)
+      decision = InterpreterV1.decide(configuration, bare_tree, context)
     elif semver.match(tree_version, ">=2.0.0") and semver.match(tree_version, "<3.0.0"):
-      decision["output"] = InterpreterV2.decide(configuration, bare_tree, context)
+      decision = InterpreterV2.decide(configuration, bare_tree, context)
     else:
       raise CraftAiDecisionError(
         """Invalid decision tree format, "{}" is currently not a valid version.""".
@@ -39,7 +34,6 @@ class Interpreter(object):
       )
 
     decision["context"] = context
-    decision["_version"] = _DECISION_VERSION
 
     return decision
 

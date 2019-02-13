@@ -6,6 +6,8 @@ from craftai.operators import OPERATORS, OPERATORS_FUNCTION
 from craftai.types import TYPES
 from craftai.timezones import is_timezone
 
+_DECISION_VERSION = "2.0.0"
+
 _VALUE_VALIDATORS = {
   TYPES["continuous"]: lambda value: isinstance(value, numbers.Real),
   TYPES["enum"]: lambda value: isinstance(value, six.string_types),
@@ -35,12 +37,14 @@ class InterpreterV2(object):
     InterpreterV2._check_context(configuration, context, enable_missing_values)
 
     decision_result = {}
+    decision_result["output"] = {}
     for output in configuration.get("output"):
-      decision_result[output] = InterpreterV2._decide_recursion(bare_tree[output],
-                                                                context,
-                                                                bare_tree[output].get(
-                                                                  "output_values"),
-                                                                enable_missing_values)
+      decision_result["output"][output] = InterpreterV2._decide_recursion(bare_tree[output],
+                                                                          context,
+                                                                          bare_tree[output].get(
+                                                                            "output_values"),
+                                                                          enable_missing_values)
+    decision_result["_version"] = _DECISION_VERSION
     return decision_result
 
   @staticmethod
