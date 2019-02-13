@@ -2,7 +2,7 @@ import numbers
 import six
 
 from craftai.errors import CraftAiDecisionError, CraftAiNullDecisionError
-from craftai.operators import OPERATORS, OPERATORS_FUNCTION
+from craftai.operators import OPERATORS_V1 as OPERATORS, OPERATORS_FUNCTION_V1 as OPERATORS_FUNCTION
 from craftai.types import TYPES
 from craftai.timezones import is_timezone
 
