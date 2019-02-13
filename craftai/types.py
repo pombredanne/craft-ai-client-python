@@ -1,6 +1,7 @@
 TYPES = {
   "continuous": "continuous",
   "enum": "enum",
+  "boolean": "boolean",
   "timezone": "timezone",
   "time_of_day": "time_of_day",
   "day_of_week": "day_of_week",

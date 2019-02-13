@@ -11,6 +11,7 @@ _DECISION_VERSION = "2.0.0"
 _VALUE_VALIDATORS = {
   TYPES["continuous"]: lambda value: isinstance(value, numbers.Real),
   TYPES["enum"]: lambda value: isinstance(value, six.string_types),
+  TYPES["boolean"]: lambda value: isinstance(value, bool),
   TYPES["timezone"]: lambda value: is_timezone(value),
   TYPES["time_of_day"]: lambda value: (isinstance(value, numbers.Real)
                                        and value >= 0 and value < 24),
