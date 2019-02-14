@@ -404,7 +404,7 @@ class CraftAIClient(object):
         # Do nothing and continue.
         continue
 
-  def _get_bulk_decision_tree(self, payload, valid_indices, invalid_indices, invalid_dts):
+  def _get_bulk_decision_trees(self, payload, valid_indices, invalid_indices, invalid_dts):
     valid_dts = self.create_and_send_json_bulk([payload[i] for i in valid_indices],
                                                "{}/bulk/decision_tree".format(self._base_url),
                                                "POST")
@@ -415,7 +415,7 @@ class CraftAIClient(object):
     # Put the valid and invalid decision trees in their original index
     return self.recreate_list_with_indices(valid_indices, valid_dts, invalid_indices, invalid_dts)
 
-  def get_bulk_decision_tree(self, payload, version=DEFAULT_DECISION_TREE_VERSION):
+  def get_bulk_decision_trees(self, payload, version=DEFAULT_DECISION_TREE_VERSION):
     # payload = [{"id": agent_id, "timestamp": timestamp}]
     headers = self._headers.copy()
     headers["x-craft-ai-tree-version"] = version
@@ -424,10 +424,10 @@ class CraftAIClient(object):
 
     if self._config["decisionTreeRetrievalTimeout"] is False:
       # Don't retry
-      return self._get_bulk_decision_tree(payload,
-                                          valid_indices,
-                                          invalid_indices,
-                                          invalid_dts)
+      return self._get_bulk_decision_trees(payload,
+                                           valid_indices,
+                                           invalid_indices,
+                                           invalid_dts)
     start = current_time_ms()
     while True:
       now = current_time_ms()
@@ -435,10 +435,10 @@ class CraftAIClient(object):
         # Client side timeout
         raise CraftAiLongRequestTimeOutError()
       try:
-        return self._get_bulk_decision_tree(payload,
-                                            valid_indices,
-                                            invalid_indices,
-                                            invalid_dts)
+        return self._get_bulk_decision_trees(payload,
+                                             valid_indices,
+                                             invalid_indices,
+                                             invalid_dts)
       except CraftAiLongRequestTimeOutError:
         # Do nothing and continue.
         continue
@@ -583,7 +583,7 @@ class CraftAIClient(object):
     try:
       json_pl = json.dumps(payload)
     except TypeError as e:
-      raise CraftAiBadRequestError("Invalid configuration or agent id given. {}"
+      raise CraftAiBadRequestError("Invalid configuration or agent id given to create JSON. {}"
                                    .format(e.__str__()))
 
     if request_type == "POST":
