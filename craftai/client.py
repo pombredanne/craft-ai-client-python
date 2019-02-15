@@ -452,9 +452,10 @@ class CraftAIClient(object):
     try:
       return response.json()
     except:
-      raise CraftAiInternalError(
-        "Internal Error, the craft ai server responded in an invalid format."
-      )
+      return response.text()
+      # raise CraftAiInternalError(
+      #   "Internal Error, the craft ai server responded in an invalid format."
+      # )
 
   @staticmethod
   def _decode_response(response):
@@ -462,7 +463,8 @@ class CraftAIClient(object):
 
     message = "Status code " + str(status_code)
     try:
-      message = CraftAIClient._parse_body(response)["message"]
+      message = json.dumps(CraftAIClient._parse_body(response))
+      #message = CraftAIClient._parse_body(response)["message"]
     except (CraftAiInternalError, KeyError, TypeError):
       pass
 
@@ -546,23 +548,33 @@ class CraftAIClient(object):
     an empty string.
     """
     invalid_agent_indices = []
+    invalid_agent_errors = []
     valid_agent_indices = []
     for index, agent in enumerate(payload):
       try:
+        # Check if the agent ID is valid
         if "id" in agent:
           self._check_agent_id(agent["id"])
-      except CraftAiBadRequestError as _:
+      except CraftAiBadRequestError:
         invalid_agent_indices.append(index)
+        invalid_agent_errors.append(CraftAiBadRequestError(ERROR_ID_MESSAGE))
       else:
-        valid_agent_indices.append(index)
+        try:
+          # Check if the agent is serializable
+          json.dumps([agent])
+        except TypeError as e:
+          invalid_agent_indices.append(index)
+          invalid_agent_errors.append(e)
+        else:
+          valid_agent_indices.append(index)
 
     if len(invalid_agent_indices) == len(payload):
       raise CraftAiBadRequestError(ERROR_ID_MESSAGE)
 
     invalid_payload = []
-    for invalid_agent in [payload[i] for i in invalid_agent_indices]:
+    for index, invalid_agent in enumerate([payload[i] for i in invalid_agent_indices]):
       invalid_payload.append({"id": invalid_agent["id"],
-                              "error": CraftAiBadRequestError(ERROR_ID_MESSAGE)})
+                              "error": invalid_agent_errors[index]})
 
     return valid_agent_indices, invalid_agent_indices, invalid_payload
 
