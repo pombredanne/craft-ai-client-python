@@ -47,6 +47,9 @@ def check_expectation(tree, expectation):
   timestamp = None
   exp_time = expectation.get("time")
   time = Time(exp_time["t"], exp_time["tz"]) if exp_time else {}
+  configuration = expectation.get("configuration")
+  if configuration:
+    tree["configuration"].update(configuration)
 
   if expectation.get("error"):
     with assert_raises(craft_err.CraftAiDecisionError) as context_manager:

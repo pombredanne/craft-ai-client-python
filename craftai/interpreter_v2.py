@@ -85,12 +85,16 @@ class InterpreterV2(object):
     if not matching_child:
       if enable_missing_values:
         result, _ = InterpreterV2._distribution(node)
-        if isinstance(result, list):
+        # if the given result is an array with more than an
+        # element, then it means that it corresponds to a
+        # distribution. Otherwise, it corresponds to the
+        # distributed mean in this subtree.
+        if len(result) > 1:
           final_result = {"predicted_value": values[result.index(max(result))]}
         else:
-          final_result = {"predicted_value": result}
-        final_result["confidence"] = 0
+          final_result = {"predicted_value": result[0]}
         final_result["decision_rules"] = []
+        final_result["confidence"] = None
         return final_result
       prop = node.get("children")[0].get("decision_rule").get("property")
       raise CraftAiNullDecisionError(
@@ -123,14 +127,15 @@ class InterpreterV2(object):
     if not (node.get("children") is not None and len(node.get("children"))):
       prediction = node.get("prediction")
       value_distribution = prediction.get("distribution")
+      nb_samples = prediction["nb_samples"]
       # It is a classification problem
-      if value_distribution is not None:
-        return [value_distribution, node["nb_samples"]]
+      if isinstance(value_distribution, list):
+        return [value_distribution, nb_samples]
 
       # It is a regression problem
-      predicted_value = prediction.get("predicted_value")
+      predicted_value = prediction.get("value")
       if predicted_value is not None:
-        return [[predicted_value], node["nb_samples"]]
+        return [[predicted_value], nb_samples]
 
       raise CraftAiDecisionError(
         """Unable to take decision: the decision tree has no valid"""
@@ -143,7 +148,9 @@ class InterpreterV2(object):
       return InterpreterV2._distribution(_child)
     array_sizes = map(recurse, node.get("children"))
     array, sizes = zip(*array_sizes)
-    return InterpreterV2.compute_mean(array, sizes)
+    mean = InterpreterV2.compute_mean(array, sizes)
+    return mean, sum(sizes)
+
 
   @staticmethod
   def compute_mean(array, sizes):
@@ -151,7 +158,7 @@ class InterpreterV2(object):
     total_size = float(sum(sizes))
     ratio_applied = [[x * size / total_size for x in x_array]
                      for x_array, size in zip(array, sizes)]
-    return map(sum, zip(*ratio_applied))
+    return list(map(sum, zip(*ratio_applied)))
 
   @staticmethod
   def _find_matching_child(node, context, enable_missing_values=False):
@@ -161,11 +168,14 @@ class InterpreterV2(object):
       operator = child["decision_rule"]["operator"]
       context_value = context.get(property_name)
       # If there is no context value:
-      if context_value is None and not enable_missing_values:
-        raise CraftAiDecisionError(
-          """Unable to take decision, property '{}' is missing from the given context.""".
-          format(property_name)
-        )
+      if context_value is None:
+        if not enable_missing_values:
+          raise CraftAiDecisionError(
+            """Unable to take decision, property '{}' is missing from the given context.""".
+            format(property_name)
+          )
+        else:
+          return {}
       if (not isinstance(operator, six.string_types) or
           not operator in OPERATORS.values()):
         raise CraftAiDecisionError(
