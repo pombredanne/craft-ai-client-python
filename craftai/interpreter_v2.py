@@ -71,9 +71,8 @@ class InterpreterV2(object):
 
       distribution = prediction.get("distribution")
       if distribution and not isinstance(distribution, list):
-        standard_deviation = prediction["distribution"].get("standard_deviation")
-        if standard_deviation:
-          leaf["standard_deviation"] = standard_deviation
+        if distribution.get("standard_deviation"):
+          leaf["standard_deviation"] = distribution.get("standard_deviation")
 
       return leaf
     # Finding the first element in this node's childrens matching the
