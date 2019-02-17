@@ -69,13 +69,13 @@ class InterpreterV2(object):
         "decision_rules": []
       }
 
-      if not isinstance(prediction.get("distribution"), list):
+      distribution = prediction.get("distribution")
+      if distribution and not isinstance(distribution, list):
         standard_deviation = prediction["distribution"].get("standard_deviation")
         if standard_deviation:
           leaf["standard_deviation"] = standard_deviation
 
       return leaf
-
     # Finding the first element in this node's childrens matching the
     # operator condition with given context
     matching_child = InterpreterV2._find_matching_child(node, context, enable_missing_values)
@@ -167,6 +167,7 @@ class InterpreterV2(object):
       operand = child["decision_rule"]["operand"]
       operator = child["decision_rule"]["operator"]
       context_value = context.get(property_name)
+
       # If there is no context value:
       if context_value is None:
         if not enable_missing_values:
@@ -174,8 +175,6 @@ class InterpreterV2(object):
             """Unable to take decision, property '{}' is missing from the given context.""".
             format(property_name)
           )
-        else:
-          return {}
       if (not isinstance(operator, six.string_types) or
           not operator in OPERATORS.values()):
         raise CraftAiDecisionError(
@@ -187,7 +186,6 @@ class InterpreterV2(object):
       if TYPES["continuous"] in operator:
         context_value = float(context_value)
         operand = float(operand)
-
       if OPERATORS_FUNCTION[operator](context_value, operand):
         return child
     return {}
