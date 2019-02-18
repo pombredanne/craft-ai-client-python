@@ -19,6 +19,6 @@ OPERATORS_FUNCTION = {
 }
 
 def safe_op(context, value, func):
-  if context is not None:
+  if context is not None and context != {}:
     return func(context, value)
   return False

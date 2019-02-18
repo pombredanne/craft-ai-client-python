@@ -211,7 +211,6 @@ class InterpreterV2(object):
       p for p in expected_properties
       if not InterpreterV2.validate_property_value(configuration, context, p)
     ]
-
     if missing_properties or bad_properties:
       missing_properties = sorted(missing_properties)
       missing_properties_messages = [
@@ -243,9 +242,11 @@ class InterpreterV2(object):
 
     if context[property_name] is None:
       return True
-
-    property_type = configuration["context"][property_name]["type"]
+    property_def = configuration["context"][property_name]
+    property_type = property_def["type"]
+    is_optional = property_def.get("is_optional")
     if property_type in _VALUE_VALIDATORS:
       property_value = context[property_name]
-      return _VALUE_VALIDATORS[property_type](property_value)
+      return _VALUE_VALIDATORS[property_type](property_value) or (is_optional
+                                                                  and property_value == {})
     return True
