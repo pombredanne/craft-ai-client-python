@@ -28,7 +28,8 @@ SIMPLE_AGENT_CONFIGURATION = {
     }
   },
   "output": ["a"],
-  "time_quantum": 100
+  "time_quantum": 100,
+  "deactivate_missing_values": True,
 }
 SIMPLE_AGENT_DATA = pd.DataFrame(
   randn(300, 5),
@@ -48,7 +49,8 @@ COMPLEX_AGENT_CONFIGURATION = {
     }
   },
   "output": ["b"],
-  "time_quantum": 100
+  "time_quantum": 100,
+  "deactivate_missing_values": True,
 }
 COMPLEX_AGENT_CONFIGURATION_2 = {
   "context": {
@@ -63,7 +65,8 @@ COMPLEX_AGENT_CONFIGURATION_2 = {
     }
   },
   "output": ["a"],
-  "time_quantum": 100
+  "time_quantum": 100,
+  "deactivate_missing_values": True,
 }
 COMPLEX_AGENT_DATA = pd.DataFrame(
   [
@@ -113,7 +116,8 @@ DATETIME_AGENT_CONFIGURATION = {
     }
   },
   "output": ["b"],
-  "time_quantum": 3600
+  "time_quantum": 3600,
+  "deactivate_missing_values": True
 }
 DATETIME_AGENT_DATA = pd.DataFrame(
   [

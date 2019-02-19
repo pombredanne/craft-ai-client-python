@@ -20,31 +20,36 @@ TREES_DIR = os.path.join(HERE, "data", "interpreter", "decide", "trees")
 CLIENT = Client(settings.CRAFT_CFG)
 
 def interpreter_tests_generator():
-  tree_files = os.listdir(TREES_DIR)
-  for tree_file in tree_files:
-    if os.path.splitext(tree_file)[1] == ".json":
-      # Loading the json tree
-      with open(os.path.join(TREES_DIR, tree_file)) as f:
-        tree = json.load(f)
-      # Loading the expectations for this tree
-      with open(os.path.join(EXPECS_DIR, tree_file)) as f:
-        expectations = json.load(f)
+  versions = os.listdir(TREES_DIR)
+  for version in versions:
+    tree_files = os.listdir(os.path.join(TREES_DIR, version))
+    for tree_file in tree_files:
+      if os.path.splitext(tree_file)[1] == ".json":
+        # Loading the json tree
+        with open(os.path.join(TREES_DIR, version, tree_file)) as f:
+          tree = json.load(f)
+        # Loading the expectations for this tree
+        with open(os.path.join(EXPECS_DIR, version, tree_file)) as f:
+          expectations = json.load(f)
 
-      for expectation in expectations:
+        for expectation in expectations:
 #pylint: disable=W0108
-        test_fn = lambda t, e: check_expectation(t, e)
+          test_fn = lambda t, e: check_expectation(t, e)
 #pylint: enable=W0108
 
-        test_fn.description = tree_file + " - " + expectation["title"]
-        interpreter_tests_generator.compat_func_name = test_fn.description
+          test_fn.description = tree_file + " - " + expectation["title"]
+          interpreter_tests_generator.compat_func_name = test_fn.description
 
-        yield test_fn, tree, expectation
+          yield test_fn, tree, expectation
 
 def check_expectation(tree, expectation):
   exp_context = expectation["context"]
   timestamp = None
   exp_time = expectation.get("time")
   time = Time(exp_time["t"], exp_time["tz"]) if exp_time else {}
+  configuration = expectation.get("configuration")
+  if configuration:
+    tree["configuration"].update(configuration)
 
   if expectation.get("error"):
     with assert_raises(craft_err.CraftAiDecisionError) as context_manager:
