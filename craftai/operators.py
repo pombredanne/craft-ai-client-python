@@ -5,7 +5,7 @@
 
 OPERATORS_V1 = {
   "IS": "is",
-  "IN": "[in[",
+  "IN_INTERVAL": "[in[",
   "GTE": ">=",
   "LT": "<",
 }
@@ -17,10 +17,11 @@ OPERATORS_FUNCTION_V1 = {
   OPERATORS_V1["IS"]: lambda context, value: context == value,
   OPERATORS_V1["GTE"]: lambda context, value: safe_op(context, value, GTE),
   OPERATORS_V1["LT"]: lambda context, value: safe_op(context, value, LT),
-  OPERATORS_V1["IN"]: lambda context, value:
-                      safe_op(context, value[0], GTE) and
-                      safe_op(context, value[1], LT) if safe_op(value[0], value[1], LT)
-                      else safe_op(context, value[0], GTE) or safe_op(context, value[1], LT)
+  OPERATORS_V1["IN_INTERVAL"]: lambda context, value:
+                               safe_op(context, value[0], GTE) and safe_op(context, value[1], LT)
+                               if safe_op(value[0], value[1], LT)
+                               else safe_op(context, value[0], GTE)
+                               or safe_op(context, value[1], LT)
 }
 
 def safe_op(context, value, func):

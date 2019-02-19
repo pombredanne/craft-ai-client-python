@@ -130,7 +130,7 @@ FORMATTER_FROM_DECISION_RULE = {
   OPERATORS["IS"]: {
     TYPE_ANY: _is_formatter
   },
-  OPERATORS["IN"]: {
+  OPERATORS["IN_INTERVAL"]: {
     TYPE_ANY: _in_formatter,
     TYPES["day_of_week"]: _in_day_of_week_formatter,
     TYPES["day_of_month"]: _in_formatter,

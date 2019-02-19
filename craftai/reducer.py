@@ -50,7 +50,7 @@ def _in_in_reducer(rule_1, rule_2):
     #             |   op_2   |
     return {
       "property": rule_1["property"],
-      "operator": OPERATORS["IN"],
+      "operator": OPERATORS["IN_INTERVAL"],
       "operand": [op_2_from, op_1_to]
     }
 
@@ -60,7 +60,7 @@ def _in_in_reducer(rule_1, rule_2):
     #     |   op_2   |
     return {
       "property": rule_1["property"],
-      "operator": OPERATORS["IN"],
+      "operator": OPERATORS["IN_INTERVAL"],
       "operand": [op_1_from, op_2_to]
     }
 
@@ -98,7 +98,7 @@ def _in_gte_reducer(rule_1, rule_2):
     #           |op_2
     return {
       "property": rule_1["property"],
-      "operator": OPERATORS["IN"],
+      "operator": OPERATORS["IN_INTERVAL"],
       "operand": [op_2, op_1_to]
     }
 
@@ -134,7 +134,7 @@ def _in_lt_reducer(rule_1, rule_2):
     #           |op_2
     return {
       "property": rule_1["property"],
-      "operator": OPERATORS["IN"],
+      "operator": OPERATORS["IN_INTERVAL"],
       "operand": [op_1_from, op_2]
     }
 
@@ -152,7 +152,7 @@ def _gte_lt_reducer(rule_1, rule_2):
                        .format(format_decision_rules([rule_1]), format_decision_rules([rule_2])))
   return {
     "property": rule_1["property"],
-    "operator": OPERATORS["IN"],
+    "operator": OPERATORS["IN_INTERVAL"],
     "operand": [new_lower_bound, new_upper_bound]
   }
 
@@ -160,13 +160,13 @@ REDUCER_FROM_DECISION_RULE = {
   OPERATORS["IS"]: {
     OPERATORS["IS"]: _is_is_reducer
   },
-  OPERATORS["IN"]: {
-    OPERATORS["IN"]: _in_in_reducer,
+  OPERATORS["IN_INTERVAL"]: {
+    OPERATORS["IN_INTERVAL"]: _in_in_reducer,
     OPERATORS["GTE"]: _in_gte_reducer,
     OPERATORS["LT"]: _in_lt_reducer
   },
   OPERATORS["GTE"]: {
-    OPERATORS["IN"]: lambda rule_1, rule_2: _in_gte_reducer(rule_2, rule_1),
+    OPERATORS["IN_INTERVAL"]: lambda rule_1, rule_2: _in_gte_reducer(rule_2, rule_1),
     OPERATORS["GTE"]: lambda rule_1, rule_2: {
       "property": rule_1["property"],
       "operator": OPERATORS["GTE"],
@@ -175,7 +175,7 @@ REDUCER_FROM_DECISION_RULE = {
     OPERATORS["LT"]: _gte_lt_reducer
   },
   OPERATORS["LT"]: {
-    OPERATORS["IN"]: lambda rule_1, rule_2: _in_lt_reducer(rule_2, rule_1),
+    OPERATORS["IN_INTERVAL"]: lambda rule_1, rule_2: _in_lt_reducer(rule_2, rule_1),
     OPERATORS["GTE"]: lambda rule_1, rule_2: _gte_lt_reducer(rule_2, rule_1),
     OPERATORS["LT"]: lambda rule_1, rule_2: {
       "property": rule_1["property"],
