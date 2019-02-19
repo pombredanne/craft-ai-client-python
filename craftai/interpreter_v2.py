@@ -39,16 +39,18 @@ class InterpreterV2(object):
     decision_result = {}
     decision_result["output"] = {}
     for output in configuration.get("output"):
+      output_type = configuration["context"][output]["type"]
       decision_result["output"][output] = InterpreterV2._decide_recursion(bare_tree[output],
                                                                           context,
                                                                           bare_tree[output].get(
                                                                             "output_values"),
+                                                                          output_type,
                                                                           enable_missing_values)
     decision_result["_version"] = _DECISION_VERSION
     return decision_result
 
   @staticmethod
-  def _decide_recursion(node, context, values, enable_missing_values):
+  def _decide_recursion(node, context, output_values, output_type, enable_missing_values):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
       # We check if a leaf has the key 'prediction' corresponging to a v2 tree
@@ -83,26 +85,16 @@ class InterpreterV2(object):
     # the probabilistic distribution from this node.
     if not matching_child:
       if enable_missing_values:
-        result, _ = InterpreterV2._distribution(node)
-        # if the given result is an array with more than an
-        # element, then it means that it corresponds to a
-        # distribution. Otherwise, it corresponds to the
-        # distributed mean in this subtree.
-        if len(result) > 1:
-          final_result = {"predicted_value": values[result.index(max(result))]}
-        else:
-          final_result = {"predicted_value": result[0]}
-        final_result["decision_rules"] = []
-        final_result["confidence"] = None
-        return final_result
+        return InterpreterV2.compute_distribution(node, output_values, output_type)
       prop = node.get("children")[0].get("decision_rule").get("property")
       raise CraftAiNullDecisionError(
         """Unable to take decision: value '{}' for property '{}' doesn't"""
         """ validate any of the decision rules.""".format(context.get(prop), prop)
-      )
+        )
 
     # If a matching child is found, recurse
-    result = InterpreterV2._decide_recursion(matching_child, context, values, enable_missing_values)
+    result = InterpreterV2._decide_recursion(matching_child, context, output_values,
+                                             output_type, enable_missing_values)
     new_predicates = [{
       "property": matching_child["decision_rule"]["property"],
       "operator": matching_child["decision_rule"]["operator"],
@@ -118,6 +110,17 @@ class InterpreterV2(object):
     if result.get("standard_deviation", None) is not None:
       final_result["standard_deviation"] = result.get("standard_deviation")
 
+    return final_result
+
+  @staticmethod
+  def compute_distribution(node, output_values, output_type):
+    result, _ = InterpreterV2._distribution(node)
+    if output_type == "enum":
+      final_result = {"predicted_value": output_values[result.index(max(result))]}
+    else:
+      final_result = {"predicted_value": result[0]}
+    final_result["decision_rules"] = []
+    final_result["confidence"] = None
     return final_result
 
   @staticmethod
