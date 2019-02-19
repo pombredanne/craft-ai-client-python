@@ -118,7 +118,7 @@ class InterpreterV2(object):
     if output_type == "enum":
       final_result = {"predicted_value": output_values[result.index(max(result))]}
     else:
-      final_result = {"predicted_value": result[0]}
+      final_result = {"predicted_value": result}
     final_result["decision_rules"] = []
     final_result["confidence"] = None
     return final_result
@@ -127,8 +127,8 @@ class InterpreterV2(object):
   def _distribution(node):
     # If it is a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
-      prediction = node.get("prediction")
-      value_distribution = prediction.get("distribution")
+      prediction = node["prediction"]
+      value_distribution = prediction["distribution"]
       nb_samples = prediction["nb_samples"]
       # It is a classification problem
       if isinstance(value_distribution, list):
@@ -137,7 +137,7 @@ class InterpreterV2(object):
       # It is a regression problem
       predicted_value = prediction.get("value")
       if predicted_value is not None:
-        return [[predicted_value], nb_samples]
+        return [predicted_value, nb_samples]
 
       raise CraftAiDecisionError(
         """Unable to take decision: the decision tree has no valid"""
@@ -148,19 +148,31 @@ class InterpreterV2(object):
     # the distributions/means and sizes of each child branch.
     def recurse(_child):
       return InterpreterV2._distribution(_child)
-    array_sizes = map(recurse, node.get("children"))
-    array, sizes = zip(*array_sizes)
-    mean = InterpreterV2.compute_mean(array, sizes)
-    return mean, sum(sizes)
-
+    values_sizes = map(recurse, node.get("children"))
+    values, sizes = zip(*values_sizes)
+    if isinstance(values[0], list):
+      return InterpreterV2.compute_mean_distributions(values, sizes)
+    return InterpreterV2.compute_mean_values(values, sizes)
 
   @staticmethod
-  def compute_mean(array, sizes):
-    # Compute the total number of element
-    total_size = float(sum(sizes))
-    ratio_applied = [[x * size / total_size for x in x_array]
-                     for x_array, size in zip(array, sizes)]
-    return list(map(sum, zip(*ratio_applied)))
+  def compute_mean_distributions(values, sizes):
+    # Compute the weighted mean of the given array of distributions (array of probabilities).
+    # Example, for values = [[ 4, 3, 6 ], [1, 2, 3], [3, 4, 5]], sizes = [1, 2, 1]
+    # This function computes ([ 4, 3, 6]*1 + [1, 2, 3]*2 + [3, 4, 5]*6) / (1+2+1) = ...
+    total_size = sum(sizes)
+    ratio_applied = [[x * size / float(total_size) for x in x_array]
+                     for x_array, size in zip(values, sizes)]
+    return list(map(sum, zip(*ratio_applied))), total_size
+
+  @staticmethod
+  def compute_mean_values(values, sizes):
+    # Compute the weighted mean of the given array of values.
+    # Example, for values = [ 4, 3, 6 ], sizes = [1, 2, 1]
+    # This function computes (4*1 + 3*2 + 1*6) / (1+2+1) = 16/4 = 4
+    total_size = sum(sizes)
+    mean = sum([val * size / float(total_size)
+                for val, size in zip(values, sizes)])
+    return mean, total_size
 
   @staticmethod
   def _find_matching_child(node, context, enable_missing_values=False):
@@ -184,10 +196,6 @@ class InterpreterV2(object):
           """ decision operator.""".format(operator)
         )
 
-      # To be compared, continuous parameters should not be strings
-      if TYPES["continuous"] in operator:
-        context_value = float(context_value)
-        operand = float(operand)
       if OPERATORS_FUNCTION[operator](context_value, operand):
         return child
     return {}
