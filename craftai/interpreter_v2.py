@@ -32,8 +32,9 @@ class InterpreterV2(object):
   @staticmethod
   def decide(configuration, bare_tree, context):
     # Check if missing values are handled
-    enable_missing_values = False if configuration.get(
-      "deactivate_missing_values") is True else True
+    enable_missing_values = False
+    if configuration.get("deactivate_missing_values", True) is False:
+      enable_missing_values = True
 
     InterpreterV2._check_context(configuration, context, enable_missing_values)
 
