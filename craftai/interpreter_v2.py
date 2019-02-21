@@ -32,11 +32,11 @@ class InterpreterV2(object):
   @staticmethod
   def decide(configuration, bare_tree, context):
     # Check if missing values are handled
-    enable_missing_values = False
+    deactivate_missing_values = True
     if configuration.get("deactivate_missing_values", True) is False:
-      enable_missing_values = True
+      deactivate_missing_values = False
 
-    InterpreterV2._check_context(configuration, context, enable_missing_values)
+    InterpreterV2._check_context(configuration, context, deactivate_missing_values)
 
     decision_result = {}
     decision_result["output"] = {}
@@ -47,12 +47,12 @@ class InterpreterV2(object):
                                                                           bare_tree[output].get(
                                                                             "output_values"),
                                                                           output_type,
-                                                                          enable_missing_values)
+                                                                          deactivate_missing_values)
     decision_result["_version"] = _DECISION_VERSION
     return decision_result
 
   @staticmethod
-  def _decide_recursion(node, context, output_values, output_type, enable_missing_values):
+  def _decide_recursion(node, context, output_values, output_type, deactivate_missing_values):
     # If we are on a leaf
     if not (node.get("children") is not None and len(node.get("children"))):
       # We check if a leaf has the key 'prediction' corresponging to a v2 tree
@@ -83,12 +83,12 @@ class InterpreterV2(object):
       return leaf
     # Finding the first element in this node's childrens matching the
     # operator condition with given context
-    matching_child = InterpreterV2._find_matching_child(node, context, enable_missing_values)
+    matching_child = InterpreterV2._find_matching_child(node, context, deactivate_missing_values)
 
     # If there is no child corresponding matching the operators then we compute
     # the probabilistic distribution from this node.
     if not matching_child:
-      if enable_missing_values:
+      if not deactivate_missing_values:
         return InterpreterV2.compute_distribution(node, output_values, output_type)
       prop = node.get("children")[0].get("decision_rule").get("property")
       raise CraftAiNullDecisionError(
@@ -98,7 +98,7 @@ class InterpreterV2(object):
 
     # If a matching child is found, recurse
     result = InterpreterV2._decide_recursion(matching_child, context, output_values,
-                                             output_type, enable_missing_values)
+                                             output_type, deactivate_missing_values)
     new_predicates = [{
       "property": matching_child["decision_rule"]["property"],
       "operator": matching_child["decision_rule"]["operator"],
@@ -187,7 +187,7 @@ class InterpreterV2(object):
     return mean, total_size
 
   @staticmethod
-  def _find_matching_child(node, context, enable_missing_values=False):
+  def _find_matching_child(node, context, deactivate_missing_values=True):
     for child in node["children"]:
       property_name = child["decision_rule"]["property"]
       operand = child["decision_rule"]["operand"]
@@ -196,7 +196,7 @@ class InterpreterV2(object):
 
       # If there is no context value:
       if context_value is None:
-        if not enable_missing_values:
+        if deactivate_missing_values:
           raise CraftAiDecisionError(
             """Unable to take decision, property '{}' is missing from the given context.""".
             format(property_name)
@@ -213,14 +213,14 @@ class InterpreterV2(object):
     return {}
 
   @staticmethod
-  def _check_context(configuration, context, enable_missing_values=False):
+  def _check_context(configuration, context, deactivate_missing_values=True):
     # Extract the required properties (i.e. those that are not the output)
     expected_properties = [
       p for p in configuration["context"]
       if not p in configuration["output"]
     ]
 
-    if not enable_missing_values:
+    if deactivate_missing_values:
       # Retrieve the missing properties
       missing_properties = [
         p for p in expected_properties
