@@ -69,13 +69,15 @@ class InterpreterV2(object):
       leaf = {
         "predicted_value": predicted_value,
         "confidence": prediction.get("confidence") or 0,
-        "decision_rules": []
+        "decision_rules": [],
+        "nb_samples": prediction["nb_samples"]
       }
 
       distribution = prediction.get("distribution")
-      if distribution and not isinstance(distribution, list):
-        if distribution.get("standard_deviation"):
-          leaf["standard_deviation"] = distribution.get("standard_deviation")
+      if not isinstance(distribution, list) and distribution.get("standard_deviation"):
+        leaf["standard_deviation"] = distribution.get("standard_deviation")
+      else:
+        leaf["distribution"] = distribution
 
       return leaf
     # Finding the first element in this node's childrens matching the
@@ -105,23 +107,31 @@ class InterpreterV2(object):
     final_result = {
       "predicted_value": result["predicted_value"],
       "confidence": result["confidence"],
-      "decision_rules": new_predicates + result["decision_rules"]
+      "decision_rules": new_predicates + result["decision_rules"],
+      "nb_samples": result["nb_samples"],
     }
 
     if result.get("standard_deviation", None) is not None:
       final_result["standard_deviation"] = result.get("standard_deviation")
 
+    if result.get("distribution"):
+      final_result["distribution"] = result.get("distribution")
+
     return final_result
 
   @staticmethod
   def compute_distribution(node, output_values, output_type):
-    result, _ = InterpreterV2._distribution(node)
+    result, size = InterpreterV2._distribution(node)
     if output_type == "enum":
-      final_result = {"predicted_value": output_values[result.index(max(result))]}
+      final_result = {
+        "predicted_value": output_values[result.index(max(result))],
+        "distribution": result
+      }
     else:
       final_result = {"predicted_value": result}
     final_result["decision_rules"] = []
     final_result["confidence"] = None
+    final_result["nb_samples"] = size
     return final_result
 
   @staticmethod
